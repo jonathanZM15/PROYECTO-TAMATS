@@ -17,3 +17,4 @@ class SplashActivity : AppCompatActivity() { // o ComponentActivity
         // setContentView(R.layout.activity_splash)
     }
 }
+

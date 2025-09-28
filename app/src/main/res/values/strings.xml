@@ -3,4 +3,18 @@
     <string name="splash_logo_content_description">Logo de TAMATS</string>
     <string name="splash_title">TAMATS</string>
     <string name="splash_subtitle">Encuentra tu Match Perfecto</string>
+
+    <!-- Login Screen Strings -->
+    <string name="login_main_title">TAMATS</string>
+    <string name="login_welcome_back">¡Bienvenido de Nuevo!</string>
+    <string name="login_email_hint">Correo Electrónico</string>
+    <string name="login_password_hint">Contraseña</string>
+    <string name="login_button_text">Iniciar Sesión</string>
+    <string name="login_or_divider">o</string>
+    <string name="login_facebook_button">Regístrate con Facebook</string>
+    <string name="login_google_button">Regístrate con Google</string>
+    <string name="login_twitter_button">Regístrate con Twitter</string>
+    <string name="login_new_user_prompt">¿Nuevo Aquí?</string>
+    <string name="login_register_link">Regístrate</string>
+    <string name="login_copyright">© 2025 TAMATS. Todos los derechos reservados.</string>
 </resources>

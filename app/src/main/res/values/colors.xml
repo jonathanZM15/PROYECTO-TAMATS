@@ -2,4 +2,7 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="tamats_pink">#FFFF007A</color> <!-- Color rosa fucsia para el título -->
+    <color name="tamats_login_background_dark_purple">#FF54075D</color> <!-- Morado oscuro para fondo de login -->
+    <color name="register_card_background_color">#FFF5EEF8</color> <!-- Lavanda claro para card de registro -->
 </resources>
