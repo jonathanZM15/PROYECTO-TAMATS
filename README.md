@@ -39,7 +39,7 @@ Copiar código
 ## 👨‍💻 Equipo de desarrollo
 
 - Jonathan Zambrano (@jonathanZM15)  
-- [Agregar aquí los demás miembros del equipo]  
+- Kelly Cevallos (kellycevallos15) 
 
 ---
 
