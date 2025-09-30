@@ -9,15 +9,15 @@
 
     <ImageView
         android:id="@+id/ivRegisterBackgroundOverlay"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:src="@drawable/imagen_login"
+        android:layout_width="372dp"
+        android:layout_height="676dp"
+        android:alpha="1.0"
         android:scaleType="centerCrop"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        android:src="@drawable/imagen_login"
+        app:layout_constraintBottom_toBottomOf="@+id/tvCopyrightRegister"
         app:layout_constraintEnd_toEndOf="parent"
-        android:alpha="1.0" /> <!-- Imagen de líneas opaca -->
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" /> <!-- Imagen de líneas opaca -->
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/clRegisterFormCard"
@@ -25,12 +25,14 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
         android:layout_marginEnd="24dp"
-        android:padding="24dp"
         android:background="@drawable/register_card_background"
-        app:layout_constraintTop_toTopOf="parent"
+        android:padding="24dp"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.555">
 
         <TextView
             android:id="@+id/tvRegisterTitle"
@@ -40,9 +42,9 @@
             android:textColor="@color/black"
             android:textSize="24sp"
             android:textStyle="bold"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <!-- Nombre -->
         <TextView
@@ -53,24 +55,24 @@
             android:text="Nombre:"
             android:textColor="@color/black"
             android:textSize="14sp"
-            app:layout_constraintTop_toBottomOf="@id/tvRegisterTitle"
-            app:layout_constraintStart_toStartOf="parent"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvRegisterTitle" />
 
         <EditText
             android:id="@+id/etName"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:background="@drawable/edit_text_rounded_background"
             android:hint="Ingresa tu nombre completo"
             android:inputType="textPersonName"
             android:padding="12dp"
-            android:textSize="14sp"
-            android:textColorHint="#757575"
             android:textColor="@color/black"
-            app:layout_constraintTop_toBottomOf="@id/tvLabelName"
-            app:layout_constraintStart_toStartOf="parent"
+            android:textColorHint="#757575"
+            android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="8dp"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvLabelName" />
 
         <!-- Correo Electrónico -->
         <TextView
@@ -81,24 +83,24 @@
             android:text="Correo Electrónico:"
             android:textColor="@color/black"
             android:textSize="14sp"
-            app:layout_constraintTop_toBottomOf="@id/etName"
-            app:layout_constraintStart_toStartOf="parent"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/etName" />
 
         <EditText
             android:id="@+id/etEmailRegister"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:background="@drawable/edit_text_rounded_background"
             android:hint="tu.correo@example.com"
             android:inputType="textEmailAddress"
             android:padding="12dp"
-            android:textSize="14sp"
-            android:textColorHint="#757575"
             android:textColor="@color/black"
-            app:layout_constraintTop_toBottomOf="@id/tvLabelEmail"
-            app:layout_constraintStart_toStartOf="parent"
+            android:textColorHint="#757575"
+            android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="8dp"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvLabelEmail" />
 
         <!-- Fecha de nacimiento -->
         <TextView
@@ -109,25 +111,25 @@
             android:text="Fecha de nacimiento:"
             android:textColor="@color/black"
             android:textSize="14sp"
-            app:layout_constraintTop_toBottomOf="@id/etEmailRegister"
-            app:layout_constraintStart_toStartOf="parent"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/etEmailRegister" />
 
         <EditText
             android:id="@+id/etBirthDate"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:background="@drawable/edit_text_rounded_background"
+            android:focusable="false"
             android:hint="DD/MM/AAAA"
             android:inputType="date"
-            android:focusable="false"
             android:padding="12dp"
-            android:textSize="14sp"
-            android:textColorHint="#757575"
             android:textColor="@color/black"
-            app:layout_constraintTop_toBottomOf="@id/tvLabelBirthDate"
-            app:layout_constraintStart_toStartOf="parent"
+            android:textColorHint="#757575"
+            android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="8dp"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvLabelBirthDate" />
 
         <!-- Genero -->
         <TextView
@@ -138,24 +140,19 @@
             android:text="Genero:"
             android:textColor="@color/black"
             android:textSize="14sp"
-            app:layout_constraintTop_toBottomOf="@id/etBirthDate"
-            app:layout_constraintStart_toStartOf="parent"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/etBirthDate" />
 
-        <EditText
-            android:id="@+id/etGender"
+        <Spinner
+            android:id="@+id/spinnerGender"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:background="@drawable/edit_text_rounded_background"
-            android:hint="Ej: Masculino, Femenino, Otro"
-            android:inputType="textCapWords"
-            android:padding="12dp"
-            android:textSize="14sp"
-            android:textColorHint="#757575"
-            android:textColor="@color/black"
-            app:layout_constraintTop_toBottomOf="@id/tvLabelGender"
-            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginTop="8dp"
+            android:entries="@array/gender_options"
+            android:minHeight="48dp"
             app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="8dp"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvLabelGender" />
 
         <!-- Contraseña -->
         <TextView
@@ -166,35 +163,25 @@
             android:text="Contraseña:"
             android:textColor="@color/black"
             android:textSize="14sp"
-            app:layout_constraintTop_toBottomOf="@id/etGender"
-            app:layout_constraintStart_toStartOf="parent"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/spinnerGender" />
 
         <EditText
             android:id="@+id/etPasswordRegister"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:background="@drawable/edit_text_rounded_background"
             android:hint="Mínimo 8 caracteres"
             android:inputType="textPassword"
             android:padding="12dp"
-            android:textSize="14sp"
+            android:textColor="@color/black"
             android:textColorHint="#757575"
-            android:textColor="@color/black"
-            app:layout_constraintTop_toBottomOf="@id/tvLabelPassword"
-            app:layout_constraintStart_toStartOf="parent"
+            android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="8dp"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvLabelPassword" />
 
-        <CheckBox
-            android:id="@+id/cbTerms"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="Aceptar términos y condiciones"
-            android:textColor="@color/black"
-            android:textSize="12sp"
-            app:layout_constraintTop_toBottomOf="@id/etPasswordRegister"
-            app:layout_constraintStart_toStartOf="parent" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnRegister"
@@ -208,9 +195,21 @@
             android:textColor="@android:color/white"
             android:textSize="16sp"
             app:cornerRadius="24dp"
-            app:layout_constraintTop_toBottomOf="@id/cbTerms"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintTop_toBottomOf="@id/cbTerms" />
+
+        <CheckBox
+            android:id="@+id/cbTerms"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Aceptar términos y condiciones"
+            android:textColor="@color/black"
+            android:textSize="12sp"
+            app:layout_constraintStart_toStartOf_parent
+            app:layout_constraintTop_toBottomOf="@id/etPasswordRegister"
+            tools:layout_editor_absoluteX="54dp"
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
