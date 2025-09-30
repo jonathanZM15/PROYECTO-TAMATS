@@ -40,6 +40,7 @@ Copiar código
 
 - Jonathan Zambrano (@jonathanZM15)  
 - Kelly Cevallos (kellycevallos15) 
+- Yender Mejia (@YenderMejia)
 
 ---
 
