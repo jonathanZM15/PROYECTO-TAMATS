@@ -17,12 +17,13 @@
     <string name="login_new_user_prompt">¿Nuevo Aquí?</string>
     <string name="login_register_link">Regístrate</string>
     <string name="login_copyright">© 2025 TAMATS. Todos los derechos reservados.</string>
+    <string name="register_confirm_password_hint">Confirma tu contraseña</string>
 
     <!-- Register Screen Strings -->
     <string-array name="gender_options">
         <item>Selecciona tu género</item> <!-- Opción por defecto/prompt -->
         <item>Masculino</item>
         <item>Femenino</item>
-        <item>Otro</item>
+        <item>Trasformers</item>
     </string-array>
 </resources>
