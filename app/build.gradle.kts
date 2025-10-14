@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id("org.jetbrains.kotlin.kapt")
 }
 
 android {
@@ -45,4 +46,13 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+    //declara dependencias
+    implementation(libs.room.runtime)
+    //ejecutar secuencias de sql con room
+    implementation(libs.room.ktx)
+    //generar sentencias sql automaticas
+    kapt(libs.room.compiler)
+    //ejecutar procesos en segundo plano
+    implementation(libs.kotlinx.coroutines.android)
 }
