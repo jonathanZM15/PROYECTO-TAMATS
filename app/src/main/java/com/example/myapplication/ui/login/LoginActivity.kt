@@ -18,6 +18,7 @@ import com.example.myapplication.ui.simulacion.EXTRA_USER_BIRTH_DATE
 import com.example.myapplication.ui.simulacion.EXTRA_USER_EMAIL
 import com.example.myapplication.ui.simulacion.EXTRA_USER_GENDER
 import com.example.myapplication.ui.simulacion.EXTRA_USER_NAME
+import com.example.myapplication.util.EncryptionUtil
 import com.google.android.material.button.MaterialButton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -70,7 +71,8 @@ class LoginActivity : AppCompatActivity() {
             }
 
             if (localUser != null) {
-                if (localUser.passwordHash == password) {
+                // Verificar la contraseña cifrada usando EncryptionUtil
+                if (EncryptionUtil.verifyPassword(password, localUser.passwordHash)) {
                     navigateToProfile(localUser)
                 } else {
                     Toast.makeText(this@LoginActivity, "Credenciales incorrectas.", Toast.LENGTH_LONG).show()
@@ -83,7 +85,7 @@ class LoginActivity : AppCompatActivity() {
                         return@findUserByEmail
                     }
 
-                    if (firebaseUser != null && firebaseUser.passwordHash == password) {
+                    if (firebaseUser != null && EncryptionUtil.verifyPassword(password, firebaseUser.passwordHash)) {
                         lifecycleScope.launch(Dispatchers.IO) {
                             usuarioDao.insertar(firebaseUser)
                             withContext(Dispatchers.Main) {

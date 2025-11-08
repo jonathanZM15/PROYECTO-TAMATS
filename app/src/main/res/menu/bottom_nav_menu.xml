@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_explore"
+        android:icon="@drawable/ic_launcher_foreground"
+        android:title="Explorar" />
+    <item
+        android:id="@+id/nav_matches"
+        android:icon="@drawable/ic_launcher_foreground"
+        android:title="Matches" />
+    <item
+        android:id="@+id/nav_chats"
+        android:icon="@drawable/ic_launcher_foreground"
+        android:title="Chats" />
+    <item
+        android:id="@+id/nav_profile"
+        android:icon="@drawable/ic_launcher_foreground"
+        android:title="Perfil" />
+</menu>
+

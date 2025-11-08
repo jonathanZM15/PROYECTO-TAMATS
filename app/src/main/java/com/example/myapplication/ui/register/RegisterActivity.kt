@@ -11,6 +11,7 @@ import com.example.myapplication.cloud.FirebaseService
 import com.example.myapplication.database.AppDatabase
 import com.example.myapplication.model.UsuarioEntity
 import com.example.myapplication.ui.login.LoginActivity
+import com.example.myapplication.util.EncryptionUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -108,14 +109,15 @@ class RegisterActivity : AppCompatActivity() {
             val gender = spinnerGender.selectedItem.toString()
             val password = etPasswordRegister.text.toString()
 
-            val passwordHash = password // ¡CIFRAR EN PRODUCCIÓN!
+            // Cifrar la contraseña antes de guardarla
+            val encryptedPassword = EncryptionUtil.encryptPassword(password)
 
             val newUser = UsuarioEntity(
                 name = name,
                 email = email,
                 birthDate = birthDate,
                 gender = gender,
-                passwordHash = passwordHash
+                passwordHash = encryptedPassword
             )
 
             scope.launch {
