@@ -7,7 +7,14 @@ import android.text.InputFilter
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.example.myapplication.R
-import com.example.myapplication.ui.login.LoginActivity // Asegúrate de importar LoginActivity
+import com.example.myapplication.cloud.FirebaseService
+import com.example.myapplication.database.AppDatabase
+import com.example.myapplication.model.UsuarioEntity
+import com.example.myapplication.ui.login.LoginActivity
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.*
 
 class RegisterActivity : AppCompatActivity() {
@@ -21,12 +28,20 @@ class RegisterActivity : AppCompatActivity() {
     private lateinit var etConfirmPassword: EditText
     private lateinit var cbTerms: CheckBox
     private lateinit var btnRegister: Button
+    private lateinit var tvLoginLink: TextView
+
+    private val db by lazy { AppDatabase.getInstance(applicationContext) }
+    private val usuarioDao by lazy { db.usuarioDao() }
+    private val firebaseService by lazy { FirebaseService }
+    private val scope = CoroutineScope(Dispatchers.IO)
+
+    private val emailRegex = Regex("[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_register)
 
-        // Inicialización de Vistas (Usando findViewById)
+        // Inicialización de Vistas
         etName = findViewById(R.id.etName)
         etEmailRegister = findViewById(R.id.etEmailRegister)
         etBirthDate = findViewById(R.id.etBirthDate)
@@ -35,164 +50,142 @@ class RegisterActivity : AppCompatActivity() {
         etConfirmPassword = findViewById(R.id.etConfirmPassword)
         cbTerms = findViewById(R.id.cbTerms)
         btnRegister = findViewById(R.id.btnRegister)
+        tvLoginLink = findViewById(R.id.tvLoginLink)
 
-        // Configuración inicial de la UI
-        setupNameField()
-        setupGenderSpinner()
-        setupBirthDatePicker()
+        setupListeners()
+    }
 
-        // Listener principal para el registro
-        btnRegister.setOnClickListener {
-            // Llama al método de validación. Si es true, inicia el proceso de finalización.
-            if (validateForm()) {
-                handleSuccessfulRegistration()
+    private fun setupListeners() {
+        etName.filters = arrayOf(InputFilter { source, _, _, _, _, _ ->
+            if (source.toString().matches(Regex("[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]*"))) source else ""
+        })
+
+        etBirthDate.setOnClickListener { showDatePickerDialog() }
+
+        btnRegister.setOnClickListener { handleRegistration() }
+
+        tvLoginLink.setOnClickListener {
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
+    }
+
+    private fun showDatePickerDialog() {
+        val calendar = Calendar.getInstance()
+        val year = calendar.get(Calendar.YEAR)
+        val month = calendar.get(Calendar.MONTH)
+        val day = calendar.get(Calendar.DAY_OF_MONTH)
+
+        val datePickerDialog = DatePickerDialog(
+            this,
+            { _, selectedYear, selectedMonth, selectedDay ->
+                val date = "${selectedDay.toString().padStart(2, '0')}/${(selectedMonth + 1).toString().padStart(2, '0')}/${selectedYear}"
+                etBirthDate.setText(date)
+            },
+            year,
+            month,
+            day
+        )
+
+        // --- RESTRICCIÓN DE EDAD ---
+        // 1. Crear una instancia de Calendar para la fecha máxima
+        val maxDate = Calendar.getInstance()
+        // 2. Restar 18 años a la fecha actual
+        maxDate.add(Calendar.YEAR, -18)
+        // 3. Establecer esa fecha como la máxima seleccionable
+        datePickerDialog.datePicker.maxDate = maxDate.timeInMillis
+
+        datePickerDialog.show()
+    }
+
+    private fun handleRegistration() {
+        // (El resto del código de validación y registro permanece igual)
+        if (validateFields()) {
+            val name = etName.text.toString().trim()
+            val email = etEmailRegister.text.toString().trim()
+            val birthDate = etBirthDate.text.toString()
+            val gender = spinnerGender.selectedItem.toString()
+            val password = etPasswordRegister.text.toString()
+
+            val passwordHash = password // ¡CIFRAR EN PRODUCCIÓN!
+
+            val newUser = UsuarioEntity(
+                name = name,
+                email = email,
+                birthDate = birthDate,
+                gender = gender,
+                passwordHash = passwordHash
+            )
+
+            scope.launch {
+                val isRegistered = usuarioDao.isEmailRegistered(email)
+                withContext(Dispatchers.Main) {
+                    if (isRegistered) {
+                        etEmailRegister.error = "Este correo ya está registrado."
+                        Toast.makeText(this@RegisterActivity, "El correo ya existe.", Toast.LENGTH_LONG).show()
+                    } else {
+                        try {
+                            usuarioDao.insertar(newUser)
+                            firebaseService.guardarUsuario(newUser)
+
+                            Toast.makeText(this@RegisterActivity, "¡Registro Exitoso! Ahora inicia sesión.", Toast.LENGTH_LONG).show()
+
+                            val intent = Intent(this@RegisterActivity, LoginActivity::class.java)
+                            startActivity(intent)
+                            finish()
+                        } catch (e: Exception) {
+                            Toast.makeText(this@RegisterActivity, "Error al guardar el usuario: ${e.message}", Toast.LENGTH_LONG).show()
+                        }
+                    }
+                }
             }
         }
     }
 
-    /**
-     * Maneja la lógica después de que el formulario es válido.
-     */
-    private fun handleSuccessfulRegistration() {
-        // [1] Muestra el mensaje de éxito
-        Toast.makeText(this, "¡Registro Exitoso! Redirigiendo a Login.", Toast.LENGTH_LONG).show()
-
-        // [2] Crea el Intent para ir a LoginActivity
-        val loginIntent = Intent(this, LoginActivity::class.java)
-        startActivity(loginIntent)
-
-        // [3] Cierra RegisterActivity para que el usuario no pueda volver con el botón "Atrás"
-        finish()
-    }
-
-
-    /**
-     * Configura el EditText del nombre para limitar a 50 caracteres y solo aceptar letras y espacios.
-     */
-    private fun setupNameField() {
-        // Validación de longitud máxima (ya en XML, pero reforzado aquí)
-        etName.filters = arrayOf(InputFilter.LengthFilter(50))
-    }
-
-    /**
-     * Configura el Spinner para las opciones de género.
-     */
-    private fun setupGenderSpinner() {
-        // Los ítems se toman del array definido en res/values/arrays.xml
-        val adapter = ArrayAdapter.createFromResource(
-            this,
-            R.array.gender_options,
-            android.R.layout.simple_spinner_dropdown_item
-        )
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerGender.adapter = adapter
-    }
-
-    /**
-     * Configura el DatePickerDialog con la restricción de edad (mayor de 18 años).
-     */
-    private fun setupBirthDatePicker() {
-        etBirthDate.setOnClickListener {
-            // Obtiene la fecha actual
-            val c = Calendar.getInstance()
-
-            // Restringe el máximo de la fecha a 18 años menos que hoy (mayoría de edad)
-            val maxDate = Calendar.getInstance()
-            maxDate.add(Calendar.YEAR, -18)
-
-            // Determina el año inicial a mostrar en el selector (el año de la restricción)
-            val year = maxDate.get(Calendar.YEAR)
-            val month = maxDate.get(Calendar.MONTH)
-            val day = maxDate.get(Calendar.DAY_OF_MONTH)
-
-            val dpd = DatePickerDialog(
-                this,
-                { _, selectedYear, selectedMonth, selectedDay ->
-                    // Formato DD/MM/AAAA (Month es 0-indexed, se suma 1)
-                    val formattedDate = String.format(
-                        "%02d/%02d/%d",
-                        selectedDay,
-                        selectedMonth + 1,
-                        selectedYear
-                    )
-                    etBirthDate.setText(formattedDate)
-                },
-                year, month, day // Muestra el selector en la fecha máxima permitida
-            )
-
-            // Establece la fecha máxima seleccionable
-            dpd.datePicker.maxDate = maxDate.timeInMillis
-            dpd.show()
-        }
-    }
-
-    /**
-     * Realiza todas las validaciones del formulario.
-     * @return true si todas las validaciones pasan, false en caso contrario.
-     */
-    private fun validateForm(): Boolean {
-        var isValid = true
-        // Restablecer errores antes de validar
+    private fun validateFields(): Boolean {
         etName.error = null
         etEmailRegister.error = null
         etBirthDate.error = null
         etPasswordRegister.error = null
         etConfirmPassword.error = null
+        var isValid = true
 
-        // 1. Nombre
-        val name = etName.text.toString().trim()
-        val nameRegex = Regex("^[a-zA-Z\\s]{1,50}$") // Letras y espacios, 1-50 caracteres
-        if (name.isEmpty()) {
+        if (etName.text.toString().trim().isEmpty()) {
             etName.error = "El nombre es obligatorio."
-            isValid = false
-        } else if (!name.matches(nameRegex)) {
-            etName.error = "Solo se permiten letras y espacios, máximo 50 caracteres."
             isValid = false
         }
 
-        // 2. Correo Electrónico
         val email = etEmailRegister.text.toString().trim()
-        val emailRegex = Regex("[a-zA-Z0-9._-]+@[a-z]+\\.[a-z]+")
         if (email.isEmpty()) {
-            etEmailRegister.error = "El correo es obligatorio."
+            etEmailRegister.error = "El correo electrónico es obligatorio."
             isValid = false
         } else if (!email.matches(emailRegex)) {
             etEmailRegister.error = "Formato de correo inválido (ej: usuario@dominio.com)."
             isValid = false
         }
 
-        // 3. Fecha de Nacimiento
-        val birthDate = etBirthDate.text.toString()
-        if (birthDate.isEmpty()) {
+        if (etBirthDate.text.toString().isEmpty()) {
             etBirthDate.error = "Debes seleccionar tu fecha de nacimiento."
             isValid = false
         }
 
-        // 4. Género
         if (spinnerGender.selectedItemPosition == 0) {
             Toast.makeText(this, "Por favor, selecciona tu género.", Toast.LENGTH_SHORT).show()
             isValid = false
         }
 
-        // 5. Contraseñas
         val password = etPasswordRegister.text.toString()
-        val confirmPassword = etConfirmPassword.text.toString()
-
         if (password.length != 8) {
             etPasswordRegister.error = "La contraseña debe ser de exactamente 8 caracteres."
             isValid = false
         }
 
-        if (confirmPassword.isEmpty()) {
-            etConfirmPassword.error = "Confirma la contraseña."
-            isValid = false
-        } else if (password != confirmPassword) {
+        if (etConfirmPassword.text.toString() != password) {
             etConfirmPassword.error = "Las contraseñas no coinciden."
             isValid = false
         }
 
-
-        // 6. Términos y Condiciones
         if (!cbTerms.isChecked) {
             Toast.makeText(this, "Debes aceptar los términos y condiciones.", Toast.LENGTH_SHORT).show()
             isValid = false

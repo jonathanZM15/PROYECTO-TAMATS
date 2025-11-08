@@ -5,4 +5,11 @@
     <color name="tamats_pink">#FFFF007A</color> <!-- Color rosa fucsia para el título -->
     <color name="tamats_login_background_dark_purple">#FF54075D</color> <!-- Morado oscuro para fondo de login -->
     <color name="register_card_background_color">#FFF5EEF8</color> <!-- Lavanda claro para card de registro -->
+
+    <!-- Nuevos colores para Explore -->
+    <color name="purple_top">#6A1B9A</color>
+    <color name="purple_mid">#7B1FA2</color>
+    <color name="pink_bottom">#FF2D7A</color>
+    <color name="card_overlay_solid">#8A4BA7</color>
+    <color name="bottom_nav_bg">#3C0F3A</color>
 </resources>

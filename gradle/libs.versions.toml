@@ -9,6 +9,8 @@ appcompat = "1.7.1"
 material = "1.13.0"
 activity = "1.11.0"
 constraintlayout = "2.2.1"
+googleGmsGoogleServices = "4.4.4"
+firebaseFirestore = "26.0.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -22,11 +24,14 @@ androidx-constraintlayout = { group = "androidx.constraintlayout", name = "const
 
 # Para ROOM
 room-runtime = "androidx.room:room-runtime:2.6.1"
-room-ktx = "androidx.room:room-runtime:2.6.1"
+room-ktx = "androidx.room:room-ktx:2.6.1"
 room-compiler = "androidx.room:room-compiler:2.6.1"
 kotlinx-coroutines-android = "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1"
+firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+google-gms-google-services = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }
 

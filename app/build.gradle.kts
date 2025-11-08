@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id("org.jetbrains.kotlin.kapt")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -43,6 +44,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.firebase.firestore)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -55,4 +57,21 @@ dependencies {
     kapt(libs.room.compiler)
     //ejecutar procesos en segundo plano
     implementation(libs.kotlinx.coroutines.android)
+
+    //dependencias para firebase
+    implementation(platform("com.google.firebase:firebase-bom:33.3.0"))
+    //ejecutar un CRUD completo
+    implementation("com.google.firebase:firebase-firestore-ktx")
+    //por si en algun momento se quiere trabajar conn google analitics
+    implementation("com.google.firebase:firebase-analytics")
+
+    //Librerias lifecycle
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.4")
+    //para actualizar datos en tiempo real en firebase y mi interfaz de mi app
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.4")
+    //se guarden los datos en segundo plano
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.4")
+    //las coroutines-core
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
+
 }

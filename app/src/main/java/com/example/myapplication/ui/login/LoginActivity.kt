@@ -1,99 +1,117 @@
 package com.example.myapplication.ui.login
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
-import com.example.myapplication.R // Si usas R.layout.activity_login
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import com.example.myapplication.R
+import com.example.myapplication.cloud.FirebaseService
+import com.example.myapplication.database.AppDatabase
+import com.example.myapplication.model.UsuarioEntity
 import com.example.myapplication.ui.register.RegisterActivity
+import com.example.myapplication.ui.simulacion.ProfileActivity
+import com.example.myapplication.ui.simulacion.EXTRA_USER_BIRTH_DATE
+import com.example.myapplication.ui.simulacion.EXTRA_USER_EMAIL
+import com.example.myapplication.ui.simulacion.EXTRA_USER_GENDER
+import com.example.myapplication.ui.simulacion.EXTRA_USER_NAME
 import com.google.android.material.button.MaterialButton
-
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class LoginActivity : AppCompatActivity() {
 
-    // Declara las referencias como propiedades de la clase para acceder a ellas en otros métodos
     private lateinit var etEmail: EditText
     private lateinit var etPassword: EditText
     private lateinit var btnLogin: MaterialButton
     private lateinit var tvRegisterLink: TextView
 
+    private val db by lazy { AppDatabase.getInstance(applicationContext) }
+    private val usuarioDao by lazy { db.usuarioDao() }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // [1] CICLO DE VIDA: onCreate() - Inicialización de UI y Listeners
         setContentView(R.layout.activity_login)
 
-        // 1. Obtener referencias de los elementos de la UI usando findViewById
         etEmail = findViewById(R.id.etEmail)
         etPassword = findViewById(R.id.etPassword)
         btnLogin = findViewById(R.id.btnLogin)
         tvRegisterLink = findViewById(R.id.tvRegisterLink)
 
-        // 2. Configurar los Listeners una sola vez
         setupListeners()
     }
 
-    override fun onResume() {
-        super.onResume()
-        // [2] CICLO DE VIDA: onResume() - Restablecer el estado cada vez que la actividad vuelve a ser visible
-        // Limpiamos los campos de email y contraseña. Esto es útil si el usuario vuelve desde RegisterActivity.
-        etEmail.text.clear()
-        etPassword.text.clear()
-    }
-
     private fun setupListeners() {
-
-        // Lógica de Navegación (tvRegisterLink)
         tvRegisterLink.setOnClickListener {
-            // Crea un Intent explícito para ir a RegisterActivity
-            val intent = Intent(this, RegisterActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(this, RegisterActivity::class.java))
         }
-
-        // Lógica del Botón de Inicio de Sesión (btnLogin)
         btnLogin.setOnClickListener {
             handleLoginAttempt()
         }
     }
 
-    /**
-     * Valida los campos de email y contraseña y, si son válidos, simula el login.
-     */
     private fun handleLoginAttempt() {
-
-        // Obtener los textos y eliminar espacios al inicio y final
         val email = etEmail.text.toString().trim()
         val password = etPassword.text.toString().trim()
 
-        // Restablecer errores anteriores
-        etEmail.error = null
-        etPassword.error = null
-
-        var isValid = true
-
-        // A. Validación de Email vacío
-        if (email.isEmpty()) {
-            etEmail.error = "El correo electrónico es obligatorio."
-            isValid = false
+        if (email.isEmpty() || password.isEmpty()) {
+            if (email.isEmpty()) etEmail.error = "El correo es obligatorio."
+            if (password.isEmpty()) etPassword.error = "La contraseña es obligatoria."
+            return
         }
 
-        // B. Validación de Contraseña vacía
-        if (password.isEmpty()) {
-            etPassword.error = "La contraseña es obligatoria."
-            isValid = false
+        lifecycleScope.launch {
+            val localUser = withContext(Dispatchers.IO) {
+                usuarioDao.getUserByEmail(email)
+            }
+
+            if (localUser != null) {
+                if (localUser.passwordHash == password) {
+                    navigateToProfile(localUser)
+                } else {
+                    Toast.makeText(this@LoginActivity, "Credenciales incorrectas.", Toast.LENGTH_LONG).show()
+                }
+            } else {
+                Toast.makeText(this@LoginActivity, "Buscando en la nube...", Toast.LENGTH_SHORT).show()
+
+                FirebaseService.findUserByEmail(email) { firebaseUser ->
+                    if (!lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+                        return@findUserByEmail
+                    }
+
+                    if (firebaseUser != null && firebaseUser.passwordHash == password) {
+                        lifecycleScope.launch(Dispatchers.IO) {
+                            usuarioDao.insertar(firebaseUser)
+                            withContext(Dispatchers.Main) {
+                                navigateToProfile(firebaseUser)
+                            }
+                        }
+                    } else {
+                        // Falla la autenticación de Firebase
+                        // Usamos runOnUiThread para asegurar que se ejecuta en el hilo principal
+                        runOnUiThread {
+                            Toast.makeText(this@LoginActivity, "Credenciales incorrectas.", Toast.LENGTH_LONG).show()
+                        }
+                    }
+                }
+            }
         }
+    }
 
-        // C. Resultado de la Validación
-        if (isValid) {
-            // **CAMPOS VÁLIDOS:** Muestra el Toast de Bienvenida
-            Toast.makeText(this, "Bienvenido", Toast.LENGTH_LONG).show()
+    private fun navigateToProfile(user: UsuarioEntity) {
+        Toast.makeText(this, "¡Bienvenido, ${user.name}!", Toast.LENGTH_LONG).show()
 
-            // NOTA: Aquí iría la lógica real de autenticación y navegación a la actividad principal.
-
-        } else {
-            // **CAMPOS VACÍOS:** Muestra un Toast genérico de error
-            Toast.makeText(this, "Por favor, completa los campos obligatorios.", Toast.LENGTH_SHORT).show()
+        val intent = Intent(this, ProfileActivity::class.java).apply {
+            putExtra(EXTRA_USER_NAME, user.name)
+            putExtra(EXTRA_USER_EMAIL, user.email)
+            putExtra(EXTRA_USER_BIRTH_DATE, user.birthDate)
+            putExtra(EXTRA_USER_GENDER, user.gender)
         }
+        startActivity(intent)
+        finish()
     }
 }
