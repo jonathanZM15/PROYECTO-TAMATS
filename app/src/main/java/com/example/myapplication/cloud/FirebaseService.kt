@@ -93,4 +93,92 @@ object FirebaseService {
                 callback(null)
             }
     }
+
+    /**
+     * Guarda o actualiza el perfil del usuario en Firestore
+     */
+    fun saveUserProfile(email: String, profileData: Map<String, Any>, callback: (Boolean) -> Unit) {
+        db.collection("usuarios")
+            .whereEqualTo("email", email)
+            .limit(1)
+            .get()
+            .addOnSuccessListener { documents ->
+                if (documents.isEmpty) {
+                    // Si no existe, crear una nueva colección "userProfiles"
+                    db.collection("userProfiles").document(email)
+                        .set(profileData)
+                        .addOnSuccessListener {
+                            Log.d("FirebaseService", "Perfil de usuario guardado exitosamente")
+                            callback(true)
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e("FirebaseService", "Error al guardar perfil de usuario", e)
+                            callback(false)
+                        }
+                } else {
+                    // Si existe, actualizar el documento
+                    val docId = documents.first().id
+                    db.collection("usuarios").document(docId)
+                        .update(profileData)
+                        .addOnSuccessListener {
+                            Log.d("FirebaseService", "Perfil de usuario actualizado exitosamente")
+                            callback(true)
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e("FirebaseService", "Error al actualizar perfil de usuario", e)
+                            callback(false)
+                        }
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("FirebaseService", "Error al buscar usuario", e)
+                callback(false)
+            }
+    }
+
+    /**
+     * Obtiene el perfil del usuario desde Firestore
+     */
+    fun getUserProfile(email: String, callback: (Map<String, Any>?) -> Unit) {
+        Log.d("FirebaseService", "Buscando perfil para email: $email")
+
+        // Primero intentar buscar en userProfiles
+        db.collection("userProfiles").document(email)
+            .get()
+            .addOnSuccessListener { document ->
+                Log.d("FirebaseService", "userProfiles.document($email).exists() = ${document.exists()}")
+
+                if (document.exists()) {
+                    val data = document.data
+                    Log.d("FirebaseService", "✓ Perfil encontrado en userProfiles: $data")
+                    callback(data)
+                } else {
+                    Log.d("FirebaseService", "⚠ No encontrado en userProfiles, buscando en usuarios...")
+
+                    // Si no existe en userProfiles, buscar en usuarios
+                    db.collection("usuarios")
+                        .whereEqualTo("email", email)
+                        .limit(1)
+                        .get()
+                        .addOnSuccessListener { documents ->
+                            if (!documents.isEmpty) {
+                                val userData = documents.first().data
+                                Log.d("FirebaseService", "✓ Datos encontrados en usuarios: $userData")
+                                callback(userData)
+                            } else {
+                                Log.d("FirebaseService", "❌ No se encontró perfil en ningún lugar")
+                                callback(null)
+                            }
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e("FirebaseService", "Error buscando en usuarios: ${e.message}", e)
+                            callback(null)
+                        }
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("FirebaseService", "Error buscando en userProfiles: ${e.message}", e)
+                callback(null)
+            }
+    }
 }

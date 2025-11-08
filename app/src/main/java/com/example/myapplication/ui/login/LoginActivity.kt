@@ -13,11 +13,8 @@ import com.example.myapplication.cloud.FirebaseService
 import com.example.myapplication.database.AppDatabase
 import com.example.myapplication.model.UsuarioEntity
 import com.example.myapplication.ui.register.RegisterActivity
-import com.example.myapplication.ui.simulacion.ProfileActivity
-import com.example.myapplication.ui.simulacion.EXTRA_USER_BIRTH_DATE
-import com.example.myapplication.ui.simulacion.EXTRA_USER_EMAIL
-import com.example.myapplication.ui.simulacion.EXTRA_USER_GENDER
-import com.example.myapplication.ui.simulacion.EXTRA_USER_NAME
+import com.example.myapplication.ui.simulacion.EditProfileActivity
+import com.example.myapplication.ui.simulacion.ViewProfileActivity
 import com.example.myapplication.util.EncryptionUtil
 import com.google.android.material.button.MaterialButton
 import kotlinx.coroutines.Dispatchers
@@ -107,13 +104,23 @@ class LoginActivity : AppCompatActivity() {
     private fun navigateToProfile(user: UsuarioEntity) {
         Toast.makeText(this, "¡Bienvenido, ${user.name}!", Toast.LENGTH_LONG).show()
 
-        val intent = Intent(this, ProfileActivity::class.java).apply {
-            putExtra(EXTRA_USER_NAME, user.name)
-            putExtra(EXTRA_USER_EMAIL, user.email)
-            putExtra(EXTRA_USER_BIRTH_DATE, user.birthDate)
-            putExtra(EXTRA_USER_GENDER, user.gender)
+        // Verificar si el usuario ya tiene perfil en Firebase
+        FirebaseService.getUserProfile(user.email) { profileData ->
+            runOnUiThread {
+                val intent = if (profileData != null) {
+                    // Usuario YA tiene perfil → ir a ViewProfileActivity
+                    Intent(this, ViewProfileActivity::class.java).apply {
+                        putExtra("userEmail", user.email)
+                    }
+                } else {
+                    // Usuario NO tiene perfil → ir a EditProfileActivity
+                    Intent(this, EditProfileActivity::class.java).apply {
+                        putExtra("userEmail", user.email)
+                    }
+                }
+                startActivity(intent)
+                finish()
+            }
         }
-        startActivity(intent)
-        finish()
     }
 }
