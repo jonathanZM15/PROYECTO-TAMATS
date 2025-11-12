@@ -26,4 +26,31 @@
         <item>Femenino</item>
         <item>Trasformers</item>
     </string-array>
+
+    <!-- Edit Profile Screen Strings -->
+    <string name="edit_profile_title">EDITAR PERFIL</string>
+    <string name="photo_description">Foto de perfil</string>
+    <string name="change_photo">Cambiar foto</string>
+    <string name="label_name">Nombre</string>
+    <string name="hint_name">Ingresa tu nombre</string>
+    <string name="label_age">Edad</string>
+    <string name="hint_age">Ingresa tu edad</string>
+    <string name="label_city">Ciudad</string>
+    <string name="hint_city">Ingresa tu ciudad</string>
+    <string name="label_description">Descripción (Opcional)</string>
+    <string name="hint_description">Cuéntanos sobre ti…</string>
+    <string name="label_interests">Intereses</string>
+    <string name="save_profile">Guardar Perfil</string>
+    <string name="interest_deporte">Deporte</string>
+    <string name="interest_literatura">Literatura</string>
+    <string name="interest_musica">Música</string>
+    <string name="interest_viajar">Viajar</string>
+    <string name="interest_fotografia">Fotografía</string>
+    <string name="interest_arte">Arte</string>
+    <string name="interest_cine">Cine</string>
+    <string name="interest_cocina">Cocina</string>
+    <string name="interest_yoga">Yoga</string>
+    <string name="interest_tecnologia">Tecnología</string>
+    <string name="interest_lectura">Lectura</string>
+    <string name="interest_moda">Moda</string>
 </resources>

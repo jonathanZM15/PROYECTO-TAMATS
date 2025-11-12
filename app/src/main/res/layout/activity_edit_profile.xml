@@ -25,7 +25,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="EDITAR PERFIL"
+                android:text="@string/edit_profile_title"
                 android:textColor="@android:color/white"
                 android:textSize="28sp"
                 android:textStyle="bold"
@@ -44,13 +44,14 @@
                     android:layout_height="120dp"
                     android:src="@drawable/ic_launcher_foreground"
                     android:scaleType="centerCrop"
-                    android:contentDescription="Foto de perfil" />
+                    android:contentDescription="@string/photo_description" />
 
                 <!-- Botón para cambiar foto -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="bottom|end"
+                    android:paddingStart="4dp"
                     android:paddingEnd="4dp"
                     android:paddingBottom="4dp">
 
@@ -61,7 +62,7 @@
                         android:src="@drawable/ic_launcher_foreground"
                         android:background="@drawable/button_rounded_red"
                         android:scaleType="centerInside"
-                        android:contentDescription="Cambiar foto"
+                        android:contentDescription="@string/change_photo"
                         android:padding="8dp" />
                 </LinearLayout>
 
@@ -85,7 +86,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Nombre"
+                        android:text="@string/label_name"
                         android:textStyle="bold"
                         android:textColor="@android:color/black"
                         android:textSize="14sp"
@@ -95,7 +96,8 @@
                         android:id="@+id/etProfileName"
                         android:layout_width="match_parent"
                         android:layout_height="48dp"
-                        android:hint="Ingresa tu nombre"
+                        android:hint="@string/hint_name"
+                        android:autofillHints="name"
                         android:inputType="text"
                         android:paddingStart="12dp"
                         android:paddingEnd="12dp"
@@ -107,7 +109,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Edad"
+                        android:text="@string/label_age"
                         android:textStyle="bold"
                         android:textColor="@android:color/black"
                         android:textSize="14sp"
@@ -117,7 +119,8 @@
                         android:id="@+id/etProfileAge"
                         android:layout_width="match_parent"
                         android:layout_height="48dp"
-                        android:hint="Ingresa tu edad"
+                        android:hint="@string/hint_age"
+                        android:autofillHints="birthdate"
                         android:inputType="number"
                         android:paddingStart="12dp"
                         android:paddingEnd="12dp"
@@ -129,7 +132,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Ciudad"
+                        android:text="@string/label_city"
                         android:textStyle="bold"
                         android:textColor="@android:color/black"
                         android:textSize="14sp"
@@ -139,7 +142,8 @@
                         android:id="@+id/etProfileCity"
                         android:layout_width="match_parent"
                         android:layout_height="48dp"
-                        android:hint="Ingresa tu ciudad"
+                        android:hint="@string/hint_city"
+                        android:autofillHints="postalLocality"
                         android:inputType="text"
                         android:paddingStart="12dp"
                         android:paddingEnd="12dp"
@@ -151,7 +155,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Descripción (Opcional)"
+                        android:text="@string/label_description"
                         android:textStyle="bold"
                         android:textColor="@android:color/black"
                         android:textSize="14sp"
@@ -161,7 +165,8 @@
                         android:id="@+id/etProfileDescription"
                         android:layout_width="match_parent"
                         android:layout_height="100dp"
-                        android:hint="Cuéntanos sobre ti..."
+                        android:hint="@string/hint_description"
+                        android:autofillHints=""
                         android:inputType="textMultiLine"
                         android:gravity="top|start"
                         android:paddingStart="12dp"
@@ -179,7 +184,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Intereses"
+                android:text="@string/label_interests"
                 android:textStyle="bold"
                 android:textColor="@android:color/white"
                 android:textSize="18sp"
@@ -212,7 +217,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Deporte"
+                            android:text="@string/interest_deporte"
                             android:textColor="@android:color/black"
                             android:textSize="14sp" />
 
@@ -221,7 +226,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Literatura"
+                            android:text="@string/interest_literatura"
                             android:textColor="@android:color/black"
                             android:textSize="14sp" />
 
@@ -230,7 +235,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Música"
+                            android:text="@string/interest_musica"
                             android:textColor="@android:color/black"
                             android:textSize="14sp" />
 
@@ -248,7 +253,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Viajar"
+                            android:text="@string/interest_viajar"
                             android:textColor="@android:color/black"
                             android:textSize="14sp" />
 
@@ -257,7 +262,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Fotografía"
+                            android:text="@string/interest_fotografia"
                             android:textColor="@android:color/black"
                             android:textSize="14sp" />
 
@@ -266,7 +271,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Arte"
+                            android:text="@string/interest_arte"
                             android:textColor="@android:color/black"
                             android:textSize="14sp" />
 
@@ -284,7 +289,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Cine"
+                            android:text="@string/interest_cine"
                             android:textColor="@android:color/black"
                             android:textSize="14sp" />
 
@@ -293,7 +298,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Cocina"
+                            android:text="@string/interest_cocina"
                             android:textColor="@android:color/black"
                             android:textSize="14sp" />
 
@@ -302,7 +307,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Yoga"
+                            android:text="@string/interest_yoga"
                             android:textColor="@android:color/black"
                             android:textSize="14sp" />
 
@@ -320,7 +325,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Tecnología"
+                            android:text="@string/interest_tecnologia"
                             android:textColor="@android:color/black"
                             android:textSize="14sp" />
 
@@ -329,7 +334,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Lectura"
+                            android:text="@string/interest_lectura"
                             android:textColor="@android:color/black"
                             android:textSize="14sp" />
 
@@ -338,7 +343,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Moda"
+                            android:text="@string/interest_moda"
                             android:textColor="@android:color/black"
                             android:textSize="14sp" />
 
@@ -370,7 +375,7 @@
             android:orientation="vertical"
             android:padding="16dp"
             android:layout_gravity="bottom"
-            android:layout_marginBottom="72dp"
+            android:layout_marginBottom="112dp"
             android:elevation="12dp"
             android:translationZ="12dp">
 
@@ -378,7 +383,7 @@
                 android:id="@+id/btnSaveProfile"
                 android:layout_width="match_parent"
                 android:layout_height="52dp"
-                android:text="Guardar Perfil"
+                android:text="@string/save_profile"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:layout_marginBottom="8dp"
