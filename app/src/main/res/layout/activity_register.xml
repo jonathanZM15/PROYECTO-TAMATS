@@ -216,16 +216,36 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvLabelConfirmPassword" />
 
-        <CheckBox
-            android:id="@+id/cbTerms"
+        <LinearLayout
+            android:id="@+id/llTermsContainer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Aceptar términos y condiciones"
-            android:textColor="@color/black"
-            android:textSize="12sp"
+            android:orientation="horizontal"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/etConfirmPassword" />
+            app:layout_constraintTop_toBottomOf="@id/etConfirmPassword">
+
+            <CheckBox
+                android:id="@+id/cbTerms"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Aceptar términos y condiciones"
+                android:textColor="@color/black"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/tvViewTerms"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="Ver"
+                android:textColor="@color/tamats_pink"
+                android:textStyle="bold"
+                android:textSize="12sp"
+                android:clickable="true"
+                android:focusable="true"
+                android:paddingTop="8dp" />
+        </LinearLayout>
 
 
         <com.google.android.material.button.MaterialButton
@@ -242,7 +262,7 @@
             app:cornerRadius="24dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/cbTerms" />
+            app:layout_constraintTop_toBottomOf="@id/llTermsContainer" />
 
         <LinearLayout
             android:layout_width="wrap_content"

@@ -30,6 +30,7 @@ class RegisterActivity : AppCompatActivity() {
     private lateinit var cbTerms: CheckBox
     private lateinit var btnRegister: Button
     private lateinit var tvLoginLink: TextView
+    private lateinit var tvViewTerms: TextView
 
     private val db by lazy { AppDatabase.getInstance(applicationContext) }
     private val usuarioDao by lazy { db.usuarioDao() }
@@ -52,6 +53,7 @@ class RegisterActivity : AppCompatActivity() {
         cbTerms = findViewById(R.id.cbTerms)
         btnRegister = findViewById(R.id.btnRegister)
         tvLoginLink = findViewById(R.id.tvLoginLink)
+        tvViewTerms = findViewById(R.id.tvViewTerms)
 
         setupListeners()
     }
@@ -69,6 +71,11 @@ class RegisterActivity : AppCompatActivity() {
             val intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)
             finish()
+        }
+
+        tvViewTerms.setOnClickListener {
+            val intent = Intent(this, TermsAndConditionsActivity::class.java)
+            startActivity(intent)
         }
     }
 
