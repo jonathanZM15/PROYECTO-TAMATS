@@ -18,8 +18,8 @@ class MyApplication : Application() {
         }
 
         try {
-            // Inicializar Firebase cuando la aplicación se inicia
-            FirebaseApp.initializeApp(this)
+            // Inicializar Firebase usando applicationContext para evitar mismatch de tipo
+            FirebaseApp.initializeApp(applicationContext)
             android.util.Log.d("MyApplication", "Firebase inicializado correctamente")
         } catch (e: Exception) {
             android.util.Log.e("MyApplication", "Error inicializando Firebase: ${e.message}", e)
@@ -27,4 +27,3 @@ class MyApplication : Application() {
         }
     }
 }
-

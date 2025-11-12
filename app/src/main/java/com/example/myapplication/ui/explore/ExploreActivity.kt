@@ -9,7 +9,7 @@ class ExploreActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // Usamos temporalmente el layout fijo para validar el centrado de FABs
-        setContentView(R.layout.activity_explore_fixed)
+        setContentView(R.layout.activity_explore)
 
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNav)
         bottomNav.selectedItemId = R.id.nav_explore
