@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "188092400826",
+    "project_id": "tamats-aea71",
+    "storage_bucket": "tamats-aea71.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:188092400826:android:e1c125ef54b1370c31ee83",
+        "android_client_info": {
+          "package_name": "com.example.myapplication"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCoIaA-_rdCemrqmAg2I71nv4xGcUerrG0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
