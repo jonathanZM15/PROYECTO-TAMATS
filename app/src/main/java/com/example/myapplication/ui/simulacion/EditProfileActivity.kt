@@ -109,6 +109,13 @@ class EditProfileActivity : AppCompatActivity() {
             initializeViews()
             setupListeners()
             loadProfileData()
+
+            // Asegurar que el contenedor del botón Guardar quede por encima del FAB
+            val saveContainer = findViewById<LinearLayout>(R.id.saveButtonContainer)
+            saveContainer?.bringToFront()
+
+            // Evitar que el teclado oculte el contenido
+            window.setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
         } catch (e: Exception) {
             android.util.Log.e("EditProfileActivity", "Error en onCreate: ${e.message}", e)
             Toast.makeText(this, "Error al cargar el perfil: ${e.message}", Toast.LENGTH_LONG).show()
@@ -415,5 +422,24 @@ class EditProfileActivity : AppCompatActivity() {
             }
         }
     }
-}
 
+    override fun onResume() {
+        super.onResume()
+        // Asegurar que el contenedor del botón Guardar esté al frente después de layout
+        val saveContainer = findViewById<LinearLayout>(R.id.saveButtonContainer)
+        saveContainer?.bringToFront()
+        saveContainer?.requestLayout()
+        saveContainer?.invalidate()
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) {
+            val saveContainer = findViewById<LinearLayout>(R.id.saveButtonContainer)
+            saveContainer?.bringToFront()
+            // aseguremos que la elevación sea grande
+            saveContainer?.translationZ = 200f
+            saveContainer?.invalidate()
+        }
+    }
+}

@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:id="@+id/bottomNavigation"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:background="@color/bottom_nav_bg"
+        android:gravity="center">
+
+        <LinearLayout
+            android:id="@+id/navExplorar"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <ImageView
+                android:id="@+id/ivNavExplore"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_explore"
+                android:contentDescription="Explorar"
+                app:tint="@color/bottom_nav_inactive" />
+
+            <TextView
+                android:id="@+id/tvNavExplore"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Explorar"
+                android:textSize="11sp"
+                android:textColor="@color/bottom_nav_inactive"
+                android:layout_marginTop="2dp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/navMatches"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <ImageView
+                android:id="@+id/ivNavMatches"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_favorite"
+                android:contentDescription="Matches"
+                app:tint="@color/bottom_nav_inactive" />
+
+            <TextView
+                android:id="@+id/tvNavMatches"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Matches"
+                android:textSize="11sp"
+                android:textColor="@color/bottom_nav_inactive"
+                android:layout_marginTop="2dp" />
+
+        </LinearLayout>
+
+        <!-- Hueco central para el FAB -->
+        <View
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <LinearLayout
+            android:id="@+id/navChats"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <ImageView
+                android:id="@+id/ivNavChats"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_chat"
+                android:contentDescription="Chats"
+                app:tint="@color/bottom_nav_inactive" />
+
+            <TextView
+                android:id="@+id/tvNavChats"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Chats"
+                android:textSize="11sp"
+                android:textColor="@color/bottom_nav_inactive"
+                android:layout_marginTop="2dp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/navPerfil"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <ImageView
+                android:id="@+id/ivNavPerfil"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_person"
+                android:contentDescription="Perfil"
+                app:tint="@color/bottom_nav_active" />
+
+            <TextView
+                android:id="@+id/tvNavPerfil"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Perfil"
+                android:textSize="11sp"
+                android:textColor="@color/bottom_nav_active"
+                android:layout_marginTop="2dp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/fabCenter"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:text="+"
+        android:textSize="28sp"
+        android:textColor="@color/purple_700"
+        app:backgroundTint="@android:color/white"
+        app:cornerRadius="32dp"
+        android:layout_gravity="center"
+        android:translationY="-18dp"
+        app:elevation="6dp" />
+
+</FrameLayout>

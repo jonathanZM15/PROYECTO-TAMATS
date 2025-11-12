@@ -14,4 +14,8 @@
     <color name="bottom_nav_bg">#3C0F3A</color>
     <color name="teal_200">#80DEEA</color>
     <color name="purple_700">#7B1FA2</color>
+
+    <!-- Colores para estado de la barra inferior -->
+    <color name="bottom_nav_active">#FFFFFFFF</color>
+    <color name="bottom_nav_inactive">#FFB0A5B7</color>
 </resources>

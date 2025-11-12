@@ -120,7 +120,7 @@
         android:orientation="horizontal"
         android:gravity="center"
         android:layout_marginBottom="90dp"
-        app:layout_constraintBottom_toTopOf="@+id/bottomNav"
+        app:layout_constraintBottom_toTopOf="@+id/bottomContainer"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
@@ -154,16 +154,16 @@
             android:contentDescription="like" />
     </LinearLayout>
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottomNav"
+    <FrameLayout
+        android:id="@+id/bottomContainer"
         android:layout_width="0dp"
-        android:layout_height="64dp"
-        app:itemIconTint="@color/white"
-        app:itemTextColor="@color/white"
-        app:menu="@menu/bottom_nav_menu"
-        android:background="#3C0F3A"
+        android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <include layout="@layout/layout_bottom_nav" />
+
+    </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
