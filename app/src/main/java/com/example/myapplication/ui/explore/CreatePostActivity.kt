@@ -117,12 +117,22 @@ class CreatePostActivity : AppCompatActivity() {
         val gm = GridLayoutManager(this, 3)
         gm.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
             override fun getSpanSize(position: Int): Int {
-                val items = selectedUris
-                return if (items.isEmpty() && position == 0) 3 else 1
+                return try {
+                    val itemCount = adapter.itemCount
+                    if (position < 0 || position >= itemCount) return 1
+                    // Si hay espacio para el botón de añadir y la posición es la del botón, ocupar las 3 columnas
+                    if (adapter.currentList.size < maxPhotos && position == adapter.currentList.size) return 3
+                    1
+                } catch (_: Exception) {
+                    // En caso de cualquier inconsistencia, usar span 1 para seguir seguro
+                    1
+                }
             }
         }
         rvPhotos.layoutManager = gm
         rvPhotos.adapter = adapter
+        // Desactivar animaciones para evitar inconsistencias durante actualizaciones rápidas
+        rvPhotos.itemAnimator = null
         adapter.submitList(selectedUris.toList())
 
         val spacingPx = (12 * resources.displayMetrics.density).toInt()

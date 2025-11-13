@@ -140,7 +140,17 @@ class RegisterActivity : AppCompatActivity() {
 
                             Toast.makeText(this@RegisterActivity, "¡Registro Exitoso! Ahora inicia sesión.", Toast.LENGTH_LONG).show()
 
-                            val intent = Intent(this@RegisterActivity, LoginActivity::class.java)
+                            // Guardar sesión automáticamente para mantener al usuario logueado
+                            val prefs = getSharedPreferences("user_data", MODE_PRIVATE)
+                            prefs.edit().apply {
+                                putString("user_email", email)
+                                putString("user_name", name)
+                                apply()
+                            }
+
+                            // Redirigir a EditProfileActivity para completar perfil
+                            val intent = Intent(this@RegisterActivity, com.example.myapplication.ui.simulacion.EditProfileActivity::class.java)
+                            intent.putExtra("userEmail", email)
                             startActivity(intent)
                             finish()
                         } catch (e: Exception) {

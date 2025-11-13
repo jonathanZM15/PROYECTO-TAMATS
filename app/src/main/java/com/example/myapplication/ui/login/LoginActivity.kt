@@ -36,6 +36,15 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
+        // Si ya existe sesión guardada, ir directo a ExploreActivity
+        val prefs = getSharedPreferences("user_data", MODE_PRIVATE)
+        val savedEmail = prefs.getString("user_email", null)
+        if (!savedEmail.isNullOrEmpty()) {
+            startActivity(Intent(this, com.example.myapplication.ui.explore.ExploreActivity::class.java))
+            finish()
+            return
+        }
+
         etEmail = findViewById(R.id.etEmail)
         etPassword = findViewById(R.id.etPassword)
         btnLogin = findViewById(R.id.btnLogin)

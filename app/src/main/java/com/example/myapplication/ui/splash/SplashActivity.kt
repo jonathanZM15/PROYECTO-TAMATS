@@ -7,6 +7,7 @@ import android.os.Handler
 import android.os.Looper
 import com.example.myapplication.R
 import com.example.myapplication.ui.login.LoginActivity // RUTA AL LOGIN
+import com.example.myapplication.ui.explore.ExploreActivity
 
 class SplashActivity : AppCompatActivity() {
 
@@ -21,11 +22,21 @@ class SplashActivity : AppCompatActivity() {
 
         // Usa un Handler para crear un temporizador
         Handler(Looper.getMainLooper()).postDelayed({
-            // 1. Crea el Intent para iniciar la LoginActivity
-            val intent = Intent(this, LoginActivity::class.java)
+            // Comprobar si hay un usuario ya guardado en SharedPreferences
+            val prefs = getSharedPreferences("user_data", MODE_PRIVATE)
+            val savedEmail = prefs.getString("user_email", null)
+
+            val intent = if (!savedEmail.isNullOrEmpty()) {
+                // Usuario previamente logueado → ir directo a ExploreActivity
+                Intent(this, ExploreActivity::class.java)
+            } else {
+                // No hay sesión → ir a LoginActivity
+                Intent(this, LoginActivity::class.java)
+            }
+
             startActivity(intent)
 
-            // 2. Finaliza la SplashActivity para que no se pueda volver atrás
+            // Finaliza la SplashActivity para que no se pueda volver atrás
             finish()
 
         }, SPLASH_TIME_OUT)
