@@ -1,5 +1,8 @@
 package com.example.myapplication.ui.explore
 
+import android.graphics.BitmapFactory
+import android.util.Base64
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,11 +25,34 @@ class ImagePagerAdapter(private val images: List<String>) : RecyclerView.Adapter
     }
 
     override fun onBindViewHolder(holder: ImageViewHolder, position: Int) {
-        val url = images[position]
-        Glide.with(holder.image.context)
-            .load(url)
-            .centerCrop()
-            .into(holder.image)
+        val imageData = images[position]
+
+        // Verificar si es una URL o Base64
+        if (imageData.startsWith("http://") || imageData.startsWith("https://")) {
+            // Es una URL, cargarla con Glide
+            Glide.with(holder.image.context)
+                .load(imageData)
+                .centerCrop()
+                .into(holder.image)
+        } else {
+            // Es Base64, decodificar y mostrar
+            try {
+                val decoded = Base64.decode(imageData, Base64.DEFAULT)
+                val bitmap = BitmapFactory.decodeByteArray(decoded, 0, decoded.size)
+                if (bitmap != null) {
+                    Glide.with(holder.image.context)
+                        .load(bitmap)
+                        .centerCrop()
+                        .into(holder.image)
+                } else {
+                    Log.w("ImagePagerAdapter", "No se pudo decodificar imagen en posición $position")
+                    holder.image.setImageResource(android.R.drawable.ic_dialog_alert)
+                }
+            } catch (e: Exception) {
+                Log.e("ImagePagerAdapter", "Error decodificando Base64 en posición $position: ${e.message}", e)
+                holder.image.setImageResource(android.R.drawable.ic_dialog_alert)
+            }
+        }
     }
 
     override fun getItemCount(): Int = images.size

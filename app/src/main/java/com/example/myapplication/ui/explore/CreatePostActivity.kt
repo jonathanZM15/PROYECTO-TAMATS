@@ -35,7 +35,7 @@ import android.content.pm.PackageManager
 
 /**
  * Activity para crear una publicación con texto (máx 1000 caracteres) y hasta 5 fotos.
- * Ahora soporta: elegir galería, tomar foto con cámara, y position-based insertion en el grid.
+ * Las imágenes se guardan en Base64 directamente en Firestore.
  */
 class CreatePostActivity : AppCompatActivity() {
 
@@ -50,9 +50,8 @@ class CreatePostActivity : AppCompatActivity() {
     // Launchers
     private lateinit var pickImagesLauncher: ActivityResultLauncher<String>
     private lateinit var takePictureLauncher: ActivityResultLauncher<Uri>
-    // Launcher para pedir múltiples permisos en tiempo de ejecución
     private lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
-    // Acción pendiente después de conceder permisos: 0 = nada, 1 = cámara, 2 = galería
+
     private var pendingPermissionAction: Int = 0
 
     // Lista local de Uris seleccionadas
@@ -62,7 +61,6 @@ class CreatePostActivity : AppCompatActivity() {
     private val maxPhotos = 5
     private val mainScope = MainScope()
 
-    // Para saber en qué posición se intentó agregar una foto (si se usa cámara)
     private var pendingAddPosition: Int = -1
     private var cameraTempUri: Uri? = null
 
@@ -70,9 +68,8 @@ class CreatePostActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create_post)
 
-        // Registrar launcher de permisos antes de usarlo
+        // Registrar launcher de permisos
         permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { results ->
-            // Si TODOS los permisos solicitados son concedidos, ejecutamos la acción pendiente
             val allGranted = results.values.all { it }
             if (allGranted) {
                 when (pendingPermissionAction) {
@@ -86,7 +83,6 @@ class CreatePostActivity : AppCompatActivity() {
         }
 
         etPostText = findViewById(R.id.etPostText)
-        // Ajustar el hint para incluir el nombre del usuario (preferir FirebaseAuth > SharedPreferences)
         try {
             val currentName = getCurrentUserName()
             if (currentName.isNotEmpty()) {
@@ -101,56 +97,43 @@ class CreatePostActivity : AppCompatActivity() {
         rvPhotos = findViewById(R.id.rvPhotos)
         btnPublish = findViewById(R.id.btnPublish)
 
-        // Inicializar header avatar y nombre
         ivUserAvatar = findViewById(R.id.ivUserAvatar)
         tvUserName = findViewById(R.id.tvUserName)
 
-        // Cargar primero los datos guardados localmente para evitar parpadeo
         loadProfileFromPrefs()
-
-        // Cargar datos de perfil del usuario (nombre y foto) en el header
         loadCurrentUserProfile()
 
-        // Crear el adapter basado en DiffUtil (PhotoGridAdapter) y pasar los callbacks
         adapter = PhotoGridAdapter(
             maxPhotos = maxPhotos,
             onAddClick = { pos -> showAddOptions(pos) },
             onRemoveClick = { pos ->
                 if (pos in selectedUris.indices) {
                     selectedUris.removeAt(pos)
-                    // Actualizar la lista mediante DiffUtil en el hilo UI
                     rvPhotos.post { adapter.submitList(selectedUris.toList()) }
                 }
             }
         )
-        // 3 columnas como en el mock
+
         val gm = GridLayoutManager(this, 3)
-        // Hacer que cuando no haya imágenes el único slot ocupe las 3 columnas (solo posición 0)
         gm.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
             override fun getSpanSize(position: Int): Int {
                 val items = selectedUris
-                // Si no hay items, solo la posición 0 ocupa las 3 columnas (slot central)
                 return if (items.isEmpty() && position == 0) 3 else 1
             }
         }
         rvPhotos.layoutManager = gm
         rvPhotos.adapter = adapter
-        // Enviar estado inicial (puede estar vacío) al adapter basado en DiffUtil
         adapter.submitList(selectedUris.toList())
 
-        // Añadir spacing entre items (12dp)
         val spacingPx = (12 * resources.displayMetrics.density).toInt()
         rvPhotos.addItemDecoration(GridSpacingItemDecoration(3, spacingPx, true))
 
-        // Launcher para seleccionar múltiples imágenes desde galería
         pickImagesLauncher = registerForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris: List<Uri> ->
             if (uris.isNotEmpty()) {
-                // Si el usuario seleccionó más de maxPhotos en la galería, avisamos y tomamos solo las primeras
                 if (uris.size > maxPhotos) {
                     Toast.makeText(this, "Has seleccionado más de $maxPhotos fotos. Se añadirán las primeras $maxPhotos.", Toast.LENGTH_LONG).show()
                 }
                 val spaceLeft = maxPhotos - selectedUris.size
-                // Si el usuario pasó más URIs que el espacio disponible, avisamos y recortamos
                 var toAdd = uris
                 if (uris.size > spaceLeft) {
                     toAdd = uris.take(spaceLeft)
@@ -158,9 +141,7 @@ class CreatePostActivity : AppCompatActivity() {
                 }
 
                 val oldSize = selectedUris.size
-                // Insertar en la posición pendiente si existe, manteniendo orden
                 if (pendingAddPosition in 0 until maxPhotos) {
-                    // Insertar secuencialmente a partir de pendingAddPosition
                     var insertIndex = pendingAddPosition
                     var added = 0
                     for (u in toAdd) {
@@ -176,7 +157,6 @@ class CreatePostActivity : AppCompatActivity() {
                     }
                     pendingAddPosition = -1
                     if (added > 0) {
-                        // Actualizar la lista usando DiffUtil
                         rvPhotos.post { adapter.submitList(selectedUris.toList()) }
                     }
                 } else {
@@ -186,17 +166,13 @@ class CreatePostActivity : AppCompatActivity() {
                         rvPhotos.post { adapter.submitList(selectedUris.toList()) }
                     }
                 }
-                // No es necesario llamar a notifyDataSetChanged aquí (ya notificamos rangos especificos)
-             } else {
-                 // No seleccionó nada
-                 Toast.makeText(this, "Debes seleccionar al menos una foto", Toast.LENGTH_SHORT).show()
-              }
-          }
+            } else {
+                Toast.makeText(this, "Debes seleccionar al menos una foto", Toast.LENGTH_SHORT).show()
+            }
+        }
 
-        // Launcher para tomar foto con cámara (recibe URI donde guardar)
         takePictureLauncher = registerForActivityResult(ActivityResultContracts.TakePicture()) { success: Boolean ->
             if (success && cameraTempUri != null) {
-                // Insertar la foto en la posición pendiente o al final
                 if (pendingAddPosition in 0 until maxPhotos) {
                     val idx = pendingAddPosition
                     if (idx <= selectedUris.size) {
@@ -209,10 +185,8 @@ class CreatePostActivity : AppCompatActivity() {
                 }
                 cameraTempUri = null
                 pendingAddPosition = -1
-                // Notificar con seguridad usando DiffUtil
                 rvPhotos.post { adapter.submitList(selectedUris.toList()) }
             } else {
-                // falló o cancelado
                 cameraTempUri = null
                 pendingAddPosition = -1
             }
@@ -223,76 +197,59 @@ class CreatePostActivity : AppCompatActivity() {
         }
 
         setupBottomNav()
-
-        // rvPhotos siempre visible; el adaptador gestiona slots vacíos y clicks para agregar
     }
 
     override fun onResume() {
         super.onResume()
-        // Recargar nombre/foto por si el usuario lo actualizó en EditProfile
         loadCurrentUserProfile()
     }
 
-    // Load current user email (FirebaseAuth or SharedPreferences) and request profile from FirebaseService
     private fun loadCurrentUserProfile() {
-        // Usar SharedPreferences como fuente principal para email/nombre (evitar dependencia directa de FirebaseAuth aquí)
         val prefs = getSharedPreferences("user_data", MODE_PRIVATE)
-
         val emailToUse = prefs.getString("user_email", null)
 
-        // No usamos FirebaseAuth aquí: tomar el email guardado en prefs
         if (emailToUse.isNullOrEmpty()) {
-            // No hay email para consultar en la nube; ya mostramos datos locales si existían
             if (tvUserName.text.isNullOrEmpty()) tvUserName.text = getString(R.string.user_name_demo)
-            if (tvUserName.text.isNullOrEmpty()) ivUserAvatar.setImageResource(R.mipmap.ic_launcher)
             return
         }
 
-        // Solicitar datos de perfil desde la nube usando el email determinado
         FirebaseService.getUserProfile(emailToUse) { profileData ->
-             runOnUiThread {
-                 if (profileData != null) {
-                     val name = profileData["name"]?.toString()
-                     if (!name.isNullOrEmpty()) tvUserName.text = name
+            runOnUiThread {
+                if (profileData != null) {
+                    val name = profileData["name"]?.toString()
+                    if (!name.isNullOrEmpty()) tvUserName.text = name
 
-                     val photoBase64 = profileData["photo"]?.toString()
-                     if (!photoBase64.isNullOrEmpty()) {
+                    val photoBase64 = profileData["photo"]?.toString()
+                    if (!photoBase64.isNullOrEmpty()) {
                         try {
                             val decoded = Base64.decode(photoBase64, Base64.DEFAULT)
                             val bmp = BitmapFactory.decodeByteArray(decoded, 0, decoded.size)
                             if (bmp != null) Glide.with(this@CreatePostActivity).load(bmp).circleCrop().into(ivUserAvatar)
-                        } catch (_: Exception) { /* ignore */ }
-                     }
+                        } catch (_: Exception) { }
+                    }
 
-                    // Actualizar SharedPreferences con los datos de perfil obtenidos
                     try {
                         prefs.edit().apply {
                             if (!name.isNullOrEmpty()) putString("user_name", name)
                             if (!photoBase64.isNullOrEmpty()) putString("user_photo", photoBase64)
                             putString("user_email", emailToUse)
+                            commit()
                         }
-                    } catch (_: Exception) { /* ignore */ }
-                 } else {
-                     // Sin perfil en la nube: mantener valores locales ya mostrados
-                 }
-             }
-         }
+                    } catch (_: Exception) { }
+                }
+            }
+        }
     }
 
-    // Configurar la barra inferior incluida para navegación básica (A: conecta los botones)
     private fun setupBottomNav() {
         val ivExplore = findViewById<ImageView>(R.id.ivNavExplore)
         val tvExplore = findViewById<TextView>(R.id.tvNavExplore)
-
         val ivMatches = findViewById<ImageView>(R.id.ivNavMatches)
         val tvMatches = findViewById<TextView>(R.id.tvNavMatches)
-
         val ivChats = findViewById<ImageView>(R.id.ivNavChats)
         val tvChats = findViewById<TextView>(R.id.tvNavChats)
-
         val ivProfile = findViewById<ImageView>(R.id.ivNavPerfil)
         val tvProfile = findViewById<TextView>(R.id.tvNavPerfil)
-
         val fabCenter = findViewById<MaterialButton>(R.id.fabCenter)
 
         fun setActive(iv: ImageView, tv: TextView) {
@@ -307,70 +264,58 @@ class CreatePostActivity : AppCompatActivity() {
             tv.setTextColor(inactiveColor)
         }
 
-        // Marcar Perfil como activo en esta pantalla
         setInactive(ivExplore, tvExplore)
         setInactive(ivMatches, tvMatches)
         setInactive(ivChats, tvChats)
         setActive(ivProfile, tvProfile)
 
         ivExplore.setOnClickListener {
-            // Abrir ExploreActivity directamente
-            startActivity(Intent(this, com.example.myapplication.ui.explore.ExploreActivity::class.java))
-         }
+            startActivity(Intent(this, ExploreActivity::class.java))
+        }
 
-         ivMatches.setOnClickListener {
-             Toast.makeText(this, "Matches - Próximamente", Toast.LENGTH_SHORT).show()
-         }
+        ivMatches.setOnClickListener {
+            Toast.makeText(this, "Matches - Próximamente", Toast.LENGTH_SHORT).show()
+        }
 
-         ivChats.setOnClickListener {
-             Toast.makeText(this, "Chats - Próximamente", Toast.LENGTH_SHORT).show()
-         }
+        ivChats.setOnClickListener {
+            Toast.makeText(this, "Chats - Próximamente", Toast.LENGTH_SHORT).show()
+        }
 
-         ivProfile.setOnClickListener {
-            // Abrir ViewProfileActivity directamente
+        ivProfile.setOnClickListener {
             val intent = Intent(this, com.example.myapplication.ui.simulacion.ViewProfileActivity::class.java)
-            // intentar pasar email si lo tenemos
             val prefs = getSharedPreferences("user_data", MODE_PRIVATE)
             val currentEmail = prefs.getString("user_email", null)
             if (!currentEmail.isNullOrEmpty()) intent.putExtra("userEmail", currentEmail)
             startActivity(intent)
-         }
+        }
 
         fabCenter.setOnClickListener {
-            // Ya estamos en CreatePostActivity (desde FAB), no hacer nada o mostrar mensaje
             Toast.makeText(this, "Ya estás creando una publicación", Toast.LENGTH_SHORT).show()
         }
     }
 
-    // Comprueba y solicita permisos necesarios para la cámara; si ya están concedidos, lanza la cámara
     private fun ensureCameraPermissionsAndLaunch() {
         val perms = mutableListOf<String>()
-        // Cámara
         perms.add(Manifest.permission.CAMERA)
-        // Lectura de imágenes depende de la API
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             perms.add(Manifest.permission.READ_MEDIA_IMAGES)
         } else {
             perms.add(Manifest.permission.READ_EXTERNAL_STORAGE)
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-                // En versiones antiguas puede ser necesario WRITE_EXTERNAL_STORAGE
                 perms.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
             }
         }
 
-        // Si ya están concedidos, ejecutar inmediatamente
         val notGranted = perms.filter { ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED }
         if (notGranted.isEmpty()) {
             launchCamera()
             return
         }
 
-        // Solicitar permisos pendientes
         pendingPermissionAction = 1
         permissionLauncher.launch(perms.toTypedArray())
     }
 
-    // Comprueba y solicita permisos necesarios para galería; si ya están concedidos, lanza picker
     private fun ensureGalleryPermissionsAndLaunch() {
         val perms = mutableListOf<String>()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -392,7 +337,6 @@ class CreatePostActivity : AppCompatActivity() {
         permissionLauncher.launch(perms.toTypedArray())
     }
 
-    // Muestra opciones para agregar: Cámara o Galería
     private fun showAddOptions(position: Int) {
         val spaceLeft = maxPhotos - selectedUris.size
         if (spaceLeft <= 0) {
@@ -404,11 +348,11 @@ class CreatePostActivity : AppCompatActivity() {
             .setTitle("Agregar Foto")
             .setItems(options) { dialog: DialogInterface, which: Int ->
                 when (which) {
-                    0 -> { // Cámara
+                    0 -> {
                         pendingAddPosition = position
                         ensureCameraPermissionsAndLaunch()
                     }
-                    1 -> { // Galería
+                    1 -> {
                         pendingAddPosition = position
                         ensureGalleryPermissionsAndLaunch()
                     }
@@ -417,7 +361,6 @@ class CreatePostActivity : AppCompatActivity() {
             .show()
     }
 
-    // Crear un archivo temporal y lanzar la cámara para tomar foto
     private fun launchCamera() {
         val values = ContentValues().apply {
             put(MediaStore.Images.Media.DISPLAY_NAME, "IMG_${SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())}.jpg")
@@ -435,6 +378,10 @@ class CreatePostActivity : AppCompatActivity() {
 
     private fun publishPost() {
         val text = etPostText.text.toString().trim()
+        if (text.isEmpty()) {
+            Toast.makeText(this, "Escribe un texto para la publicación.", Toast.LENGTH_SHORT).show()
+            return
+        }
         if (text.length > 1000) {
             Toast.makeText(this, "El texto no puede superar 1000 caracteres.", Toast.LENGTH_SHORT).show()
             return
@@ -445,34 +392,38 @@ class CreatePostActivity : AppCompatActivity() {
         }
 
         btnPublish.isEnabled = false
-        Toast.makeText(this, "Subiendo publicación...", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Procesando imágenes...", Toast.LENGTH_SHORT).show()
 
-        // Subir imágenes secuencialmente y obtener URLs usando coroutines
         mainScope.launch {
             try {
-                val uploadedUrls = mutableListOf<String>()
-                val thumbnailsBase64 = mutableListOf<String>()
+                val imagesBase64 = mutableListOf<String>()
+                var totalSize = 0L
+                val maxTotalSize = 15 * 1024 * 1024 // 15MB máximo
 
-                for (uri in selectedUris) {
-                    // Generar thumbnail Base64 (max dim 512)
-                    val t64 = withContext(Dispatchers.IO) { uriToBase64Thumbnail(uri, 512) }
-                    if (t64 == null) throw Exception("Error generando thumbnail")
-                    thumbnailsBase64.add(t64)
+                for ((index, uri) in selectedUris.withIndex()) {
+                    val imageBase64 = withContext(Dispatchers.IO) { uriToBase64Image(uri, 1024) }
+                    if (imageBase64 == null) {
+                        throw Exception("Error procesando imagen ${index + 1}")
+                    }
 
-                    // Subir usando la función suspend nueva
-                    val url = FirebaseService.uploadImageSuspend(uri)
-                    if (url == null) throw Exception("Error subiendo imagen")
-                    uploadedUrls.add(url)
+                    val imageSize = imageBase64.length
+                    totalSize += imageSize
+
+                    if (totalSize > maxTotalSize) {
+                        throw Exception("Las imágenes son muy grandes. Intenta comprimir o reducir la cantidad.")
+                    }
+
+                    imagesBase64.add(imageBase64)
+                    android.util.Log.d("CreatePostActivity", "Imagen ${index + 1} procesada: ${(imageSize / 1024)} KB")
                 }
 
-                // Crear objeto publicación y guardarlo en Firestore (incluye ambas representaciones)
+                android.util.Log.d("CreatePostActivity", "Total de imágenes: ${imagesBase64.size}, tamaño: ${(totalSize / 1024)} KB")
+
                 val authorEmail = getCurrentUserEmail()
                 val authorName = getCurrentUserName()
                 val post = hashMapOf(
                     "text" to text,
-                    "photos" to uploadedUrls,
-                    "thumbnailsBase64" to thumbnailsBase64,
-                    // incluir autor para poder filtrar y mostrar en Explore
+                    "photos" to imagesBase64,
                     "authorEmail" to authorEmail,
                     "authorName" to authorName,
                     "timestamp" to System.currentTimeMillis()
@@ -480,31 +431,30 @@ class CreatePostActivity : AppCompatActivity() {
 
                 val db = com.google.firebase.firestore.FirebaseFirestore.getInstance()
                 db.collection("posts").add(post).addOnSuccessListener {
-                    Toast.makeText(this@CreatePostActivity, "Publicación creada correctamente.", Toast.LENGTH_SHORT).show()
-                    // Limpiar el formulario localmente antes de redirigir
-                    clearPostForm()
-                    // Redirigir automáticamente a ExploreActivity para que el usuario vea su publicación
-                    // ExploreActivity escucha la colección 'posts' y mostrará la publicación recién creada.
-                    val intent = Intent(this@CreatePostActivity, ExploreActivity::class.java)
-                    // Opcional: limpiar el back stack para evitar volver a la pantalla de creación
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                    startActivity(intent)
-                    // Finalizar esta Activity para liberar recursos
-                    finish()
-                 }.addOnFailureListener { e ->
-                     Toast.makeText(this@CreatePostActivity, "Error guardando publicación", Toast.LENGTH_LONG).show()
-                     btnPublish.isEnabled = true
-                 }
+                    runOnUiThread {
+                        Toast.makeText(this@CreatePostActivity, "¡Publicación creada!", Toast.LENGTH_SHORT).show()
+                        clearPostForm()
+                        val intent = Intent(this@CreatePostActivity, ExploreActivity::class.java)
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                        startActivity(intent)
+                        finish()
+                    }
+                }.addOnFailureListener { e ->
+                    runOnUiThread {
+                        android.util.Log.e("CreatePostActivity", "Error guardando: ${e.message}", e)
+                        Toast.makeText(this@CreatePostActivity, "Error: ${e.message}", Toast.LENGTH_LONG).show()
+                        btnPublish.isEnabled = true
+                    }
+                }
 
-            } catch (_: Exception) {
-                // Mostrar diálogo con opción de reintentar
+            } catch (e: Exception) {
                 runOnUiThread {
                     btnPublish.isEnabled = true
+                    android.util.Log.e("CreatePostActivity", "Error: ${e.message}", e)
                     androidx.appcompat.app.AlertDialog.Builder(this@CreatePostActivity)
-                        .setTitle("Error al subir imágenes")
-                        .setMessage("Ocurrió un error subiendo las imágenes. ¿Quieres reintentar?")
+                        .setTitle("Error al procesar imágenes")
+                        .setMessage(e.message ?: "Ocurrió un error.\n¿Quieres reintentar?")
                         .setPositiveButton("Reintentar") { _, _ ->
-                            // Reintentar publicación completa
                             publishPost()
                         }
                         .setNegativeButton("Cancelar", null)
@@ -514,16 +464,13 @@ class CreatePostActivity : AppCompatActivity() {
         }
     }
 
-    // Crea un thumbnail de tamaño máximo maxDim (px), lo comprime y devuelve la cadena Base64
-    private fun uriToBase64Thumbnail(uri: Uri, maxDim: Int): String? {
+    private fun uriToBase64Image(uri: Uri, maxDim: Int): String? {
         return try {
             val input = contentResolver.openInputStream(uri) ?: return null
-            // Cargar dimensiones primero
             val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
             BitmapFactory.decodeStream(input, null, options)
             input.close()
 
-            // Calcular factor de escala
             var scale = 1
             val width = options.outWidth
             val height = options.outHeight
@@ -532,13 +479,11 @@ class CreatePostActivity : AppCompatActivity() {
                 scale = Math.ceil(max.toDouble() / maxDim.toDouble()).toInt()
             }
 
-            // Decodificar con inSampleSize
             val opts2 = BitmapFactory.Options().apply { inSampleSize = scale }
             val input2 = contentResolver.openInputStream(uri) ?: return null
             val bmp = BitmapFactory.decodeStream(input2, null, opts2) ?: return null
             input2.close()
 
-            // Si el bitmap aún es mayor que maxDim, escalarlo exactamente
             val scaled = if (maxOf(bmp.width, bmp.height) > maxDim) {
                 val ratio = bmp.width.toFloat() / bmp.height.toFloat()
                 if (bmp.width >= bmp.height) {
@@ -549,29 +494,26 @@ class CreatePostActivity : AppCompatActivity() {
             } else bmp
 
             val baos = ByteArrayOutputStream()
-            scaled.compress(Bitmap.CompressFormat.JPEG, 75, baos) // calidad 75 para thumbnails
+            scaled.compress(Bitmap.CompressFormat.JPEG, 85, baos)
             val bytes = baos.toByteArray()
             baos.close()
 
+            android.util.Log.d("CreatePostActivity", "Imagen convertida: ${bytes.size} bytes")
             Base64.encodeToString(bytes, Base64.NO_WRAP)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            android.util.Log.e("CreatePostActivity", "Error: ${e.message}", e)
             null
         }
     }
 
-
-    // Helper: obtener email actual preferente (SharedPreferences)
     private fun getCurrentUserEmail(): String {
-        // Usar SharedPreferences como fuente fiable del email en este proyecto
         return getSharedPreferences("user_data", MODE_PRIVATE).getString("user_email", "") ?: ""
     }
 
-    // Helper: obtener nombre actual preferente (SharedPreferences)
     private fun getCurrentUserName(): String {
         return getSharedPreferences("user_data", MODE_PRIVATE).getString("user_name", "") ?: ""
     }
 
-    // Cargar y mostrar los datos de perfil guardados en SharedPreferences
     private fun loadProfileFromPrefs() {
         val prefs = getSharedPreferences("user_data", MODE_PRIVATE)
         val name = prefs.getString("user_name", null)
@@ -583,7 +525,7 @@ class CreatePostActivity : AppCompatActivity() {
                 val decoded = Base64.decode(photoBase64, Base64.DEFAULT)
                 val bmp = BitmapFactory.decodeByteArray(decoded, 0, decoded.size)
                 if (bmp != null) Glide.with(this@CreatePostActivity).load(bmp).circleCrop().into(ivUserAvatar)
-            } catch (_: Exception) { /* ignore */ }
+            } catch (_: Exception) { }
         }
     }
 
@@ -592,18 +534,15 @@ class CreatePostActivity : AppCompatActivity() {
         mainScope.cancel()
     }
 
-    // Limpia el formulario de creación de publicación (texto y fotos)
-     private fun clearPostForm() {
-         try {
-             etPostText.setText("")
-             selectedUris.clear()
-             // Notificar al adaptador para mostrar el slot vacío
-             if (::adapter.isInitialized) {
+    private fun clearPostForm() {
+        try {
+            etPostText.setText("")
+            selectedUris.clear()
+            if (::adapter.isInitialized) {
                 rvPhotos.post { adapter.submitList(selectedUris.toList()) }
-             }
-             // Reset cámara temporal/pending
-             cameraTempUri = null
-             pendingAddPosition = -1
-         } catch (_: Exception) { /* ignore */ }
-     }
+            }
+            cameraTempUri = null
+            pendingAddPosition = -1
+        } catch (_: Exception) { }
+    }
 }

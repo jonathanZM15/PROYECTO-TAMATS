@@ -2,7 +2,9 @@ package com.example.myapplication.ui.explore
 
 import android.content.Intent
 import android.content.res.ColorStateList
+import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.ImageView
@@ -11,8 +13,10 @@ import android.widget.ScrollView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
 import com.example.myapplication.R
+import com.example.myapplication.cloud.FirebaseService
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 
@@ -45,48 +49,116 @@ class ExploreActivity : AppCompatActivity() {
                 // Limpiar contenedor y volver a poblar
                 llPosts.removeAllViews()
 
+                if (snapshots.documents.isEmpty()) {
+                    // Mostrar mensaje de que no hay más publicaciones
+                    val emptyView = LayoutInflater.from(this).inflate(R.layout.item_post, llPosts, false)
+                    val tvEmpty = emptyView.findViewById<TextView>(R.id.tvThinking)
+                    tvEmpty.text = "No hay más publicaciones"
+                    llPosts.addView(emptyView)
+                }
+
                 for (doc in snapshots.documents) {
                     try {
                         val data = doc.data ?: continue
                         val text = data["text"]?.toString() ?: ""
                         val photos = (data["photos"] as? List<*>)?.mapNotNull { it?.toString() } ?: emptyList()
                         val authorName = data["authorName"]?.toString() ?: ""
+                        val authorEmail = data["authorEmail"]?.toString() ?: ""
 
                         // Inflar item_post y rellenar
                         val itemView = LayoutInflater.from(this).inflate(R.layout.item_post, llPosts, false)
 
-                        // vpPhotos: usar ImagePagerAdapter para mostrar fotos
-                        val vpPhotos = itemView.findViewById<androidx.viewpager2.widget.ViewPager2>(R.id.vpPhotos)
+                        // Configurar avatar y nombre del autor
+                        val ivAuthorAvatar = itemView.findViewById<ImageView>(R.id.ivAuthorAvatar)
+                        val tvAuthor = itemView.findViewById<TextView>(R.id.tvAuthor)
+
+                        tvAuthor.text = authorName.ifEmpty { "Usuario Anónimo" }
+
+                        // Cargar foto de perfil del autor si existe
+                        if (authorEmail.isNotEmpty()) {
+                            FirebaseService.getUserProfile(authorEmail) { profileData ->
+                                runOnUiThread {
+                                    if (profileData != null) {
+                                        val photoBase64 = profileData["photo"]?.toString()
+                                        if (!photoBase64.isNullOrEmpty()) {
+                                            try {
+                                                val decoded = Base64.decode(photoBase64, Base64.DEFAULT)
+                                                val bmp = BitmapFactory.decodeByteArray(decoded, 0, decoded.size)
+                                                if (bmp != null) {
+                                                    Glide.with(this@ExploreActivity)
+                                                        .load(bmp)
+                                                        .circleCrop()
+                                                        .into(ivAuthorAvatar)
+                                                }
+                                            } catch (e: Exception) {
+                                                android.util.Log.w("ExploreActivity", "Error cargando foto de autor: ${e.message}")
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // Configurar ViewPager2 para el carrusel de fotos
+                        val vpPhotos = itemView.findViewById<ViewPager2>(R.id.vpPhotos)
+                        val llPageIndicator = itemView.findViewById<LinearLayout>(R.id.llPageIndicator)
+
                         if (photos.isEmpty()) {
                             vpPhotos.visibility = View.GONE
+                            llPageIndicator.visibility = View.GONE
                         } else {
                             vpPhotos.adapter = ImagePagerAdapter(photos)
                             vpPhotos.visibility = View.VISIBLE
-                        }
 
-                        val tvAuthor = itemView.findViewById<TextView>(R.id.tvAuthor)
-                        if (authorName.isNotEmpty()) {
-                            tvAuthor.visibility = View.VISIBLE
-                            tvAuthor.text = authorName
-                        } else {
-                            tvAuthor.visibility = View.GONE
+                            // Crear indicadores de página (puntos)
+                            llPageIndicator.removeAllViews()
+                            if (photos.size > 1) {
+                                llPageIndicator.visibility = View.VISIBLE
+                                for (i in photos.indices) {
+                                    val dot = View(this)
+                                    val dotParams = LinearLayout.LayoutParams(12, 12)
+                                    dotParams.marginStart = 6
+                                    dotParams.marginEnd = 6
+                                    dot.layoutParams = dotParams
+                                    dot.setBackgroundResource(R.drawable.dot_indicator)
+
+                                    if (i == 0) {
+                                        dot.setBackgroundColor(ContextCompat.getColor(this, R.color.white))
+                                    } else {
+                                        dot.setBackgroundColor(ContextCompat.getColor(this, R.color.dot_inactive))
+                                    }
+                                    llPageIndicator.addView(dot)
+                                }
+
+                                // Actualizar indicadores cuando se cambia de página
+                                vpPhotos.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+                                    override fun onPageSelected(position: Int) {
+                                        for (j in photos.indices) {
+                                            val dot = llPageIndicator.getChildAt(j)
+                                            if (j == position) {
+                                                dot?.setBackgroundColor(ContextCompat.getColor(this@ExploreActivity, R.color.white))
+                                            } else {
+                                                dot?.setBackgroundColor(ContextCompat.getColor(this@ExploreActivity, R.color.dot_inactive))
+                                            }
+                                        }
+                                    }
+                                })
+                            } else {
+                                llPageIndicator.visibility = View.GONE
+                            }
                         }
 
                         val tvThinking = itemView.findViewById<TextView>(R.id.tvThinking)
-                        // Mostrar el texto de la publicación
                         tvThinking.text = text
-
-                        // actualmente mostramos el texto de la publicación en tvThinking
 
                         llPosts.addView(itemView)
                     } catch (e: Exception) {
                         android.util.Log.e("ExploreActivity", "Error al renderizar post ${doc.id}: ${e.message}", e)
-                        // seguir con el siguiente post
                     }
                 }
                 // Hacer scroll al inicio para mostrar el post más reciente
                 try {
-                    val svPosts = findViewById<android.widget.ScrollView>(R.id.svPosts)
+                    val svPosts = findViewById<ScrollView>(R.id.svPosts)
                     svPosts?.post { svPosts.fullScroll(View.FOCUS_UP) }
                 } catch (_: Exception) { /* ignore */ }
             }
