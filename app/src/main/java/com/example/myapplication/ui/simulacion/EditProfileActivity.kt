@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
@@ -15,6 +14,11 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.content.edit
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.launch
 import com.example.myapplication.R
 import com.example.myapplication.cloud.FirebaseService
 import com.google.android.material.button.MaterialButton
@@ -55,29 +59,62 @@ class EditProfileActivity : AppCompatActivity() {
     private val takePictureLauncher =
         registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
             if (success && currentPhotoPath != null) {
-                val file = File(currentPhotoPath!!)
-                val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, Uri.fromFile(file))
-                selectedBitmap = bitmap
-                ivProfilePhoto.setImageBitmap(bitmap)
-                // Guardar en galería
-                savePhotoToGallery(bitmap)
-            }
-        }
+                // Decodificar la imagen en background para evitar bloquear la UI
+                val path = currentPhotoPath
+                lifecycleScope.launch(Dispatchers.IO) {
+                    try {
+                        val bmp = android.graphics.BitmapFactory.decodeFile(path)
+                        if (bmp != null) {
+                            selectedBitmap = bmp
+                            withContext(Dispatchers.Main) {
+                                ivProfilePhoto.setImageBitmap(bmp)
+                            }
+                            // Guardar en galería (no bloqueante)
+                            savePhotoToGallery(bmp)
+                        } else {
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(this@EditProfileActivity, "Error al procesar la foto", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(this@EditProfileActivity, "Error al cargar imagen", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+             }
+         }
 
     // Registrar resultado de la galería
     private val pickPictureLauncher =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
             if (uri != null) {
-                try {
-                    val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, uri)
-                    selectedBitmap = bitmap
-                    ivProfilePhoto.setImageBitmap(bitmap)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    Toast.makeText(this, "Error al cargar imagen", Toast.LENGTH_SHORT).show()
+                // Decodificar en background para evitar bloquear la UI
+                lifecycleScope.launch(Dispatchers.IO) {
+                    try {
+                        val input = contentResolver.openInputStream(uri)
+                        val bmp = android.graphics.BitmapFactory.decodeStream(input)
+                        input?.close()
+                        if (bmp != null) {
+                            selectedBitmap = bmp
+                            withContext(Dispatchers.Main) {
+                                ivProfilePhoto.setImageBitmap(bmp)
+                            }
+                        } else {
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(this@EditProfileActivity, "Error al procesar la imagen seleccionada", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(this@EditProfileActivity, "Error al cargar imagen", Toast.LENGTH_SHORT).show()
+                        }
+                    }
                 }
-            }
-        }
+             }
+         }
 
     // Registrar permisos
     private val cameraPermissionLauncher =
@@ -98,6 +135,7 @@ class EditProfileActivity : AppCompatActivity() {
             }
         }
 
+    @Suppress("DEPRECATION")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         try {
@@ -154,6 +192,31 @@ class EditProfileActivity : AppCompatActivity() {
 
         btnSaveProfile.setOnClickListener {
             saveProfile()
+        }
+
+        // Botón central '+' en la barra inferior (si está incluido en el layout)
+        try {
+            val fabCenter = findViewById<com.google.android.material.button.MaterialButton>(R.id.fabCenter)
+            fabCenter?.setOnClickListener {
+                try {
+                    val intent = Intent(this, com.example.myapplication.ui.explore.CreatePostActivity::class.java)
+                    startActivity(intent)
+                } catch (_: Exception) {
+                    Toast.makeText(this, "Crear publicación no disponible", Toast.LENGTH_SHORT).show()
+                }
+            }
+        } catch (_: Exception) {
+            // No hacer nada si no existe el FAB en este layout
+        }
+
+        // Intent directo para el item Explorar del bottom nav (si está incluido)
+        try {
+            val navExplorar = findViewById<LinearLayout>(R.id.navExplorar)
+            navExplorar?.setOnClickListener {
+                startActivity(Intent(this, com.example.myapplication.ui.explore.ExploreActivity::class.java))
+            }
+        } catch (_: Exception) {
+            // ignore if layout doesn't include bottom nav
         }
     }
 
@@ -225,8 +288,34 @@ class EditProfileActivity : AppCompatActivity() {
     }
 
     private fun savePhotoToGallery(bitmap: Bitmap) {
-        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
-        MediaStore.Images.Media.insertImage(contentResolver, bitmap, "Profile_$timeStamp", "Foto de perfil")
+        try {
+            val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+            val filename = "Profile_$timeStamp.jpg"
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                val values = android.content.ContentValues().apply {
+                    put(MediaStore.Images.Media.DISPLAY_NAME, filename)
+                    put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+                    put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/${getString(R.string.app_name)}")
+                    put(MediaStore.Images.Media.IS_PENDING, 1)
+                }
+                val resolver = contentResolver
+                val collection = MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+                val uri = resolver.insert(collection, values)
+                if (uri != null) {
+                    resolver.openOutputStream(uri).use { out ->
+                        out?.let { bitmap.compress(Bitmap.CompressFormat.JPEG, 90, it) }
+                    }
+                    values.clear()
+                    values.put(MediaStore.Images.Media.IS_PENDING, 0)
+                    resolver.update(uri, values, null, null)
+                }
+            } else {
+                // Fallback antiguo (deprecated) pero funcional en versiones antiguas
+                MediaStore.Images.Media.insertImage(contentResolver, bitmap, filename, "Foto de perfil")
+            }
+        } catch (e: Exception) {
+            android.util.Log.w("EditProfileActivity", "No se pudo guardar foto en galería: ${e.message}")
+        }
     }
 
     private fun loadProfileData() {
@@ -364,7 +453,11 @@ class EditProfileActivity : AppCompatActivity() {
             ""
         }
 
-        // Crear objeto de perfil
+        // Determinar email a usar (preferir userEmail de la Activity, sino el guardado local)
+        val prefs = getSharedPreferences("user_data", MODE_PRIVATE)
+        val emailToUse = if (userEmail.isNotBlank()) userEmail else (prefs.getString("user_email", "") ?: "")
+
+        // Crear objeto de perfil (usar emailToUse para no pasar un email vacío al servidor)
         val profileData: Map<String, Any> = mapOf(
             "name" to name,
             "age" to (age.toIntOrNull() ?: 0),
@@ -372,12 +465,12 @@ class EditProfileActivity : AppCompatActivity() {
             "description" to description,
             "interests" to interests,
             "photo" to photoBase64,
-            "email" to userEmail,
+            "email" to emailToUse,
             "lastUpdated" to (System.currentTimeMillis() as Any)
         )
 
-        // Guardar en Firebase
-        saveProfileToFirebase(profileData)
+        // Guardar en Firebase (pasando el email utilizado)
+        saveProfileToFirebase(profileData, emailToUse)
     }
 
     private fun getSelectedInterests(): List<String> {
@@ -406,22 +499,35 @@ class EditProfileActivity : AppCompatActivity() {
         return Base64.encodeToString(byteArray, Base64.DEFAULT)
     }
 
-    private fun saveProfileToFirebase(profileData: Map<String, Any>) {
-        FirebaseService.saveUserProfile(userEmail, profileData) { success ->
+    private fun saveProfileToFirebase(profileData: Map<String, Any>, email: String) {
+        FirebaseService.saveUserProfile(email, profileData) { success ->
             runOnUiThread {
                 if (success) {
                     Toast.makeText(this, "Perfil guardado exitosamente", Toast.LENGTH_SHORT).show()
-                    // Navegar a ViewProfileActivity para mostrar el perfil completado
-                    val intent = Intent(this, ViewProfileActivity::class.java)
-                    intent.putExtra("userEmail", userEmail)
-                    startActivity(intent)
-                    finish()
-                } else {
-                    Toast.makeText(this, "Error al guardar el perfil", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-    }
+                    // Guardar datos localmente para uso inmediato en otras pantallas
+                    try {
+                        val prefs = getSharedPreferences("user_data", MODE_PRIVATE)
+                        prefs.edit(commit = true) {
+                            if (email.isNotBlank()) putString("user_email", email)
+                            val name = profileData["name"]?.toString() ?: ""
+                            val photo = profileData["photo"]?.toString() ?: ""
+                            if (name.isNotEmpty()) putString("user_name", name)
+                            if (photo.isNotEmpty()) putString("user_photo", photo)
+                        }
+                    } catch (_: Exception) {
+                        // ignore
+                    }
+                     // Navegar a ViewProfileActivity para mostrar el perfil completado
+                     val intent = Intent(this, ViewProfileActivity::class.java)
+                     if (email.isNotBlank()) intent.putExtra("userEmail", email)
+                     startActivity(intent)
+                     finish()
+                 } else {
+                     Toast.makeText(this, "Error al guardar el perfil", Toast.LENGTH_SHORT).show()
+                 }
+             }
+         }
+     }
 
     override fun onResume() {
         super.onResume()

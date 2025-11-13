@@ -4,6 +4,17 @@
     <string name="splash_title">TAMATS</string>
     <string name="splash_subtitle">Encuentra tu Match Perfecto</string>
 
+    <!-- New strings for Create Post -->
+    <string name="create_post_title">CREAR PUBLICACIÓN</string>
+    <string name="avatar_cd">avatar</string>
+    <string name="user_name_demo">Carlos</string>
+    <string name="now">Ahora</string>
+    <string name="create_post_hint">¿Qué estás pensando?</string>
+    <string name="publish">PUBLICAR</string>
+    <string name="expand_desc">expand</string>
+    <string name="remove_photo">Remover foto</string>
+    <string name="add_photo">Añadir Foto</string>
+
     <!-- Login Screen Strings -->
     <string name="login_main_title">TAMATS</string>
     <string name="login_welcome_back">¡Bienvenido de Nuevo!</string>
@@ -53,4 +64,11 @@
     <string name="interest_tecnologia">Tecnología</string>
     <string name="interest_lectura">Lectura</string>
     <string name="interest_moda">Moda</string>
+
+    <!-- Bottom Navigation Strings -->
+    <string name="nav_explore">Explorar</string>
+    <string name="nav_matches">Matches</string>
+    <string name="nav_chats">Chats</string>
+    <string name="nav_profile">Perfil</string>
+    <string name="fab_plus">+</string>
 </resources>

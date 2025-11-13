@@ -20,98 +20,29 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
 
-    <androidx.cardview.widget.CardView
-        android:id="@+id/cardProfile"
+    <!-- Eliminada la tarjeta de perfil del encabezado para que Explore muestre solo publicaciones -->
+
+    <!-- Contenedor scrollable para publicaciones de otros usuarios -->
+    <ScrollView
+        android:id="@+id/svPosts"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:cardCornerRadius="16dp"
-        app:cardUseCompatPadding="true"
-        app:cardElevation="8dp"
-        android:layout_marginStart="24dp"
-        android:layout_marginEnd="24dp"
+        android:fillViewport="true"
         app:layout_constraintTop_toBottomOf="@id/tvTitle"
+        app:layout_constraintBottom_toTopOf="@+id/bottomContainer"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHeight_default="percent"
-        app:layout_constraintHeight_percent="0.62">
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="12dp">
 
-        <FrameLayout
+        <LinearLayout
+            android:id="@+id/llPostsContainer"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <ImageView
-                android:id="@+id/imgProfile"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:scaleType="centerCrop"
-                android:src="@drawable/sample_profile" />
-
-            <ImageButton
-                android:id="@+id/btnInfo"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_margin="12dp"
-                android:background="@drawable/bg_info_button"
-                android:src="@drawable/ic_info"
-                app:tint="@color/white"
-                android:scaleType="center"
-                android:layout_gravity="end|top"
-                android:contentDescription="info"/>
-
-            <LinearLayout
-                android:id="@+id/overlay"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp"
-                android:layout_gravity="bottom"
-                android:background="#8A4BA7">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <TextView
-                        android:id="@+id/tvName"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Carlos"
-                        android:textColor="@color/white"
-                        android:textStyle="bold"
-                        android:textSize="18sp"/>
-
-                    <TextView
-                        android:id="@+id/tvAge"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text=" 29"
-                        android:textColor="@color/white"
-                        android:textSize="14sp"/>
-                </LinearLayout>
-
-                <TextView
-                    android:id="@+id/tvBio"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Desarrollador de software, cinéfilo y amante de la cocina italiana."
-                    android:textColor="@color/white"
-                    android:textSize="13sp"
-                    android:layout_marginTop="6dp"/>
-
-                <TextView
-                    android:id="@+id/tvDistance"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="3 km de distancia"
-                    android:textColor="#D7C6D6"
-                    android:textSize="12sp"
-                    android:layout_marginTop="8dp"/>
-            </LinearLayout>
-
-        </FrameLayout>
-    </androidx.cardview.widget.CardView>
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+    </ScrollView>
 
     <LinearLayout
         android:id="@+id/actionButtons"
@@ -124,34 +55,50 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fabReject"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            app:fabSize="normal"
-            android:src="@drawable/ic_close"
-            app:backgroundTint="#FF9A9A"
-            android:contentDescription="reject" />
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fabStar"
-            android:layout_width="72dp"
-            android:layout_height="72dp"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="20dp"
-            app:fabSize="normal"
-            android:src="@drawable/ic_star"
-            app:backgroundTint="#7EA8FF"
-            android:contentDescription="super like" />
-
+        <!-- Botón izquierdo: corazón (verde) -->
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fabLike"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            app:fabSize="normal"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_marginEnd="20dp"
+            app:fabSize="mini"
             android:src="@drawable/ic_favorite"
-            app:backgroundTint="#FF6F9B"
+            app:tint="@color/white"
+            app:backgroundTint="#8EE6B2"
+            app:useCompatPadding="true"
             android:contentDescription="like" />
+
+        <!-- Botón central: equis (rojo) - ancho/ovalado (FrameLayout + ImageView) -->
+        <FrameLayout
+            android:id="@+id/fabReject"
+            android:layout_width="92dp"
+            android:layout_height="64dp"
+            android:background="@drawable/bg_reject_oval"
+            android:clickable="true"
+            android:focusable="true">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_close"
+                app:tint="@color/white"
+                android:contentDescription="reject"/>
+
+        </FrameLayout>
+
+        <!-- Botón derecho: estrella (azul) -->
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabStar"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_marginStart="20dp"
+            app:fabSize="mini"
+            android:src="@drawable/ic_star"
+            app:tint="@color/white"
+            app:backgroundTint="#7EA8FF"
+            app:useCompatPadding="true"
+            android:contentDescription="super like" />
     </LinearLayout>
 
     <FrameLayout

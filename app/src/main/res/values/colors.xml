@@ -18,4 +18,6 @@
     <!-- Colores para estado de la barra inferior -->
     <color name="bottom_nav_active">#FFFFFFFF</color>
     <color name="bottom_nav_inactive">#FFB0A5B7</color>
+    <!-- Fondo para slots vacíos de añadir foto -->
+    <color name="slot_background">#FF6FB3FF</color>
 </resources>

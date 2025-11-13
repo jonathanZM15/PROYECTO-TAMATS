@@ -83,15 +83,12 @@ class ViewProfileActivity : AppCompatActivity() {
         val navMatches = findViewById<LinearLayout>(R.id.navMatches)
         val navChats = findViewById<LinearLayout>(R.id.navChats)
         val navPerfil = findViewById<LinearLayout>(R.id.navPerfil)
+        // Botón central '+' (fab) del bottom nav
+        val fabCenter = findViewById<com.google.android.material.button.MaterialButton>(R.id.fabCenter)
 
         navExplorar.setOnClickListener {
-            // Ir a ExploreActivity si existe
-            try {
-                val intent = Intent(this, Class.forName("com.example.myapplication.ui.explore.ExploreActivity"))
-                startActivity(intent)
-            } catch (e: Exception) {
-                Toast.makeText(this, "Explorar no disponible", Toast.LENGTH_SHORT).show()
-            }
+            // Ir a ExploreActivity directamente
+            startActivity(Intent(this, com.example.myapplication.ui.explore.ExploreActivity::class.java))
         }
 
         navMatches.setOnClickListener {
@@ -106,39 +103,61 @@ class ViewProfileActivity : AppCompatActivity() {
             // Ya estamos en el perfil, no hacer nada
             Toast.makeText(this, "Ya estás en tu perfil", Toast.LENGTH_SHORT).show()
         }
+
+        // Acción del FAB central: abrir CreatePostActivity
+        try {
+            fabCenter.setOnClickListener {
+                val intent = Intent(this, com.example.myapplication.ui.explore.CreatePostActivity::class.java)
+                startActivity(intent)
+            }
+        } catch (e: Exception) {
+            // Si por alguna razón no está disponible, mostrar mensaje
+            fabCenter?.setOnClickListener { Toast.makeText(this, "Crear publicación no disponible", Toast.LENGTH_SHORT).show() }
+        }
     }
 
     private fun loadProfileData() {
-        if (userEmail.isEmpty()) {
-            Toast.makeText(this, "Email no disponible", Toast.LENGTH_SHORT).show()
+        // Primero, intentar mostrar datos locales guardados para evitar placeholders
+        val prefs = getSharedPreferences("user_data", Context.MODE_PRIVATE)
+        val localName = prefs.getString("user_name", null)
+        val localPhotoBase64 = prefs.getString("user_photo", null)
+        val localEmail = prefs.getString("user_email", null)
+
+        if (!localName.isNullOrEmpty()) tvViewName.text = localName
+        if (!localPhotoBase64.isNullOrEmpty()) {
+            try {
+                val decoded = Base64.decode(localPhotoBase64, Base64.DEFAULT)
+                val bmp = BitmapFactory.decodeByteArray(decoded, 0, decoded.size)
+                if (bmp != null) ivProfilePhotoView.setImageBitmap(bmp)
+            } catch (e: Exception) {
+                android.util.Log.e("ViewProfileActivity", "Error decodificando foto local: ${e.message}")
+            }
+        }
+
+        // Preferir email pasado por intent; si no, usar el guardado local
+        val emailToUse = if (userEmail.isNotEmpty()) userEmail else localEmail
+        if (emailToUse.isNullOrEmpty()) {
+            // Si no hay email, acabamos aquí (ya mostramos lo local si existía)
             return
         }
 
-        FirebaseService.getUserProfile(userEmail) { profileData ->
+        // Pedir datos a Firebase y actualizar solo si los campos vienen no vacíos
+        FirebaseService.getUserProfile(emailToUse) { profileData ->
             runOnUiThread {
                 if (profileData != null) {
                     try {
-                        // Cargar nombre
-                        val name = profileData["name"]?.toString() ?: "N/A"
-                        tvViewName.text = name
+                        val name = profileData["name"]?.toString()
+                        if (!name.isNullOrEmpty()) tvViewName.text = name
 
-                        // Cargar edad
-                        val age = profileData["age"]?.toString() ?: "N/A"
-                        tvViewAge.text = age
+                        val age = profileData["age"]?.toString()
+                        if (!age.isNullOrEmpty()) tvViewAge.text = age
 
-                        // Cargar ciudad
-                        val city = profileData["city"]?.toString() ?: "N/A"
-                        tvViewCity.text = city
+                        val city = profileData["city"]?.toString()
+                        if (!city.isNullOrEmpty()) tvViewCity.text = city
 
-                        // Cargar descripción
                         val description = profileData["description"]?.toString()
-                        if (!description.isNullOrEmpty()) {
-                            tvViewDescription.text = description
-                        } else {
-                            tvViewDescription.text = "Sin descripción"
-                        }
+                        if (!description.isNullOrEmpty()) tvViewDescription.text = description
 
-                        // Cargar foto
                         val photoBase64 = profileData["photo"]?.toString()
                         if (!photoBase64.isNullOrEmpty()) {
                             try {
@@ -152,16 +171,13 @@ class ViewProfileActivity : AppCompatActivity() {
                             }
                         }
 
-                        // Cargar intereses
                         @Suppress("UNCHECKED_CAST")
                         val interests = profileData["interests"] as? List<String> ?: emptyList()
-                        displayInterests(interests)
+                        if (interests.isNotEmpty()) displayInterests(interests)
                     } catch (e: Exception) {
                         android.util.Log.e("ViewProfileActivity", "Error cargando datos: ${e.message}", e)
                         Toast.makeText(this, "Error al cargar datos del perfil", Toast.LENGTH_SHORT).show()
                     }
-                } else {
-                    Toast.makeText(this, "No hay perfil completado", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -213,4 +229,3 @@ class ViewProfileActivity : AppCompatActivity() {
         loadProfileData()
     }
 }
-

@@ -34,6 +34,8 @@ android {
     }
     kotlinOptions {
         jvmTarget = "11"
+        // Forzar language version 1.9 para compatibilidad con KAPT actualmente
+        freeCompilerArgs += listOf("-language-version", "1.9")
     }
 }
 
@@ -64,6 +66,12 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore-ktx")
     //por si en algun momento se quiere trabajar conn google analitics
     implementation("com.google.firebase:firebase-analytics")
+    // Firebase Storage (subir archivos)
+    implementation("com.google.firebase:firebase-storage-ktx")
+
+    // Glide para cargar previews de imágenes en el grid
+    implementation("com.github.bumptech.glide:glide:4.15.1")
+    kapt("com.github.bumptech.glide:compiler:4.15.1")
 
     //Librerias lifecycle
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.4")

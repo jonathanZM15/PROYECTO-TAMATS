@@ -6,6 +6,7 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.edit
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import com.example.myapplication.R
@@ -107,6 +108,25 @@ class LoginActivity : AppCompatActivity() {
         // Verificar si el usuario ya tiene perfil en Firebase
         FirebaseService.getUserProfile(user.email) { profileData ->
             runOnUiThread {
+                // Guardar el email en SharedPreferences siempre (identificador del usuario en la app)
+                try {
+                    val prefs = getSharedPreferences("user_data", MODE_PRIVATE)
+                    prefs.edit(commit = true) {
+                        putString("user_email", user.email)
+                        if (profileData != null) {
+                            val name = profileData["name"]?.toString() ?: ""
+                            val photo = profileData["photo"]?.toString() ?: ""
+                            if (name.isNotEmpty()) putString("user_name", name) else remove("user_name")
+                            if (photo.isNotEmpty()) putString("user_photo", photo) else remove("user_photo")
+                        } else {
+                            remove("user_name")
+                            remove("user_photo")
+                        }
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+
                 val intent = if (profileData != null) {
                     // Usuario YA tiene perfil → ir a ViewProfileActivity
                     Intent(this, ViewProfileActivity::class.java).apply {

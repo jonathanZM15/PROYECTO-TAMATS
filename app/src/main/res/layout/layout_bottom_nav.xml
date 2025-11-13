@@ -25,14 +25,14 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@drawable/ic_explore"
-                android:contentDescription="Explorar"
+                android:contentDescription="@string/nav_explore"
                 app:tint="@color/bottom_nav_inactive" />
 
             <TextView
                 android:id="@+id/tvNavExplore"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Explorar"
+                android:text="@string/nav_explore"
                 android:textSize="11sp"
                 android:textColor="@color/bottom_nav_inactive"
                 android:layout_marginTop="2dp" />
@@ -52,14 +52,14 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@drawable/ic_favorite"
-                android:contentDescription="Matches"
+                android:contentDescription="@string/nav_matches"
                 app:tint="@color/bottom_nav_inactive" />
 
             <TextView
                 android:id="@+id/tvNavMatches"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Matches"
+                android:text="@string/nav_matches"
                 android:textSize="11sp"
                 android:textColor="@color/bottom_nav_inactive"
                 android:layout_marginTop="2dp" />
@@ -85,14 +85,14 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@drawable/ic_chat"
-                android:contentDescription="Chats"
+                android:contentDescription="@string/nav_chats"
                 app:tint="@color/bottom_nav_inactive" />
 
             <TextView
                 android:id="@+id/tvNavChats"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Chats"
+                android:text="@string/nav_chats"
                 android:textSize="11sp"
                 android:textColor="@color/bottom_nav_inactive"
                 android:layout_marginTop="2dp" />
@@ -112,14 +112,14 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@drawable/ic_person"
-                android:contentDescription="Perfil"
+                android:contentDescription="@string/nav_profile"
                 app:tint="@color/bottom_nav_active" />
 
             <TextView
                 android:id="@+id/tvNavPerfil"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Perfil"
+                android:text="@string/nav_profile"
                 android:textSize="11sp"
                 android:textColor="@color/bottom_nav_active"
                 android:layout_marginTop="2dp" />
@@ -132,7 +132,7 @@
         android:id="@+id/fabCenter"
         android:layout_width="64dp"
         android:layout_height="64dp"
-        android:text="+"
+        android:text="@string/fab_plus"
         android:textSize="28sp"
         android:textColor="@color/purple_700"
         app:backgroundTint="@android:color/white"
