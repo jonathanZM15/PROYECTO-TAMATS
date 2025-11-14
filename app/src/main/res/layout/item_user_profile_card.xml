@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="520dp"
+    android:layout_margin="16dp"
+    app:cardCornerRadius="20dp"
+    app:cardElevation="8dp"
+    android:backgroundTint="@android:color/white">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <!-- Foto de perfil en la parte superior -->
+        <ImageView
+            android:id="@+id/ivUserProfilePhoto"
+            android:layout_width="match_parent"
+            android:layout_height="320dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_launcher_foreground"
+            android:contentDescription="Foto de perfil del usuario" />
+
+        <!-- Gradiente oscuro con transparencia en la parte inferior (sobre la foto) -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_gravity="bottom"
+            android:background="@drawable/gradient_dark_bottom" />
+
+        <!-- Contenedor con información del usuario con fondo semi-transparente -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:background="#99000000">
+
+            <!-- Nombre del usuario -->
+            <TextView
+                android:id="@+id/tvUserName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Aquí va el nombre de usuario"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:textColor="@android:color/white"
+                android:layout_marginBottom="4dp" />
+
+            <!-- Ciudad -->
+            <TextView
+                android:id="@+id/tvUserCity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ciudad"
+                android:textSize="13sp"
+                android:textColor="@android:color/white"
+                android:alpha="0.9"
+                android:layout_marginBottom="8dp" />
+
+            <!-- Descripción del usuario -->
+            <TextView
+                android:id="@+id/tvUserDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Descripción que dio el usuario de como es, que le gusta y otras cosas que haya puesto los cuales solo deben ser hasta 30 palabras"
+                android:textSize="12sp"
+                android:textColor="@android:color/white"
+                android:alpha="0.85"
+                android:ellipsize="end"
+                android:maxLines="4"
+                android:layout_marginBottom="12dp" />
+
+            <!-- Botones de acción en la parte inferior -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginTop="8dp">
+
+                <!-- Botón no me gusta (X) -->
+                <ImageButton
+                    android:id="@+id/btnReject"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/ic_close"
+                    android:background="@drawable/button_circular_reject"
+                    android:scaleType="centerInside"
+                    android:contentDescription="No me gusta"
+                    android:layout_marginEnd="16dp" />
+
+                <!-- Botón me gusta (Corazón) -->
+                <ImageButton
+                    android:id="@+id/btnLike"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/ic_heart"
+                    android:background="@drawable/button_circular_like"
+                    android:scaleType="centerInside"
+                    android:contentDescription="Me gusta"
+                    android:layout_marginEnd="16dp" />
+
+                <!-- Botón favorito (Estrella) -->
+                <ImageButton
+                    android:id="@+id/btnFavorite"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/ic_star"
+                    android:background="@drawable/button_circular_favorite"
+                    android:scaleType="centerInside"
+                    android:contentDescription="Favorito" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+</androidx.cardview.widget.CardView>
+

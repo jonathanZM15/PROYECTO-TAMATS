@@ -34,10 +34,10 @@ class EditProfileActivity : AppCompatActivity() {
     private lateinit var etProfileAge: EditText
     private lateinit var etProfileCity: EditText
     private lateinit var etProfileDescription: EditText
+    private lateinit var tvWordCount: TextView
     private lateinit var btnChangePhoto: ImageButton
     private lateinit var btnSaveProfile: MaterialButton
 
-    // CheckBoxes de intereses
     private lateinit var cbDeporte: CheckBox
     private lateinit var cbLiteratura: CheckBox
     private lateinit var cbMusica: CheckBox
@@ -55,11 +55,9 @@ class EditProfileActivity : AppCompatActivity() {
     private var selectedBitmap: Bitmap? = null
     private var userEmail: String = ""
 
-    // Registrar resultado de la cámara
     private val takePictureLauncher =
         registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
             if (success && currentPhotoPath != null) {
-                // Decodificar la imagen en background para evitar bloquear la UI
                 val path = currentPhotoPath
                 lifecycleScope.launch(Dispatchers.IO) {
                     try {
@@ -69,7 +67,6 @@ class EditProfileActivity : AppCompatActivity() {
                             withContext(Dispatchers.Main) {
                                 ivProfilePhoto.setImageBitmap(bmp)
                             }
-                            // Guardar en galería (no bloqueante)
                             savePhotoToGallery(bmp)
                         } else {
                             withContext(Dispatchers.Main) {
@@ -83,14 +80,12 @@ class EditProfileActivity : AppCompatActivity() {
                         }
                     }
                 }
-             }
-         }
+            }
+        }
 
-    // Registrar resultado de la galería
     private val pickPictureLauncher =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
             if (uri != null) {
-                // Decodificar en background para evitar bloquear la UI
                 lifecycleScope.launch(Dispatchers.IO) {
                     try {
                         val input = contentResolver.openInputStream(uri)
@@ -103,7 +98,7 @@ class EditProfileActivity : AppCompatActivity() {
                             }
                         } else {
                             withContext(Dispatchers.Main) {
-                                Toast.makeText(this@EditProfileActivity, "Error al procesar la imagen seleccionada", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(this@EditProfileActivity, "Error al procesar imagen", Toast.LENGTH_SHORT).show()
                             }
                         }
                     } catch (e: Exception) {
@@ -113,10 +108,9 @@ class EditProfileActivity : AppCompatActivity() {
                         }
                     }
                 }
-             }
-         }
+            }
+        }
 
-    // Registrar permisos
     private val cameraPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
             if (isGranted) {
@@ -135,30 +129,20 @@ class EditProfileActivity : AppCompatActivity() {
             }
         }
 
-    @Suppress("DEPRECATION")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        try {
-            setContentView(R.layout.activity_edit_profile)
+        setContentView(R.layout.activity_edit_profile)
 
-            // Obtener el email del intent
-            userEmail = intent.getStringExtra("userEmail") ?: ""
+        userEmail = intent.getStringExtra("userEmail") ?: ""
 
-            initializeViews()
-            setupListeners()
-            loadProfileData()
+        initializeViews()
+        setupListeners()
+        loadProfileData()
 
-            // Asegurar que el contenedor del botón Guardar quede por encima del FAB
-            val saveContainer = findViewById<LinearLayout>(R.id.saveButtonContainer)
-            saveContainer?.bringToFront()
+        val saveContainer = findViewById<LinearLayout>(R.id.saveButtonContainer)
+        saveContainer?.bringToFront()
 
-            // Evitar que el teclado oculte el contenido
-            window.setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
-        } catch (e: Exception) {
-            android.util.Log.e("EditProfileActivity", "Error en onCreate: ${e.message}", e)
-            Toast.makeText(this, "Error al cargar el perfil: ${e.message}", Toast.LENGTH_LONG).show()
-            finish()
-        }
+        window.setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
     }
 
     private fun initializeViews() {
@@ -167,10 +151,10 @@ class EditProfileActivity : AppCompatActivity() {
         etProfileAge = findViewById(R.id.etProfileAge)
         etProfileCity = findViewById(R.id.etProfileCity)
         etProfileDescription = findViewById(R.id.etProfileDescription)
+        tvWordCount = findViewById(R.id.tvWordCount)
         btnChangePhoto = findViewById(R.id.btnChangePhoto)
         btnSaveProfile = findViewById(R.id.btnSaveProfile)
 
-        // Inicializar checkboxes
         cbDeporte = findViewById(R.id.cbDeporte)
         cbLiteratura = findViewById(R.id.cbLiteratura)
         cbMusica = findViewById(R.id.cbMusica)
@@ -186,37 +170,26 @@ class EditProfileActivity : AppCompatActivity() {
     }
 
     private fun setupListeners() {
-        btnChangePhoto.setOnClickListener {
-            showPhotoOptions()
-        }
+        btnChangePhoto.setOnClickListener { showPhotoOptions() }
+        btnSaveProfile.setOnClickListener { saveProfile() }
 
-        btnSaveProfile.setOnClickListener {
-            saveProfile()
-        }
+        etProfileDescription.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                updateWordCount()
+            }
+            override fun afterTextChanged(s: android.text.Editable?) {}
+        })
 
-        // Botón central '+' en la barra inferior (si está incluido en el layout)
         try {
-            val fabCenter = findViewById<com.google.android.material.button.MaterialButton>(R.id.fabCenter)
+            val fabCenter = findViewById<MaterialButton>(R.id.fabCenter)
             fabCenter?.setOnClickListener {
-                try {
-                    val intent = Intent(this, com.example.myapplication.ui.explore.CreatePostActivity::class.java)
-                    startActivity(intent)
-                } catch (_: Exception) {
-                    Toast.makeText(this, "Crear publicación no disponible", Toast.LENGTH_SHORT).show()
-                }
+                val intent = Intent(this, com.example.myapplication.MainActivity::class.java)
+                intent.putExtra("fragment", "create_post")
+                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                startActivity(intent)
             }
         } catch (_: Exception) {
-            // No hacer nada si no existe el FAB en este layout
-        }
-
-        // Intent directo para el item Explorar del bottom nav (si está incluido)
-        try {
-            val navExplorar = findViewById<LinearLayout>(R.id.navExplorar)
-            navExplorar?.setOnClickListener {
-                startActivity(Intent(this, com.example.myapplication.ui.explore.ExploreActivity::class.java))
-            }
-        } catch (_: Exception) {
-            // ignore if layout doesn't include bottom nav
         }
     }
 
@@ -235,11 +208,7 @@ class EditProfileActivity : AppCompatActivity() {
     }
 
     private fun requestCameraPermission() {
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.CAMERA
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             launchCamera()
         } else {
             cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
@@ -252,7 +221,6 @@ class EditProfileActivity : AppCompatActivity() {
         } else {
             Manifest.permission.READ_EXTERNAL_STORAGE
         }
-
         if (ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED) {
             launchGallery()
         } else {
@@ -263,11 +231,7 @@ class EditProfileActivity : AppCompatActivity() {
     private fun launchCamera() {
         try {
             val photoFile = createImageFile()
-            val photoUri = FileProvider.getUriForFile(
-                this,
-                "${packageName}.fileprovider",
-                photoFile
-            )
+            val photoUri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", photoFile)
             takePictureLauncher.launch(photoUri)
         } catch (e: Exception) {
             e.printStackTrace()
@@ -291,7 +255,7 @@ class EditProfileActivity : AppCompatActivity() {
         try {
             val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
             val filename = "Profile_$timeStamp.jpg"
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 val values = android.content.ContentValues().apply {
                     put(MediaStore.Images.Media.DISPLAY_NAME, filename)
                     put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
@@ -310,97 +274,55 @@ class EditProfileActivity : AppCompatActivity() {
                     resolver.update(uri, values, null, null)
                 }
             } else {
-                // Fallback antiguo (deprecated) pero funcional en versiones antiguas
                 MediaStore.Images.Media.insertImage(contentResolver, bitmap, filename, "Foto de perfil")
             }
         } catch (e: Exception) {
-            android.util.Log.w("EditProfileActivity", "No se pudo guardar foto en galería: ${e.message}")
+            android.util.Log.w("EditProfileActivity", "Error guardando foto: ${e.message}")
         }
     }
 
     private fun loadProfileData() {
-        android.util.Log.d("EditProfileActivity", "Iniciando carga de datos para email: $userEmail")
-
         if (userEmail.isEmpty()) {
-            android.util.Log.e("EditProfileActivity", "Email vacío, no se pueden cargar datos")
-            return
+            val prefs = getSharedPreferences("user_data", 0)
+            userEmail = prefs.getString("user_email", "") ?: ""
         }
+        if (userEmail.isEmpty()) return
 
-        // Consultar Firebase
         FirebaseService.getUserProfile(userEmail) { profileData ->
-            android.util.Log.d("EditProfileActivity", "Datos recibidos de Firebase: ${profileData?.size} campos")
-
-            // Usar un pequeño delay para asegurar que la UI esté lista
             runOnUiThread {
                 try {
                     if (profileData != null && profileData.isNotEmpty()) {
-                        android.util.Log.d("EditProfileActivity", "Autocarga: Llenando campos...")
-
-                        // Cargar nombre
-                        val name = profileData["name"]?.toString() ?: ""
-                        android.util.Log.d("EditProfileActivity", "Nombre en Firebase: '$name'")
-                        if (name.isNotEmpty()) {
-                            etProfileName.setText(name)
-                            android.util.Log.d("EditProfileActivity", "✓ Nombre cargado en UI: $name")
-                        }
-
-                        // Cargar edad
-                        val age = profileData["age"]?.toString() ?: ""
-                        android.util.Log.d("EditProfileActivity", "Edad en Firebase: '$age'")
-                        if (age.isNotEmpty()) {
-                            etProfileAge.setText(age)
-                            android.util.Log.d("EditProfileActivity", "✓ Edad cargada en UI: $age")
-                        }
-
-                        // Cargar ciudad
-                        val city = profileData["city"]?.toString() ?: ""
-                        android.util.Log.d("EditProfileActivity", "Ciudad en Firebase: '$city'")
-                        if (city.isNotEmpty()) {
-                            etProfileCity.setText(city)
-                            android.util.Log.d("EditProfileActivity", "✓ Ciudad cargada en UI: $city")
-                        }
-
-                        // Cargar descripción
-                        val description = profileData["description"]?.toString() ?: ""
-                        android.util.Log.d("EditProfileActivity", "Descripción en Firebase: '$description'")
-                        if (description.isNotEmpty()) {
-                            etProfileDescription.setText(description)
-                            android.util.Log.d("EditProfileActivity", "✓ Descripción cargada en UI")
-                        }
-
-                        // Cargar foto
-                        val photoBase64 = profileData["photo"]?.toString()
-                        android.util.Log.d("EditProfileActivity", "Foto en Firebase: ${if (photoBase64.isNullOrEmpty()) "NO" else "SÍ"}")
-                        if (!photoBase64.isNullOrEmpty()) {
-                            try {
-                                val decodedString = android.util.Base64.decode(photoBase64, android.util.Base64.DEFAULT)
-                                val bitmap = android.graphics.BitmapFactory.decodeByteArray(decodedString, 0, decodedString.size)
-                                if (bitmap != null) {
-                                    selectedBitmap = bitmap
-                                    ivProfilePhoto.setImageBitmap(bitmap)
-                                    android.util.Log.d("EditProfileActivity", "✓ Foto cargada correctamente")
-                                }
-                            } catch (e: Exception) {
-                                android.util.Log.e("EditProfileActivity", "Error decodificando foto: ${e.message}", e)
+                        profileData["name"]?.toString()?.let { if (it.isNotEmpty()) etProfileName.setText(it) }
+                        profileData["age"]?.toString()?.let { if (it.isNotEmpty()) etProfileAge.setText(it) }
+                        profileData["city"]?.toString()?.let { if (it.isNotEmpty()) etProfileCity.setText(it) }
+                        profileData["description"]?.toString()?.let {
+                            if (it.isNotEmpty()) {
+                                etProfileDescription.setText(it)
+                                updateWordCount()
                             }
                         }
 
-                        // Cargar intereses
-                        @Suppress("UNCHECKED_CAST")
-                        val interests = profileData["interests"] as? List<String> ?: emptyList()
-                        android.util.Log.d("EditProfileActivity", "Intereses en Firebase: $interests")
-                        if (interests.isNotEmpty()) {
-                            setSelectedInterests(interests)
-                            android.util.Log.d("EditProfileActivity", "✓ Intereses cargados: $interests")
+                        profileData["photo"]?.toString()?.let { photoBase64 ->
+                            if (photoBase64.isNotEmpty()) {
+                                try {
+                                    val decoded = Base64.decode(photoBase64, Base64.DEFAULT)
+                                    val bitmap = android.graphics.BitmapFactory.decodeByteArray(decoded, 0, decoded.size)
+                                    if (bitmap != null) {
+                                        selectedBitmap = bitmap
+                                        ivProfilePhoto.setImageBitmap(bitmap)
+                                    }
+                                } catch (e: Exception) {
+                                    android.util.Log.e("EditProfileActivity", "Error decodificando foto: ${e.message}")
+                                }
+                            }
                         }
 
-                        android.util.Log.d("EditProfileActivity", "✓✓✓ AUTOCARGA COMPLETADA EXITOSAMENTE ✓✓✓")
-                    } else {
-                        android.util.Log.d("EditProfileActivity", "⚠ profileData es null o vacío - Usuario SIN perfil previo")
+                        @Suppress("UNCHECKED_CAST")
+                        val interests = profileData["interests"] as? List<String> ?: emptyList()
+                        if (interests.isNotEmpty()) setSelectedInterests(interests)
                     }
                 } catch (e: Exception) {
-                    android.util.Log.e("EditProfileActivity", "❌ Error cargando datos: ${e.message}", e)
-                    e.printStackTrace()
+                    android.util.Log.e("EditProfileActivity", "Error cargando perfil: ${e.message}")
                 }
             }
         }
@@ -427,37 +349,38 @@ class EditProfileActivity : AppCompatActivity() {
         val city = etProfileCity.text.toString().trim()
         val description = etProfileDescription.text.toString().trim()
 
-        // Validar campos obligatorios
         if (name.isEmpty()) {
             Toast.makeText(this, "Por favor ingresa tu nombre", Toast.LENGTH_SHORT).show()
             return
         }
-
         if (age.isEmpty()) {
             Toast.makeText(this, "Por favor ingresa tu edad", Toast.LENGTH_SHORT).show()
             return
         }
-
         if (city.isEmpty()) {
             Toast.makeText(this, "Por favor ingresa tu ciudad", Toast.LENGTH_SHORT).show()
             return
         }
-
-        // Obtener intereses seleccionados
-        val interests = getSelectedInterests()
-
-        // Convertir foto a Base64
-        val photoBase64 = if (selectedBitmap != null) {
-            bitmapToBase64(selectedBitmap!!)
-        } else {
-            ""
+        if (selectedBitmap == null) {
+            Toast.makeText(this, "Por favor selecciona una foto de perfil", Toast.LENGTH_SHORT).show()
+            return
+        }
+        if (description.isEmpty()) {
+            Toast.makeText(this, "Por favor ingresa una descripción", Toast.LENGTH_SHORT).show()
+            return
         }
 
-        // Determinar email a usar (preferir userEmail de la Activity, sino el guardado local)
+        val wordCount = description.split("\\s+".toRegex()).filter { it.isNotEmpty() }.size
+        if (wordCount > 30) {
+            Toast.makeText(this, "La descripción no puede exceder 30 palabras. Actualmente tiene $wordCount palabras", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val interests = getSelectedInterests()
+        val photoBase64 = bitmapToBase64(selectedBitmap!!)
         val prefs = getSharedPreferences("user_data", MODE_PRIVATE)
         val emailToUse = if (userEmail.isNotBlank()) userEmail else (prefs.getString("user_email", "") ?: "")
 
-        // Crear objeto de perfil (usar emailToUse para no pasar un email vacío al servidor)
         val profileData: Map<String, Any> = mapOf(
             "name" to name,
             "age" to (age.toIntOrNull() ?: 0),
@@ -469,13 +392,11 @@ class EditProfileActivity : AppCompatActivity() {
             "lastUpdated" to (System.currentTimeMillis() as Any)
         )
 
-        // Guardar en Firebase (pasando el email utilizado)
         saveProfileToFirebase(profileData, emailToUse)
     }
 
     private fun getSelectedInterests(): List<String> {
         val interests = mutableListOf<String>()
-
         if (cbDeporte.isChecked) interests.add("Deporte")
         if (cbLiteratura.isChecked) interests.add("Literatura")
         if (cbMusica.isChecked) interests.add("Música")
@@ -488,7 +409,6 @@ class EditProfileActivity : AppCompatActivity() {
         if (cbTecnologia.isChecked) interests.add("Tecnología")
         if (cbLectura.isChecked) interests.add("Lectura")
         if (cbModa.isChecked) interests.add("Moda")
-
         return interests
     }
 
@@ -499,12 +419,31 @@ class EditProfileActivity : AppCompatActivity() {
         return Base64.encodeToString(byteArray, Base64.DEFAULT)
     }
 
+    private fun updateWordCount() {
+        val description = etProfileDescription.text.toString().trim()
+        val wordCount = if (description.isEmpty()) {
+            0
+        } else {
+            description.split("\\s+".toRegex()).filter { it.isNotEmpty() }.size
+        }
+
+        val color = if (wordCount > 30) {
+            android.graphics.Color.RED
+        } else if (wordCount >= 25) {
+            android.graphics.Color.parseColor("#FF9800")
+        } else {
+            android.graphics.Color.DKGRAY
+        }
+
+        tvWordCount.setTextColor(color)
+        tvWordCount.text = "$wordCount/30 palabras"
+    }
+
     private fun saveProfileToFirebase(profileData: Map<String, Any>, email: String) {
         FirebaseService.saveUserProfile(email, profileData) { success ->
             runOnUiThread {
                 if (success) {
                     Toast.makeText(this, "Perfil guardado exitosamente", Toast.LENGTH_SHORT).show()
-                    // Guardar datos localmente para uso inmediato en otras pantallas
                     try {
                         val prefs = getSharedPreferences("user_data", MODE_PRIVATE)
                         prefs.edit(commit = true) {
@@ -515,37 +454,22 @@ class EditProfileActivity : AppCompatActivity() {
                             if (photo.isNotEmpty()) putString("user_photo", photo)
                         }
                     } catch (_: Exception) {
-                        // ignore
                     }
-                     // Navegar a ViewProfileActivity para mostrar el perfil completado
-                     val intent = Intent(this, ViewProfileActivity::class.java)
-                     if (email.isNotBlank()) intent.putExtra("userEmail", email)
-                     startActivity(intent)
-                     finish()
-                 } else {
-                     Toast.makeText(this, "Error al guardar el perfil", Toast.LENGTH_SHORT).show()
-                 }
-             }
-         }
-     }
+                    val intent = Intent(this, com.example.myapplication.MainActivity::class.java)
+                    intent.putExtra("fragment", "profile")
+                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+                    startActivity(intent)
+                    finish()
+                } else {
+                    Toast.makeText(this, "Error al guardar el perfil", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
 
     override fun onResume() {
         super.onResume()
-        // Asegurar que el contenedor del botón Guardar esté al frente después de layout
         val saveContainer = findViewById<LinearLayout>(R.id.saveButtonContainer)
         saveContainer?.bringToFront()
-        saveContainer?.requestLayout()
-        saveContainer?.invalidate()
-    }
-
-    override fun onWindowFocusChanged(hasFocus: Boolean) {
-        super.onWindowFocusChanged(hasFocus)
-        if (hasFocus) {
-            val saveContainer = findViewById<LinearLayout>(R.id.saveButtonContainer)
-            saveContainer?.bringToFront()
-            // aseguremos que la elevación sea grande
-            saveContainer?.translationZ = 200f
-            saveContainer?.invalidate()
-        }
     }
 }

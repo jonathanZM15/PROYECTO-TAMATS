@@ -5,9 +5,9 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import com.example.myapplication.MainActivity
 import com.example.myapplication.R
-import com.example.myapplication.ui.login.LoginActivity // RUTA AL LOGIN
-import com.example.myapplication.ui.explore.ExploreActivity
+import com.example.myapplication.ui.login.LoginActivity
 
 class SplashActivity : AppCompatActivity() {
 
@@ -27,8 +27,8 @@ class SplashActivity : AppCompatActivity() {
             val savedEmail = prefs.getString("user_email", null)
 
             val intent = if (!savedEmail.isNullOrEmpty()) {
-                // Usuario previamente logueado → ir directo a ExploreActivity
-                Intent(this, ExploreActivity::class.java)
+                // Usuario previamente logueado → ir directo a MainActivity
+                Intent(this, MainActivity::class.java)
             } else {
                 // No hay sesión → ir a LoginActivity
                 Intent(this, LoginActivity::class.java)

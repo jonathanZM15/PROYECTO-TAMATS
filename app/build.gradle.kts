@@ -68,6 +68,8 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
     // Firebase Storage (subir archivos)
     implementation("com.google.firebase:firebase-storage-ktx")
+    // Firebase Authentication (autenticación de usuarios)
+    implementation("com.google.firebase:firebase-auth-ktx")
 
     // Glide para cargar previews de imágenes en el grid
     implementation("com.github.bumptech.glide:glide:4.15.1")

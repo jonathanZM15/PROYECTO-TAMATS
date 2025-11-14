@@ -51,6 +51,9 @@
             android:exported="false" />
         <activity
             android:name=".ui.explore.ExploreActivity"
+            android:exported="false" />
+        <activity
+            android:name=".MainActivity"
             android:exported="true" />
 
         <!-- FileProvider para compartir archivos con la cámara -->

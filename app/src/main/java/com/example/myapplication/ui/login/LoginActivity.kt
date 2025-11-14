@@ -15,7 +15,6 @@ import com.example.myapplication.database.AppDatabase
 import com.example.myapplication.model.UsuarioEntity
 import com.example.myapplication.ui.register.RegisterActivity
 import com.example.myapplication.ui.simulacion.EditProfileActivity
-import com.example.myapplication.ui.simulacion.ViewProfileActivity
 import com.example.myapplication.util.EncryptionUtil
 import com.google.android.material.button.MaterialButton
 import kotlinx.coroutines.Dispatchers
@@ -40,7 +39,10 @@ class LoginActivity : AppCompatActivity() {
         val prefs = getSharedPreferences("user_data", MODE_PRIVATE)
         val savedEmail = prefs.getString("user_email", null)
         if (!savedEmail.isNullOrEmpty()) {
-            startActivity(Intent(this, com.example.myapplication.ui.explore.ExploreActivity::class.java))
+            val intent = Intent(this, com.example.myapplication.MainActivity::class.java)
+            intent.putExtra("fragment", "explore")
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            startActivity(intent)
             finish()
             return
         }
@@ -136,17 +138,20 @@ class LoginActivity : AppCompatActivity() {
                     e.printStackTrace()
                 }
 
+                // Siempre ir a MainActivity (que tiene la barra de navegación)
+                // Si el usuario no tiene perfil completado, irá a EditProfileActivity desde aquí
                 val intent = if (profileData != null) {
-                    // Usuario YA tiene perfil → ir a ViewProfileActivity
-                    Intent(this, ViewProfileActivity::class.java).apply {
-                        putExtra("userEmail", user.email)
+                    // Usuario YA tiene perfil → ir a MainActivity mostrando el fragment Profile
+                    Intent(this, com.example.myapplication.MainActivity::class.java).apply {
+                        putExtra("fragment", "profile")
                     }
                 } else {
-                    // Usuario NO tiene perfil → ir a EditProfileActivity
+                    // Usuario NO tiene perfil → ir a EditProfileActivity para completarlo
                     Intent(this, EditProfileActivity::class.java).apply {
                         putExtra("userEmail", user.email)
                     }
                 }
+                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
                 startActivity(intent)
                 finish()
             }
