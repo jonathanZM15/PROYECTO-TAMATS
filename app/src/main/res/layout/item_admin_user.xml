@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/admin_margin_small"
+    app:cardCornerRadius="@dimen/admin_corner_radius_medium"
+    app:cardElevation="@dimen/admin_elevation_small"
+    android:foreground="?attr/selectableItemBackground">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="@dimen/admin_padding_medium"
+        android:gravity="center_vertical"
+        android:background="@android:color/white">
+
+        <!-- Avatar: ahora ImageView para soportar foto real -->
+        <FrameLayout
+            android:layout_width="@dimen/admin_avatar_size"
+            android:layout_height="@dimen/admin_avatar_size">
+
+            <ImageView
+                android:id="@+id/ivUserAvatar"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:contentDescription="@string/user_avatar"
+                android:src="@drawable/ic_person"
+                android:background="@drawable/circle_background" />
+
+            <!-- Iniciales como fallback (sobre la imagen si no hay foto) -->
+            <TextView
+                android:id="@+id/tvUserAvatarInitials"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/admin_text_size_large"
+                android:textStyle="bold"
+                android:visibility="gone"
+                tools:text="AG" />
+
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginStart="@dimen/admin_margin_medium"
+            android:layout_marginEnd="@dimen/admin_margin_small">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/tvUserName"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textSize="@dimen/admin_text_size_medium"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/black"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    tools:text="Ana García" />
+
+                <TextView
+                    android:id="@+id/tvUserStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/badge_active"
+                    android:paddingHorizontal="@dimen/admin_padding_small"
+                    android:paddingVertical="@dimen/admin_padding_tiny"
+                    android:textSize="@dimen/admin_text_size_small"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/white"
+                    tools:text="Activo" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tvUserEmail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/admin_text_size_normal"
+                android:textColor="@color/admin_text_secondary"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:layout_marginTop="@dimen/admin_margin_tiny"
+                tools:text="ana.garcia@email.com" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="@dimen/admin_margin_small">
+
+                <TextView
+                    android:id="@+id/tvJoinDate"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textSize="@dimen/admin_text_size_small"
+                    android:textColor="@color/admin_text_tertiary"
+                    tools:text="Registro: 15/01/2024" />
+
+                <TextView
+                    android:id="@+id/tvPostsCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/admin_text_size_small"
+                    android:textColor="@color/admin_text_tertiary"
+                    tools:text="25 posts" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/ivToggleStatus"
+                android:layout_width="@dimen/admin_icon_size_medium"
+                android:layout_height="@dimen/admin_icon_size_medium"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="@dimen/admin_padding_small"
+                android:src="@drawable/ic_person"
+                app:tint="@color/tamats_pink"
+                android:contentDescription="@string/admin_toggle_status" />
+
+            <ImageView
+                android:id="@+id/ivMoreOptions"
+                android:layout_width="@dimen/admin_icon_size_medium"
+                android:layout_height="@dimen/admin_icon_size_medium"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="@dimen/admin_padding_small"
+                android:src="@drawable/ic_expand_more"
+                app:tint="@color/tamats_pink"
+                android:contentDescription="@string/admin_more_options" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Admin Padding -->
+    <dimen name="admin_padding_tiny">4dp</dimen>
+    <dimen name="admin_padding_small">8dp</dimen>
+    <dimen name="admin_padding_medium">16dp</dimen>
+    <dimen name="admin_padding_large">24dp</dimen>
+    <dimen name="admin_padding_xlarge">32dp</dimen>
+
+    <!-- Admin Margins -->
+    <dimen name="admin_margin_tiny">4dp</dimen>
+    <dimen name="admin_margin_small">8dp</dimen>
+    <dimen name="admin_margin_medium">16dp</dimen>
+    <dimen name="admin_margin_large">24dp</dimen>
+    <dimen name="admin_margin_xlarge">32dp</dimen>
+
+    <!-- Admin Text Sizes -->
+    <dimen name="admin_text_size_small">12sp</dimen>
+    <dimen name="admin_text_size_normal">14sp</dimen>
+    <dimen name="admin_text_size_medium">16sp</dimen>
+    <dimen name="admin_text_size_large">18sp</dimen>
+    <dimen name="admin_text_size_xlarge">20sp</dimen>
+    <dimen name="admin_text_size_title">24sp</dimen>
+    <dimen name="admin_text_size_subtitle">16sp</dimen>
+
+    <!-- Admin Avatar Sizes -->
+    <dimen name="admin_avatar_size">48dp</dimen>
+    <dimen name="admin_avatar_size_large">72dp</dimen>
+
+    <!-- Admin Icon Sizes -->
+    <dimen name="admin_icon_size_small">20dp</dimen>
+    <dimen name="admin_icon_size_medium">24dp</dimen>
+    <dimen name="admin_icon_size_large">32dp</dimen>
+
+    <!-- Admin Corner Radius -->
+    <dimen name="admin_corner_radius_small">4dp</dimen>
+    <dimen name="admin_corner_radius_medium">8dp</dimen>
+    <dimen name="admin_corner_radius_large">12dp</dimen>
+    <dimen name="admin_corner_radius_xlarge">16dp</dimen>
+
+    <!-- Admin Elevation -->
+    <dimen name="admin_elevation_small">2dp</dimen>
+    <dimen name="admin_elevation_medium">4dp</dimen>
+    <dimen name="admin_elevation_large">8dp</dimen>
+
+    <!-- Admin BottomSheet -->
+    <dimen name="admin_bottomsheet_handle_width">40dp</dimen>
+    <dimen name="admin_bottomsheet_handle_height">4dp</dimen>
+
+    <!-- Admin Empty State -->
+    <dimen name="admin_empty_state_icon_size">64dp</dimen>
+
+</resources>
+

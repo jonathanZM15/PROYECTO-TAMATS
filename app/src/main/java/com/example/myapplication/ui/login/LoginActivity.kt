@@ -10,6 +10,7 @@ import androidx.core.content.edit
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import com.example.myapplication.R
+import com.example.myapplication.admin.activities.AdminActivity
 import com.example.myapplication.cloud.FirebaseService
 import com.example.myapplication.database.AppDatabase
 import com.example.myapplication.model.UsuarioEntity
@@ -23,6 +24,12 @@ import kotlinx.coroutines.withContext
 
 class LoginActivity : AppCompatActivity() {
 
+    companion object {
+        // Credenciales administrativas
+        private const val ADMIN_EMAIL = "yendermejia0@gmail.com"
+        private const val ADMIN_PASSWORD = "Xiomy.123"
+    }
+
     private lateinit var etEmail: EditText
     private lateinit var etPassword: EditText
     private lateinit var btnLogin: MaterialButton
@@ -35,12 +42,20 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
-        // Si ya existe sesión guardada, ir directo a ExploreActivity
+        // Si ya existe sesión guardada, ir a la actividad correspondiente
         val prefs = getSharedPreferences("user_data", MODE_PRIVATE)
         val savedEmail = prefs.getString("user_email", null)
+        val isAdmin = prefs.getBoolean("is_admin", false)
+
         if (!savedEmail.isNullOrEmpty()) {
-            val intent = Intent(this, com.example.myapplication.MainActivity::class.java)
-            intent.putExtra("fragment", "explore")
+            // Redirigir a AdminActivity si es admin, sino a MainActivity
+            val intent = if (isAdmin) {
+                Intent(this, AdminActivity::class.java)
+            } else {
+                Intent(this, com.example.myapplication.MainActivity::class.java).apply {
+                    putExtra("fragment", "explore")
+                }
+            }
             intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             startActivity(intent)
             finish()
@@ -71,6 +86,12 @@ class LoginActivity : AppCompatActivity() {
         if (email.isEmpty() || password.isEmpty()) {
             if (email.isEmpty()) etEmail.error = "El correo es obligatorio."
             if (password.isEmpty()) etPassword.error = "La contraseña es obligatoria."
+            return
+        }
+
+        // Verificar si son credenciales de admin
+        if (email == ADMIN_EMAIL && password == ADMIN_PASSWORD) {
+            navigateToAdmin()
             return
         }
 
@@ -111,6 +132,35 @@ class LoginActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun navigateToAdmin() {
+        Toast.makeText(this, "¡Bienvenido, Administrador!", Toast.LENGTH_LONG).show()
+
+        // Intentar autenticar en Firebase con las credenciales de admin para poder leer Firestore
+        val auth = com.google.firebase.auth.FirebaseAuth.getInstance()
+        auth.signInWithEmailAndPassword(ADMIN_EMAIL, ADMIN_PASSWORD)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    // Guardar que es admin en SharedPreferences
+                    val prefs = getSharedPreferences("user_data", MODE_PRIVATE)
+                    prefs.edit(commit = true) {
+                        putString("user_email", ADMIN_EMAIL)
+                        putBoolean("is_admin", true)
+                    }
+
+                    // Ir al panel de administración
+                    val intent = Intent(this, AdminActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+                    startActivity(intent)
+                    finish()
+                } else {
+                    // Si falla la autenticación en Firebase, mostrar mensaje y no permitir acceso
+                    val err = task.exception?.message ?: "Error autenticando admin en Firebase"
+                    android.util.Log.e("LoginActivity", "Auth admin failed: $err")
+                    Toast.makeText(this, "No fue posible autenticar al administrador en Firebase: $err", Toast.LENGTH_LONG).show()
+                }
+            }
     }
 
     private fun navigateToProfile(user: UsuarioEntity) {

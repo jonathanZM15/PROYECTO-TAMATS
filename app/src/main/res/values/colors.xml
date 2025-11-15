@@ -22,4 +22,45 @@
     <color name="slot_background">#FF6FB3FF</color>
     <!-- Color para indicadores de página inactivos -->
     <color name="dot_inactive">#80FFFFFF</color>
+
+    <!-- Colores para Panel de Administración -->
+    <color name="admin_primary">#FF2D7A</color>
+    <color name="admin_primary_dark">#54075D</color>
+    <color name="admin_primary_light">#F5EEF8</color>
+    <color name="admin_accent">#FF2D7A</color>
+
+    <color name="admin_background">#FFFFFF</color>
+    <color name="admin_surface">#FFFFFF</color>
+    <color name="admin_card_background">#FFFFFF</color>
+
+    <color name="admin_text_primary">#212121</color>
+    <color name="admin_text_secondary">#757575</color>
+    <color name="admin_text_tertiary">#9E9E9E</color>
+    <color name="admin_text_hint">#BDBDBD</color>
+
+    <color name="admin_status_active">#4CAF50</color>
+    <color name="admin_status_blocked">#F44336</color>
+    <color name="admin_status_suspended">#FF9800</color>
+
+    <color name="admin_avatar_active">#7B1FA2</color>
+    <color name="admin_avatar_blocked">#F44336</color>
+    <color name="admin_avatar_suspended">#FF9800</color>
+
+    <color name="admin_action_block">#F44336</color>
+    <color name="admin_action_unblock">#4CAF50</color>
+    <color name="admin_action_suspend">#FF9800</color>
+    <color name="admin_action_activate">#4CAF50</color>
+    <color name="admin_danger">#D32F2F</color>
+
+    <color name="admin_divider">#E0E0E0</color>
+    <color name="admin_icon_tint">#FF2D7A</color>
+    <color name="admin_ripple">#1F000000</color>
+
+    <color name="admin_warning_background">#FFF3E0</color>
+    <color name="admin_warning_text">#E65100</color>
+    <color name="admin_warning_border">#FFB74D</color>
+
+    <color name="admin_gradient_start">#7B1FA2</color>
+    <color name="admin_gradient_end">#FF2D7A</color>
+
 </resources>

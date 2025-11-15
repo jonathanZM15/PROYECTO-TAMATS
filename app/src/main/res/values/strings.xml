@@ -71,4 +71,87 @@
     <string name="nav_chats">Chats</string>
     <string name="nav_profile">Perfil</string>
     <string name="fab_plus">+</string>
+
+    <!-- Admin Panel Strings -->
+    <string name="admin_panel_title">Panel de Administración</string>
+    <string name="admin_panel_subtitle">Gestión de usuarios</string>
+
+    <string name="admin_search_hint">Buscar usuarios por nombre o email</string>
+
+    <string name="admin_empty_state_title">No hay usuarios</string>
+    <string name="admin_empty_state_message">No se encontraron usuarios que coincidan con tu búsqueda</string>
+
+    <string name="admin_user_info_title">Información del Usuario</string>
+    <string name="admin_user_posts">%d publicaciones</string>
+    <string name="admin_user_posts_single">1 publicación</string>
+    <string name="admin_user_posts_none">Sin publicaciones</string>
+
+    <string name="admin_status_active">Activo</string>
+    <string name="admin_status_blocked">Bloqueado</string>
+    <string name="admin_status_suspended">Suspendido (%dd)</string>
+
+    <string name="admin_block_user">Bloquear Usuario</string>
+    <string name="admin_unblock_user">Desbloquear Usuario</string>
+    <string name="admin_suspend_user">Suspender Usuario</string>
+    <string name="admin_remove_suspension">Remover Suspensión</string>
+    <string name="admin_delete_user">Eliminar Usuario</string>
+    <string name="admin_view_posts">Ver Publicaciones</string>
+    <string name="admin_delete_user_desc">Eliminar este usuario permanentemente</string>
+    <string name="user_details_title">Detalles del Usuario</string>
+    <string name="label_information">Información</string>
+
+    <string name="admin_confirm_block_title">Bloquear Usuario</string>
+    <string name="admin_confirm_block_message">¿Estás seguro de que quieres bloquear a %s?\n\nEl usuario no podrá acceder a la aplicación.</string>
+    <string name="admin_confirm_unblock_title">Desbloquear Usuario</string>
+    <string name="admin_confirm_unblock_message">¿Estás seguro de que quieres desbloquear a %s?</string>
+    <string name="admin_confirm_delete_title">⚠️ Eliminar Usuario</string>
+    <string name="admin_confirm_delete_message">Esta acción eliminará permanentemente la cuenta de %s y todos sus datos asociados.\n\n⚠️ Esta acción NO se puede deshacer.</string>
+
+    <string name="admin_suspension_options_title">Suspender Usuario</string>
+    <string name="admin_suspension_1_day">1 día</string>
+    <string name="admin_suspension_3_days">3 días</string>
+    <string name="admin_suspension_7_days">7 días</string>
+    <string name="admin_suspension_30_days">30 días</string>
+    <string name="admin_suspension_custom">Personalizado</string>
+    <string name="admin_suspension_custom_title">Suspensión Personalizada</string>
+    <string name="admin_suspension_custom_message">Ingresa el número de días:</string>
+    <string name="admin_suspension_custom_hint">Número de días (1-365)</string>
+    <string name="admin_suspension_confirm_title">Confirmar Suspensión</string>
+    <string name="admin_suspension_confirm_message">¿Suspender a %s por %d %s?</string>
+    <string name="admin_suspension_day">día</string>
+    <string name="admin_suspension_days">días</string>
+
+    <string name="admin_user_blocked_success">Usuario bloqueado exitosamente</string>
+    <string name="admin_user_unblocked_success">Usuario desbloqueado exitosamente</string>
+    <string name="admin_user_suspended_success">Usuario suspendido por %d %s</string>
+    <string name="admin_suspension_removed_success">Suspensión removida exitosamente</string>
+    <string name="admin_user_deleted_success">Usuario %s eliminado permanentemente</string>
+
+    <string name="admin_error_user_not_found">Usuario no encontrado</string>
+    <string name="admin_error_invalid_days">Número inválido</string>
+    <string name="admin_error_days_range">Debe ser entre 1 y 365 días</string>
+    <string name="admin_error_confirmation_incorrect">Confirmación incorrecta</string>
+
+    <string name="admin_refresh">Actualizar</string>
+    <string name="admin_stats">Estadísticas</string>
+    <string name="admin_add_sample">Agregar Usuario de Prueba</string>
+
+    <string name="admin_stats_title">📊 Estadísticas de Usuarios</string>
+    <string name="admin_stats_total">Total de usuarios: %d</string>
+    <string name="admin_stats_active">Usuarios activos: %d</string>
+    <string name="admin_stats_blocked">Usuarios bloqueados: %d</string>
+    <string name="admin_stats_suspended">Usuarios suspendidos: %d</string>
+
+    <string name="admin_toggle_status">Cambiar estado del usuario</string>
+    <string name="admin_more_options">Más opciones</string>
+    <string name="admin_user_avatar">Avatar del usuario</string>
+    <string name="user_avatar">@string/admin_user_avatar</string>
+
+    <string name="admin_ok">OK</string>
+    <string name="admin_cancel">Cancelar</string>
+    <string name="admin_confirm">Confirmar</string>
+    <string name="admin_yes">Sí</string>
+    <string name="admin_no">No</string>
+    <string name="admin_menu_description">Abrir menú de opciones</string>
+
 </resources>
