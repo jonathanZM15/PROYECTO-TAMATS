@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Base64
 import android.util.Log
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,10 +15,15 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
 import com.example.myapplication.R
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.google.firebase.Timestamp
+import android.annotation.SuppressLint
 
 class KnowFragment : Fragment() {
 
@@ -97,13 +103,13 @@ class KnowFragment : Fragment() {
             tvUserNameProfile?.text = name
 
             val tvAgeProfile = view.findViewById<TextView>(R.id.tvAgeProfile)
-            tvAgeProfile?.text = if (age != "N/A") "$age años" else "Edad no especificada"
+            tvAgeProfile?.text = if (age != "N/A") getString(R.string.age_years, age) else getString(R.string.age_not_specified)
 
             val tvBirthDateProfile = view.findViewById<TextView>(R.id.tvBirthDateProfile)
-            tvBirthDateProfile?.text = "Nacimiento: $birthDate"
+            tvBirthDateProfile?.text = getString(R.string.birthdate_label, birthDate)
 
             val tvCityProfile = view.findViewById<TextView>(R.id.tvCityProfile)
-            tvCityProfile?.text = "📍 $city"
+            tvCityProfile?.text = getString(R.string.city_with_pin, city)
 
             val tvDescriptionProfile = view.findViewById<TextView>(R.id.tvDescriptionProfile)
             tvDescriptionProfile?.text = description
@@ -142,7 +148,7 @@ class KnowFragment : Fragment() {
 
             if (interests.isNotEmpty()) {
                 val tvInterestsLabel = TextView(requireContext())
-                tvInterestsLabel.text = "Intereses:"
+                tvInterestsLabel.text = getString(R.string.interests_label)
                 tvInterestsLabel.textSize = 16f
                 tvInterestsLabel.setTextColor(ContextCompat.getColor(requireContext(), R.color.tamats_pink))
                 tvInterestsLabel.setPadding(16, 16, 16, 8)
@@ -151,7 +157,7 @@ class KnowFragment : Fragment() {
                 for (interest in interests) {
                     val interestText = interest?.toString() ?: continue
                     val tvInterest = TextView(requireContext())
-                    tvInterest.text = "• $interestText"
+                    tvInterest.text = getString(R.string.interest_bullet, interestText)
                     tvInterest.textSize = 14f
                     tvInterest.setTextColor(android.graphics.Color.WHITE)
                     tvInterest.setPadding(32, 8, 16, 8)
@@ -167,34 +173,49 @@ class KnowFragment : Fragment() {
                 loadUserPublications(email, llPublicationsContainer)
             }
 
+            val rvUserStories = view.findViewById<RecyclerView>(R.id.rvUserStories)
+            rvUserStories.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+            // Evitar el warning 'No adapter attached; skipping layout' asignando un adapter vacío inicialmente
+            rvUserStories.adapter = StoryAdapter(emptyList(), this)
+
+            // Cargar historias del usuario
+            loadUserStories(email, rvUserStories, view)
+
         } catch (e: Exception) {
             Log.e("KnowFragment", "Error mostrando perfil: ${e.message}", e)
         }
     }
 
     private fun loadUserPublications(email: String, container: LinearLayout?) {
-        if (container == null) return
+        if (container == null) {
+            Log.e("KnowFragment", "loadUserPublications: container es null")
+            return
+        }
+
+        Log.d("KnowFragment", "loadUserPublications: cargando publicaciones para $email")
 
         db.collection("posts")
             .whereEqualTo("userEmail", email)
             .orderBy("timestamp", Query.Direction.DESCENDING)
             .get()
             .addOnSuccessListener { postDocs ->
+                Log.d("KnowFragment", "loadUserPublications: se encontraron ${postDocs.size()} publicaciones")
                 container.removeAllViews()
 
                 if (postDocs.isEmpty) {
+                    Log.d("KnowFragment", "loadUserPublications: sin publicaciones, mostrando mensaje")
                     val tvNoPost = TextView(requireContext())
-                    tvNoPost.text = "Este usuario aún no ha creado publicaciones"
+                    tvNoPost.text = getString(R.string.no_publications_message)
                     tvNoPost.textSize = 14f
                     tvNoPost.setTextColor(android.graphics.Color.GRAY)
-                    tvNoPost.gravity = android.view.Gravity.CENTER
+                    tvNoPost.gravity = Gravity.CENTER
                     tvNoPost.setPadding(16, 32, 16, 32)
                     container.addView(tvNoPost)
                     return@addOnSuccessListener
                 }
 
                 val tvPublicationsLabel = TextView(requireContext())
-                tvPublicationsLabel.text = "Publicaciones:"
+                tvPublicationsLabel.text = getString(R.string.publications_label)
                 tvPublicationsLabel.textSize = 16f
                 tvPublicationsLabel.setTextColor(ContextCompat.getColor(requireContext(), R.color.tamats_pink))
                 tvPublicationsLabel.setPadding(16, 16, 16, 8)
@@ -241,12 +262,139 @@ class KnowFragment : Fragment() {
                         Log.e("KnowFragment", "Error mostrando publicación: ${e.message}")
                     }
                 }
+
+                // Agregar mensaje al final indicando que no hay más publicaciones
+                Log.d("KnowFragment", "loadUserPublications: agregando mensaje de fin")
+                val tvEndMessage = TextView(requireContext())
+                tvEndMessage.text = "Ya no hay mas publicaciones para enseñar"
+                tvEndMessage.textSize = 14f
+                tvEndMessage.setTextColor(ContextCompat.getColor(requireContext(), R.color.tamats_pink))
+                tvEndMessage.gravity = Gravity.CENTER
+                tvEndMessage.setPadding(16, 32, 16, 32)
+                tvEndMessage.layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+                container.addView(tvEndMessage)
+                Log.d("KnowFragment", "loadUserPublications: mensaje agregado, childCount = ${container.childCount}")
             }
             .addOnFailureListener { e ->
                 Log.e("KnowFragment", "Error cargando publicaciones: ${e.message}")
             }
     }
 
+    private fun loadUserStories(email: String, recyclerView: RecyclerView, parentView: View) {
+        val tvNoStories = parentView.findViewById<TextView>(R.id.tvNoStories)
+        Log.d("KnowFragment", "loadUserStories: iniciando consulta por userEmail=$email")
+        db.collection("stories")
+            .whereEqualTo("userEmail", email)
+            .orderBy("timestamp", Query.Direction.DESCENDING)
+            .get()
+            .addOnSuccessListener { storyDocs ->
+                Log.d("KnowFragment", "loadUserStories: consulta inicial devuelve ${storyDocs.size()} documentos")
+                val stories = mutableListOf<Story>()
+
+                for (doc in storyDocs.documents) {
+                    val data = doc.data ?: continue
+                    val images = (data["images"] as? List<*>)?.mapNotNull { it?.toString() } ?: emptyList()
+                    val userName = data["userName"]?.toString() ?: "Usuario"
+                    val userPhoto = data["userPhoto"]?.toString() ?: ""
+
+                    // Extraer timestamp de forma robusta
+                    val tsAny = data["timestamp"]
+                    var tsSeconds: Long? = null
+                    try {
+                        if (tsAny != null) {
+                            when (tsAny) {
+                                is Timestamp -> tsSeconds = tsAny.seconds
+                                is Number -> tsSeconds = tsAny.toLong()
+                                is String -> tsAny.toLongOrNull()
+                                else -> {
+                                    // tipo no reconocido
+                                }
+                            }
+                        }
+                    } catch (ex: Exception) {
+                        Log.w("KnowFragment", "loadUserStories: no pudo extraer timestamp del doc ${doc.id}: ${ex.message}")
+                    }
+
+                    stories.add(Story(images, tsSeconds, userName, userPhoto))
+                }
+
+                // asegurar orden descendente por timestamp (nulls al final)
+                val sorted = stories.sortedWith(compareByDescending<Story> { it.tsSeconds ?: Long.MIN_VALUE })
+
+                Log.d("KnowFragment", "loadUserStories: historias procesadas (inicial): ${sorted.size}")
+
+                if (sorted.isEmpty()) {
+                    tvNoStories?.visibility = View.VISIBLE
+                    recyclerView.visibility = View.GONE
+                } else {
+                    tvNoStories?.visibility = View.VISIBLE
+                    recyclerView.visibility = View.GONE
+                    val adapter = StoryAdapter(sorted, this@KnowFragment)
+                    recyclerView.adapter = adapter
+                    Log.d("KnowFragment", "loadUserStories: adaptador asignado con ${sorted.size} historias para $email")
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("KnowFragment", "Error cargando historias (inicial): ${e.message}")
+                // Fallback: si falla por índice, hacemos la consulta sin orderBy y ordenamos localmente
+                val msg = e.message ?: ""
+                if (msg.contains("requires an index", ignoreCase = true) || msg.contains("requires an index", ignoreCase = true) || msg.contains("The query requires an index", ignoreCase = true) || msg.contains("index", ignoreCase = true)) {
+                    Log.d("KnowFragment", "loadUserStories: usando fallback sin orderBy por userEmail=$email")
+                    db.collection("stories")
+                        .whereEqualTo("userEmail", email)
+                        .get()
+                        .addOnSuccessListener { docs ->
+                            Log.d("KnowFragment", "loadUserStories (fallback): devuelve ${docs.size()} documentos")
+                            val stories = mutableListOf<Story>()
+                            for (doc in docs.documents) {
+                                val data = doc.data ?: continue
+                                val images = (data["images"] as? List<*>)?.mapNotNull { it?.toString() } ?: emptyList()
+                                val userName = data["userName"]?.toString() ?: "Usuario"
+                                val userPhoto = data["userPhoto"]?.toString() ?: ""
+                                var tsSeconds: Long? = null
+                                val tsAny = data["timestamp"]
+                                try {
+                                    if (tsAny != null) {
+                                        when (tsAny) {
+                                            is Timestamp -> tsSeconds = tsAny.seconds
+                                            is Number -> tsSeconds = tsAny.toLong()
+                                            is String -> tsAny.toLongOrNull()
+                                            else -> {}
+                                        }
+                                    }
+                                } catch (ex: Exception) {
+                                    Log.w("KnowFragment", "loadUserStories(fallback): error extrayendo timestamp doc ${doc.id}: ${ex.message}")
+                                }
+                                stories.add(Story(images, tsSeconds, userName, userPhoto))
+                            }
+                            val sorted = stories.sortedWith(compareByDescending<Story> { it.tsSeconds ?: Long.MIN_VALUE })
+                            Log.d("KnowFragment", "loadUserStories (fallback): historias procesadas: ${sorted.size}")
+                            if (sorted.isEmpty()) {
+                                tvNoStories?.visibility = View.VISIBLE
+                                recyclerView.visibility = View.GONE
+                            } else {
+                                tvNoStories?.visibility = View.GONE
+                                recyclerView.visibility = View.VISIBLE
+                                recyclerView.adapter = StoryAdapter(sorted, this@KnowFragment)
+                                Log.d("KnowFragment", "loadUserStories (fallback): adaptador asignado con ${sorted.size} historias para $email")
+                            }
+                        }
+                        .addOnFailureListener { e2 ->
+                            Log.e("KnowFragment", "Fallback error cargando historias: ${e2.message}")
+                            tvNoStories?.visibility = View.VISIBLE
+                            recyclerView.visibility = View.GONE
+                        }
+                } else {
+                    tvNoStories?.visibility = View.VISIBLE
+                    recyclerView.visibility = View.GONE
+                }
+            }
+    }
+
+    @SuppressLint("InflateParams")
     private fun showPhotoDialog(photoBase64: String?, name: String) {
         if (photoBase64.isNullOrEmpty()) return
 
@@ -271,7 +419,7 @@ class KnowFragment : Fragment() {
                     .load(bmp)
                     .centerInside()
                     .into(ivPhoto)
-                ivPhoto?.contentDescription = "Foto de $name"
+                ivPhoto?.contentDescription = getString(R.string.photo_of, name)
             }
         } catch (e: Exception) {
             Log.e("KnowFragment", "Error mostrando foto en diálogo: ${e.message}")
@@ -284,11 +432,274 @@ class KnowFragment : Fragment() {
         dialog.show()
     }
 
+    @SuppressLint("InflateParams")
+    private fun showFullscreenImageDialog(imageData: String) {
+        val dialog = Dialog(requireContext(), android.R.style.Theme_Black_NoTitleBar_Fullscreen)
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_fullscreen_image, null, false)
+        dialog.setContentView(dialogView)
+
+        val ivFullscreenImage = dialogView.findViewById<ImageView>(R.id.ivFullscreenImage)
+        val btnClose = dialogView.findViewById<ImageButton>(R.id.btnCloseFullscreenImage)
+
+        try {
+            // Detectar si es Base64 o URL
+            val isBase64 = imageData.length > 500 || imageData.contains(",") || !imageData.startsWith("http")
+
+            if (isBase64) {
+                // Es Base64 - decodificar
+                var base64String = imageData
+
+                if (base64String.contains(",")) {
+                    val parts = base64String.split(",", limit = 2)
+                    if (parts.size == 2) {
+                        base64String = parts[1]
+                    }
+                }
+
+                val decodedBytes = Base64.decode(base64String, Base64.DEFAULT)
+                val bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+
+                if (bitmap != null) {
+                    Glide.with(this)
+                        .load(bitmap)
+                        .centerInside()
+                        .into(ivFullscreenImage)
+                    Log.d("KnowFragment", "Imagen Base64 mostrada en pantalla completa")
+                }
+            } else {
+                // Es URL
+                Glide.with(this)
+                    .load(imageData)
+                    .centerInside()
+                    .into(ivFullscreenImage)
+                Log.d("KnowFragment", "Imagen URL mostrada en pantalla completa")
+            }
+        } catch (e: Exception) {
+            Log.e("KnowFragment", "Error mostrando imagen en pantalla completa: ${e.message}")
+        }
+
+        btnClose.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
     companion object {
         fun newInstance(userEmail: String): KnowFragment {
             return KnowFragment().apply {
                 arguments = Bundle().apply {
                     putString("user_email", userEmail)
+                }
+            }
+        }
+    }
+
+    // Modelo simple de historia
+    private data class Story(
+        val images: List<String>,
+        val tsSeconds: Long? = null,
+        val userName: String = "",
+        val userPhoto: String = ""
+    )
+
+    // Adapter horizontal que muestra tarjetas de historias (cada tarjeta usa item_story.xml)
+    private class StoryAdapter(
+        private val stories: List<Story>,
+        private val fragment: KnowFragment
+    ) : RecyclerView.Adapter<StoryAdapter.StoryViewHolder>() {
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StoryViewHolder {
+            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_story, parent, false)
+            return StoryViewHolder(view, fragment)
+        }
+
+        override fun onBindViewHolder(holder: StoryViewHolder, position: Int) {
+            holder.bind(stories[position])
+        }
+
+        override fun getItemCount(): Int = stories.size
+
+        class StoryViewHolder(itemView: View, private val fragment: KnowFragment) : RecyclerView.ViewHolder(itemView) {
+            private val vpImages = itemView.findViewById<ViewPager2>(R.id.vpStoryImages)
+            private val llDots = itemView.findViewById<LinearLayout>(R.id.vpStoryDots)
+            private val tvUserName = itemView.findViewById<TextView>(R.id.tvStoryUserName)
+            private val ivUserPhoto = itemView.findViewById<ImageView>(R.id.ivStoryUserPhoto)
+            private val tvStoryText = itemView.findViewById<TextView>(R.id.tvStoryText)
+
+            fun bind(story: Story) {
+                // Si el story tiene imágenes, inicializar ViewPager2
+                val images = story.images
+
+                // Mostrar nombre y foto del usuario
+                tvUserName.text = story.userName
+
+                // Cargar foto del usuario si existe
+                if (story.userPhoto.isNotEmpty()) {
+                    try {
+                        // Si es Base64 con prefijo, recortarlo
+                        var photoData = story.userPhoto
+                        if (photoData.contains(",")) {
+                            val parts = photoData.split(",", limit = 2)
+                            if (parts.size == 2 && parts[0].startsWith("data:")) {
+                                photoData = parts[1]
+                            }
+                        }
+
+                        // Decodificar Base64 si es necesario
+                        if (photoData.length > 100) { // Probablemente sea Base64
+                            val decoded = Base64.decode(photoData, Base64.DEFAULT)
+                            val bmp = BitmapFactory.decodeByteArray(decoded, 0, decoded.size)
+                            if (bmp != null) {
+                                ivUserPhoto.setImageBitmap(bmp)
+                            }
+                        } else {
+                            // Si es URL, usar Glide
+                            Glide.with(itemView.context)
+                                .load(story.userPhoto)
+                                .centerCrop()
+                                .into(ivUserPhoto)
+                        }
+                    } catch (e: Exception) {
+                        Log.w("KnowFragment", "Error cargando foto del usuario: ${e.message}")
+                        ivUserPhoto.setImageResource(R.drawable.ic_image_placeholder)
+                    }
+                } else {
+                    ivUserPhoto.setImageResource(R.drawable.ic_image_placeholder)
+                }
+
+                // Validar que hay imágenes antes de mostrar ViewPager2
+                if (images.isNotEmpty()) {
+                    vpImages.adapter = ImagesPagerAdapter(images) { imageData ->
+                        fragment.showFullscreenImageDialog(imageData)
+                    }
+                    setupDots(images.size)
+
+                    // Actualizar dots según página
+                    vpImages.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+                        override fun onPageSelected(position: Int) {
+                            super.onPageSelected(position)
+                            updateDots(position)
+                        }
+                    })
+                } else {
+                    // Si no hay imágenes, mostrar placeholder
+                    vpImages.visibility = View.GONE
+                    llDots.visibility = View.GONE
+                }
+
+                // Ocultar texto si no hay
+                if (tvStoryText.text.isNullOrEmpty()) tvStoryText.visibility = View.GONE
+            }
+
+            private fun setupDots(count: Int) {
+                llDots.removeAllViews()
+                if (count <= 1) {
+                    llDots.visibility = View.GONE
+                    return
+                }
+                llDots.visibility = View.VISIBLE
+                for (i in 0 until count) {
+                    val dot = View(itemView.context)
+                    val size = (6 * itemView.resources.displayMetrics.density).toInt()
+                    val params = LinearLayout.LayoutParams(size, size)
+                    params.setMargins(6, 0, 6, 0)
+                    dot.layoutParams = params
+                    dot.setBackgroundResource(R.drawable.dot_indicator)
+                    dot.alpha = if (i == 0) 1f else 0.4f
+                    llDots.addView(dot)
+                }
+            }
+
+            private fun updateDots(selected: Int) {
+                for (i in 0 until llDots.childCount) {
+                    llDots.getChildAt(i).alpha = if (i == selected) 1f else 0.4f
+                }
+            }
+        }
+    }
+
+    // Adapter para las imágenes dentro del ViewPager2 (item simple con ImageView)
+    private class ImagesPagerAdapter(
+        private val images: List<String>,
+        private val onImageClick: (String) -> Unit
+    ) : RecyclerView.Adapter<ImagesPagerAdapter.ImageViewHolder>() {
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageViewHolder {
+            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_story_image, parent, false)
+            return ImageViewHolder(view)
+        }
+
+        override fun onBindViewHolder(holder: ImageViewHolder, position: Int) {
+            holder.bind(images[position])
+        }
+
+        override fun getItemCount(): Int = images.size
+
+        inner class ImageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+            private val ivImage: ImageView = itemView.findViewById(R.id.ivImage)
+
+            fun bind(imageData: String) {
+                Log.d("ImagesPagerAdapter", "Cargando imagen de longitud: ${imageData.length}")
+
+                if (imageData.isEmpty()) {
+                    Log.w("ImagesPagerAdapter", "Imagen vacía")
+                    ivImage.setImageResource(R.drawable.ic_image_placeholder)
+                    return
+                }
+
+                try {
+                    // Detectar si es Base64 o URL
+                    val isBase64 = imageData.length > 500 || imageData.contains(",") || !imageData.startsWith("http")
+
+                    if (isBase64) {
+                        // Es Base64 - decodificar directamente
+                        Log.d("ImagesPagerAdapter", "Detectado como Base64, decodificando...")
+
+                        var base64String = imageData
+
+                        // Si tiene prefijo data URI, recortarlo
+                        if (base64String.contains(",")) {
+                            val parts = base64String.split(",", limit = 2)
+                            if (parts.size == 2) {
+                                base64String = parts[1]
+                            }
+                        }
+
+                        // Decodificar Base64 a Bitmap
+                        val decodedBytes = Base64.decode(base64String, Base64.DEFAULT)
+                        val bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+
+                        if (bitmap != null) {
+                            Glide.with(itemView.context)
+                                .load(bitmap)
+                                .centerCrop()
+                                .into(ivImage)
+                            Log.d("ImagesPagerAdapter", "Imagen Base64 decodificada y cargada correctamente")
+                        } else {
+                            Log.e("ImagesPagerAdapter", "No se pudo decodificar el bitmap")
+                            ivImage.setImageResource(R.drawable.ic_image_placeholder)
+                        }
+                    } else {
+                        // Es URL - usar Glide normalmente
+                        Log.d("ImagesPagerAdapter", "Detectado como URL, cargando con Glide: $imageData")
+
+                        Glide.with(itemView.context)
+                            .load(imageData)
+                            .placeholder(R.drawable.ic_image_placeholder)
+                            .error(R.drawable.ic_image_placeholder)
+                            .centerCrop()
+                            .into(ivImage)
+                        Log.d("ImagesPagerAdapter", "Imagen URL cargada con Glide")
+                    }
+                } catch (e: Exception) {
+                    Log.e("ImagesPagerAdapter", "Error cargando imagen: ${e.message}", e)
+                    ivImage.setImageResource(R.drawable.ic_image_placeholder)
+                }
+
+                // Añadir click listener para mostrar imagen en pantalla completa
+                ivImage.setOnClickListener {
+                    onImageClick(imageData)
                 }
             }
         }

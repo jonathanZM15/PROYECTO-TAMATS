@@ -12,6 +12,7 @@ import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
 import com.example.myapplication.R
 import com.google.firebase.firestore.FirebaseFirestore
+import com.example.myapplication.util.ImageOpenHelper
 
 data class Post(val images: List<String>, val text: String)
 
@@ -114,7 +115,7 @@ class PostAdapter(private val posts: List<Post>) : RecyclerView.Adapter<PostAdap
         override fun onBindViewHolder(holder: ImageViewHolder, position: Int) {
             val src = images[position]
             try {
-                if (src.startsWith("http://") || src.startsWith("https://")) {
+                if (src.startsWith("http://") || src.startsWith("https://") || src.startsWith("content://") || src.startsWith("file://")) {
                     Glide.with(holder.image.context)
                         .load(src)
                         .centerCrop()
@@ -152,6 +153,15 @@ class PostAdapter(private val posts: List<Post>) : RecyclerView.Adapter<PostAdap
                 }
             } catch (_: Exception) {
                 holder.image.setImageResource(R.drawable.ic_launcher_foreground)
+            }
+
+            // Añadir click que abra la lista completa usando ImageOpenHelper
+            holder.image.setOnClickListener {
+                try {
+                    ImageOpenHelper.openFullScreen(holder.image.context, images, position)
+                } catch (e: Exception) {
+                    android.util.Log.w("PostAdapter", "Error abriendo FullScreen: ${e.message}")
+                }
             }
         }
 

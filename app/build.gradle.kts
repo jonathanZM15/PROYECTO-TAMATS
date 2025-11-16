@@ -84,4 +84,7 @@ dependencies {
     //las coroutines-core
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
 
+    // RecyclerView para mejor rendimiento en listas
+    implementation("androidx.recyclerview:recyclerview:1.3.2")
+
 }

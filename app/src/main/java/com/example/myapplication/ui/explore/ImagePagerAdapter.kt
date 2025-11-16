@@ -10,6 +10,7 @@ import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.myapplication.R
+import com.example.myapplication.util.ImageOpenHelper
 
 class ImagePagerAdapter(private val images: List<String>) : RecyclerView.Adapter<ImagePagerAdapter.ImageViewHolder>() {
 
@@ -28,8 +29,8 @@ class ImagePagerAdapter(private val images: List<String>) : RecyclerView.Adapter
         val imageData = images[position]
 
         // Verificar si es una URL o Base64
-        if (imageData.startsWith("http://") || imageData.startsWith("https://")) {
-            // Es una URL, cargarla con Glide
+        if (imageData.startsWith("http://") || imageData.startsWith("https://") || imageData.startsWith("content://") || imageData.startsWith("file://")) {
+            // Es una URL o Uri, cargarla con Glide
             Glide.with(holder.image.context)
                 .load(imageData)
                 .centerCrop()
@@ -53,8 +54,16 @@ class ImagePagerAdapter(private val images: List<String>) : RecyclerView.Adapter
                 holder.image.setImageResource(android.R.drawable.ic_dialog_alert)
             }
         }
+
+        // Abrir imagen a pantalla completa al tocarla — usar helper para manejar listas y Base64 grandes
+        holder.image.setOnClickListener {
+            try {
+                ImageOpenHelper.openFullScreen(holder.image.context, images, position)
+            } catch (e: Exception) {
+                Log.w("ImagePagerAdapter", "Error abriendo FullScreen: ${e.message}")
+            }
+        }
     }
 
     override fun getItemCount(): Int = images.size
 }
-

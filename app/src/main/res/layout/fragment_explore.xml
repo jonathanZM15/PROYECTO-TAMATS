@@ -16,20 +16,12 @@
         android:layout_marginStart="20dp"
         android:layout_marginTop="20dp" />
 
-    <!-- Contenedor scrollable para perfiles de usuarios -->
-    <ScrollView
-        android:id="@+id/svPosts"
+    <!-- RecyclerView para mejor rendimiento -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvProfiles"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:fillViewport="true">
-
-        <LinearLayout
-            android:id="@+id/llPostsContainer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" />
-    </ScrollView>
+        android:layout_weight="1" />
 
 </LinearLayout>
 

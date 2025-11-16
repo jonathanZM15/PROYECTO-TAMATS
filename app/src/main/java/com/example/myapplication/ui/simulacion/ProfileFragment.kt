@@ -26,11 +26,11 @@ import com.example.myapplication.ui.explore.PostAdapter
 import com.example.myapplication.ui.explore.ImagePagerAdapter
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
 import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.view.WindowManager
 import android.widget.PopupWindow
+import androidx.core.graphics.toColorInt
+import androidx.core.content.ContextCompat
 
 class ProfileFragment : Fragment() {
 
@@ -130,7 +130,9 @@ class ProfileFragment : Fragment() {
             btnMenuProfile.setOnClickListener { anchorView ->
                 try {
                     val inflater = LayoutInflater.from(requireContext())
-                    val popupView = inflater.inflate(R.layout.popup_profile_menu, null)
+                    // Usar el parent del anchor como root con attachToRoot = false para resolver layout params
+                    val parentGroup = (anchorView.parent as? ViewGroup)
+                    val popupView = inflater.inflate(R.layout.popup_profile_menu, parentGroup, false)
 
                     // Crear PopupWindow con wrap_content para ancho/alto
                     val popupWindow = PopupWindow(
@@ -142,12 +144,12 @@ class ProfileFragment : Fragment() {
 
                     // Permitir tocar fuera para cerrar y dar fondo no nulo para que funcione outside touch
                     popupWindow.isOutsideTouchable = true
-                    popupWindow.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                    popupWindow.setBackgroundDrawable(ContextCompat.getDrawable(requireContext(), android.R.color.transparent))
 
                     // Opcional: sombra/elevación en API >= 21
                     try {
                         popupWindow.elevation = 8f
-                    } catch (ignored: Throwable) { }
+                    } catch (_: Throwable) { }
 
                     // Asociar botones del layout del popup
                     val btnEdit = popupView.findViewById<TextView>(R.id.btn_edit_profile)
@@ -224,8 +226,8 @@ class ProfileFragment : Fragment() {
                                     .load(bitmap)
                                     .into(ivProfilePhotoView)
                             }
-                        } catch (e: Exception) {
-                            android.util.Log.w("ProfileFragment", "Error cargando foto: ${e.message}")
+                        } catch (_: Exception) {
+                            android.util.Log.w("ProfileFragment", "Error cargando foto: ${""}")
                         }
                     }
 
@@ -271,8 +273,8 @@ class ProfileFragment : Fragment() {
                                             .load(bitmap)
                                             .into(ivProfilePhotoView)
                                     }
-                                } catch (e: Exception) {
-                                    android.util.Log.w("ProfileFragment", "Error cargando foto: ${e.message}")
+                                } catch (_: Exception) {
+                                    android.util.Log.w("ProfileFragment", "Error cargando foto: ${""}")
                                 }
                             }
 
@@ -361,8 +363,8 @@ class ProfileFragment : Fragment() {
                                 val data = doc.data ?: return@mapNotNull null
                                 val timestamp = data["timestamp"] as? Long ?: System.currentTimeMillis()
                                 Pair(doc, timestamp)
-                            } catch (e: Exception) {
-                                android.util.Log.e("ProfileFragment", "Error procesando documento: ${e.message}")
+                            } catch (_: Exception) {
+                                android.util.Log.e("ProfileFragment", "Error procesando documento: ${""}")
                                 null
                             }
                         }
@@ -384,6 +386,7 @@ class ProfileFragment : Fragment() {
                             val ivUserPhoto = storyView.findViewById<ImageView>(R.id.ivStoryUserPhoto)
                             val tvUserName = storyView.findViewById<TextView>(R.id.tvStoryUserName)
                             val vp = storyView.findViewById<ViewPager2>(R.id.vpStoryImages)
+                            val dots = storyView.findViewById<LinearLayout>(R.id.vpStoryDots)
                             val tvText = storyView.findViewById<TextView>(R.id.tvStoryText)
 
                             tvUserName.text = if (userName.isNotEmpty()) userName else tvViewName.text
@@ -398,8 +401,8 @@ class ProfileFragment : Fragment() {
                                         val bmp = BitmapFactory.decodeByteArray(decoded, 0, decoded.size)
                                         if (bmp != null) ivUserPhoto.setImageBitmap(bmp)
                                     }
-                                } catch (e: Exception) {
-                                    android.util.Log.e("ProfileFragment", "Error cargando foto usuario: ${e.message}")
+                                } catch (_: Exception) {
+                                    android.util.Log.e("ProfileFragment", "Error cargando foto usuario: ${""}")
                                 }
                             }
 
@@ -411,10 +414,11 @@ class ProfileFragment : Fragment() {
                                     // Son Base64 directos, mostrar directamente
                                     android.util.Log.d("ProfileFragment", "Imágenes Base64 directo en documento")
                                     vp.adapter = ImagePagerAdapter(imageIds)
+                                    setupStoryDots(vp, dots, imageIds.size)
                                 } else {
                                     // Son IDs de documentos, cargar de storyImages
                                     android.util.Log.d("ProfileFragment", "IDs de documentos detectados, cargando desde storyImages")
-                                    loadStoryImagesFromCollection(imageIds, vp)
+                                    loadStoryImagesFromCollection(imageIds, vp, dots)
                                 }
                             }
 
@@ -428,22 +432,25 @@ class ProfileFragment : Fragment() {
 
                             container.addView(storyView)
 
-                        } catch (e: Exception) {
-                            android.util.Log.w("ProfileFragment", "Error renderizando historia: ${e.message}")
+                        } catch (_: Exception) {
+                            android.util.Log.w("ProfileFragment", "Error renderizando historia: ${""}")
                         }
                     }
                 }
                 .addOnFailureListener { e ->
                     android.util.Log.e("ProfileFragment", "Error cargando historias: ${e.message}")
                 }
-        } catch (e: Exception) {
-            android.util.Log.e("ProfileFragment", "loadStories error: ${e.message}")
+        } catch (_: Exception) {
+            android.util.Log.e("ProfileFragment", "loadStories error: ${""}")
         }
     }
 
     // Publicaciones (paginación)
     private fun loadInitialPosts() {
-        if (currentUserEmail.isEmpty()) return
+        if (currentUserEmail.isEmpty()) {
+            return
+        }
+
         isLoading = true
         noMore = false
         lastVisible = null
@@ -457,16 +464,17 @@ class ProfileFragment : Fragment() {
             .limit(pageSize.toLong())
             .get()
             .addOnSuccessListener { snapshot ->
+                // NUNCA mostrar tvNoPostsMessage
+                tvNoPostsMessage.visibility = View.GONE
+                rvProfilePosts.visibility = View.VISIBLE
+
                 if (snapshot.isEmpty) {
                     noMore = true
-                    tvNoPostsMessage.visibility = View.VISIBLE
-                    rvProfilePosts.visibility = View.GONE
+                    posts.clear()
+                    adapter?.notifyDataSetChanged()
                 } else {
-                    tvNoPostsMessage.visibility = View.GONE
-                    rvProfilePosts.visibility = View.VISIBLE
                     lastVisible = snapshot.documents.last()
 
-                    // Ordenar localmente por timestamp descendente
                     val new = snapshot.documents
                         .mapNotNull { doc ->
                             try {
@@ -474,37 +482,26 @@ class ProfileFragment : Fragment() {
                                 val images = (doc.get("images") as? List<*>)?.mapNotNull { it?.toString() } ?: emptyList()
                                 val timestamp = doc.getLong("timestamp") ?: 0L
                                 Triple(Post(images, text), timestamp, doc)
-                            } catch (e: Exception) {
+                            } catch (_: Exception) {
                                 null
                             }
                         }
                         .sortedByDescending { it.second }
                         .map { it.first }
 
-                    // Actualizar lastVisible al documento más reciente
-                    if (new.isNotEmpty()) {
-                        lastVisible = snapshot.documents
-                            .mapNotNull { doc ->
-                                try {
-                                    val timestamp = doc.getLong("timestamp") ?: 0L
-                                    Pair(doc, timestamp)
-                                } catch (e: Exception) {
-                                    null
-                                }
-                            }
-                            .minByOrNull { it.second }?.first
-                    }
-
                     val start = posts.size
                     posts.addAll(new)
                     adapter?.notifyItemRangeInserted(start, new.size)
-                    if (new.size < pageSize) noMore = true
+
+                    if (new.size < pageSize) {
+                        noMore = true
+                    }
                 }
                 isLoading = false
             }
             .addOnFailureListener { e ->
                 isLoading = false
-                android.util.Log.e("ProfileFragment", "Error cargando posts iniciales: ${e.message}")
+                tvNoPostsMessage.visibility = View.GONE
             }
     }
 
@@ -523,7 +520,6 @@ class ProfileFragment : Fragment() {
                 } else {
                     lastVisible = snapshot.documents.last()
 
-                    // Ordenar localmente por timestamp descendente
                     val new = snapshot.documents
                         .mapNotNull { doc ->
                             try {
@@ -531,31 +527,20 @@ class ProfileFragment : Fragment() {
                                 val images = (doc.get("images") as? List<*>)?.mapNotNull { it?.toString() } ?: emptyList()
                                 val timestamp = doc.getLong("timestamp") ?: 0L
                                 Triple(Post(images, text), timestamp, doc)
-                            } catch (e: Exception) {
+                            } catch (_: Exception) {
                                 null
                             }
                         }
                         .sortedByDescending { it.second }
                         .map { it.first }
 
-                    // Actualizar lastVisible al documento más reciente
-                    if (new.isNotEmpty()) {
-                        lastVisible = snapshot.documents
-                            .mapNotNull { doc ->
-                                try {
-                                    val timestamp = doc.getLong("timestamp") ?: 0L
-                                    Pair(doc, timestamp)
-                                } catch (e: Exception) {
-                                    null
-                                }
-                            }
-                            .minByOrNull { it.second }?.first
-                    }
-
                     val insertPos = posts.size
                     posts.addAll(new)
                     adapter?.notifyItemRangeInserted(insertPos, new.size)
-                    if (new.size < pageSize) noMore = true
+
+                    if (new.size < pageSize) {
+                        noMore = true
+                    }
                 }
                 isLoading = false
             }
@@ -594,7 +579,7 @@ class ProfileFragment : Fragment() {
     }
 
     // Cargar imágenes desde collection storyImages usando sus IDs
-    private fun loadStoryImagesFromCollection(imageIds: List<String>, viewPager: ViewPager2) {
+    private fun loadStoryImagesFromCollection(imageIds: List<String>, viewPager: ViewPager2, dotsContainer: LinearLayout) {
         val loadedImages = mutableMapOf<Int, String>() // index -> base64
         var remaining = imageIds.size
 
@@ -617,8 +602,8 @@ class ProfileFragment : Fragment() {
                         } else {
                             android.util.Log.w("ProfileFragment", "Campo 'image' vacío en storyImage $imgId")
                         }
-                    } catch (e: Exception) {
-                        android.util.Log.e("ProfileFragment", "Error extrayendo imagen de storyImages: ${e.message}")
+                    } catch (_: Exception) {
+                        android.util.Log.e("ProfileFragment", "Error extrayendo imagen de storyImages: ${""}")
                     }
 
                     remaining--
@@ -630,6 +615,7 @@ class ProfileFragment : Fragment() {
                             val sortedImages = loadedImages.toSortedMap().values.toList()
                             android.util.Log.d("ProfileFragment", "Estableciendo adapter con ${sortedImages.size} imágenes ordenadas")
                             viewPager.adapter = ImagePagerAdapter(sortedImages)
+                            setupStoryDots(viewPager, dotsContainer, sortedImages.size)
                         } else {
                             android.util.Log.w("ProfileFragment", "No se pudieron cargar imágenes de storyImages")
                         }
@@ -641,8 +627,42 @@ class ProfileFragment : Fragment() {
                     if (remaining == 0 && loadedImages.isNotEmpty()) {
                         val sortedImages = loadedImages.toSortedMap().values.toList()
                         viewPager.adapter = ImagePagerAdapter(sortedImages)
+                        setupStoryDots(viewPager, dotsContainer, sortedImages.size)
                     }
                 }
         }
+    }
+
+    // Helper: crear indicadores (dots) y registrar callback para actualizar el punto activo
+    private fun setupStoryDots(viewPager: ViewPager2, dotsContainer: LinearLayout, imageCount: Int) {
+        dotsContainer.removeAllViews()
+        if (imageCount <= 1) {
+            dotsContainer.visibility = View.GONE
+            return
+        }
+
+        dotsContainer.visibility = View.VISIBLE
+        val dotViews = mutableListOf<TextView>()
+        for (i in 0 until imageCount) {
+            val dot = TextView(requireContext())
+            dot.text = "●"
+            dot.textSize = 10f
+            // Usar Color.WHITE y toColorInt() para obtener Int válidos
+            dot.setTextColor(if (i == 0) Color.WHITE else "#66FFFFFF".toColorInt())
+            val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+            lp.setMargins(6, 0, 6, 0)
+            dotsContainer.addView(dot, lp)
+            dotViews.add(dot)
+        }
+
+        viewPager.setCurrentItem(0, false)
+        viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                super.onPageSelected(position)
+                for ((i, d) in dotViews.withIndex()) {
+                    d.setTextColor(if (i == position) Color.WHITE else "#66FFFFFF".toColorInt())
+                }
+            }
+        })
     }
 }

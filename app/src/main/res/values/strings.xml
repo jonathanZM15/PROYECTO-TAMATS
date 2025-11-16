@@ -115,7 +115,9 @@
     <string name="admin_suspension_custom">Personalizado</string>
     <string name="admin_suspension_custom_title">Suspensión Personalizada</string>
     <string name="admin_suspension_custom_message">Ingresa el número de días:</string>
-    <string name="admin_suspension_custom_hint">Número de días (1-365)</string>
+    <string name="admin_suspension_custom_hint">Número de días (1–365)</string>
+    <string name="photo_of">Foto de %1$s</string>
+
     <string name="admin_suspension_confirm_title">Confirmar Suspensión</string>
     <string name="admin_suspension_confirm_message">¿Suspender a %s por %d %s?</string>
     <string name="admin_suspension_day">día</string>
@@ -153,5 +155,15 @@
     <string name="admin_yes">Sí</string>
     <string name="admin_no">No</string>
     <string name="admin_menu_description">Abrir menú de opciones</string>
+
+    <!-- Strings usados por KnowFragment -->
+    <string name="age_years">%1$s años</string>
+    <string name="age_not_specified">Edad no especificada</string>
+    <string name="birthdate_label">Nacimiento: %1$s</string>
+    <string name="city_with_pin">📍 %1$s</string>
+    <string name="interests_label">Intereses:</string>
+    <string name="interest_bullet">• %1$s</string>
+    <string name="no_publications_message">Este usuario aún no ha creado publicaciones</string>
+    <string name="publications_label">Publicaciones:</string>
 
 </resources>

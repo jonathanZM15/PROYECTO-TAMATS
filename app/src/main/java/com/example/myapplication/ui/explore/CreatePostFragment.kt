@@ -283,18 +283,19 @@ class CreatePostFragment : Fragment() {
 
             android.util.Log.d("CreatePostFragment", "Guardando historia con email: $email")
 
-            val storyData = hashMapOf<String, Any>(
-                "userEmail" to email,
-                "images" to uploadedUrls,
-                "text" to text,
-                "timestamp" to FieldValue.serverTimestamp()
-            )
-
+            // Obtener el perfil del usuario ANTES de crear la historia
             FirebaseService.getUserProfile(email) { profile ->
-                profile?.let {
-                    storyData["userName"] = it["name"]?.toString() ?: ""
-                    storyData["userPhoto"] = it["photo"]?.toString() ?: ""
-                }
+                val userName = profile?.get("name")?.toString() ?: "Usuario"
+                val userPhoto = profile?.get("photo")?.toString() ?: ""
+
+                val storyData = hashMapOf<String, Any>(
+                    "userEmail" to email,
+                    "images" to uploadedUrls,
+                    "text" to text,
+                    "timestamp" to FieldValue.serverTimestamp(),
+                    "userName" to userName,
+                    "userPhoto" to userPhoto
+                )
 
                 // Calcular tamaño combinado aproximado de las imágenes Base64 (bytes UTF-8)
                 var totalBytes = 0L
@@ -305,12 +306,12 @@ class CreatePostFragment : Fragment() {
                 val FIRESTORE_SAFE_THRESHOLD = 700 * 1024 // 700 KB conservador (máximo Firestore es 1MB por documento)
 
                 if (totalBytes <= FIRESTORE_SAFE_THRESHOLD) {
-                    // Guardar directamente en el documento stories (comportamiento original)
-                    android.util.Log.d("CreatePostFragment", "Guardando historia en collection 'stories': $storyData")
-                    db.collection("stories")
+                    // Guardar directamente en el documento posts (colección correcta)
+                    android.util.Log.d("CreatePostFragment", "Guardando publicación en collection 'posts': $storyData")
+                    db.collection("posts")
                         .add(storyData)
                         .addOnSuccessListener {
-                            Toast.makeText(requireContext(), "Historia publicada", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(requireContext(), "Publicación compartida", Toast.LENGTH_SHORT).show()
                             selectedUris.clear()
                             photoAdapter.submitList(selectedUris.toList())
                             etPostText.text.clear()
@@ -318,31 +319,31 @@ class CreatePostFragment : Fragment() {
                             btnPublish.text = "PUBLICAR"
                         }
                         .addOnFailureListener { e ->
-                            android.util.Log.e("CreatePostFragment", "Error guardando historia: ${e.message}")
-                            Toast.makeText(requireContext(), "Error guardando historia: ${e.message}", Toast.LENGTH_SHORT).show()
+                            android.util.Log.e("CreatePostFragment", "Error guardando publicación: ${e.message}")
+                            Toast.makeText(requireContext(), "Error guardando publicación: ${e.message}", Toast.LENGTH_SHORT).show()
                             btnPublish.isEnabled = true
                             btnPublish.text = "PUBLICAR"
                         }
 
                 } else {
-                    // Demasiado grande para un solo documento: crear documento stories y guardar imágenes en collection 'storyImages'
-                    val storyDocRef = db.collection("stories").document()
+                    // Demasiado grande para un solo documento: crear documento posts y guardar imágenes en collection 'postImages'
+                    val postDocRef = db.collection("posts").document()
                     // Guardar metadata sin imágenes inicialmente
-                    val storyNoImages = HashMap(storyData)
-                    storyNoImages["images"] = listOf<String>()
+                    val postNoImages = HashMap(storyData)
+                    postNoImages["images"] = listOf<String>()
 
-                    storyDocRef.set(storyNoImages)
+                    postDocRef.set(postNoImages)
                         .addOnSuccessListener {
-                            // Guardar cada imagen como documento independiente en 'storyImages'
+                            // Guardar cada imagen como documento independiente en 'postImages'
                             val imageIds = mutableListOf<String>()
                             var remaining = uploadedUrls.size
                             var failed = false
 
                             if (remaining == 0) {
                                 // No hay imágenes (caso raro), actualizar y terminar
-                                storyDocRef.update("images", imageIds)
+                                postDocRef.update("images", imageIds)
                                     .addOnSuccessListener {
-                                        Toast.makeText(requireContext(), "Historia publicada", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(requireContext(), "Publicación compartida", Toast.LENGTH_SHORT).show()
                                         selectedUris.clear()
                                         photoAdapter.submitList(selectedUris.toList())
                                         etPostText.text.clear()
@@ -350,7 +351,7 @@ class CreatePostFragment : Fragment() {
                                         btnPublish.text = "PUBLICAR"
                                     }
                                     .addOnFailureListener { e ->
-                                        Toast.makeText(requireContext(), "Error actualizando historia: ${e.message}", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(requireContext(), "Error actualizando publicación: ${e.message}", Toast.LENGTH_SHORT).show()
                                         btnPublish.isEnabled = true
                                         btnPublish.text = "PUBLICAR"
                                     }
@@ -359,19 +360,19 @@ class CreatePostFragment : Fragment() {
 
                             for ((idx, base64) in uploadedUrls.withIndex()) {
                                 val imgData = hashMapOf(
-                                    "storyId" to storyDocRef.id,
+                                    "postId" to postDocRef.id,
                                     "image" to base64,
                                     "index" to idx
                                 )
-                                db.collection("storyImages").add(imgData)
+                                db.collection("postImages").add(imgData)
                                     .addOnSuccessListener { imgDoc ->
                                         imageIds.add(imgDoc.id)
                                         remaining -= 1
                                         if (remaining == 0 && !failed) {
-                                            // Todas las imágenes guardadas: actualizar el story con los IDs
-                                            storyDocRef.update("images", imageIds)
+                                            // Todas las imágenes guardadas: actualizar el post con los IDs
+                                            postDocRef.update("images", imageIds)
                                                 .addOnSuccessListener {
-                                                    Toast.makeText(requireContext(), "Historia publicada", Toast.LENGTH_SHORT).show()
+                                                    Toast.makeText(requireContext(), "Publicación compartida", Toast.LENGTH_SHORT).show()
                                                     selectedUris.clear()
                                                     photoAdapter.submitList(selectedUris.toList())
                                                     etPostText.text.clear()
@@ -379,7 +380,7 @@ class CreatePostFragment : Fragment() {
                                                     btnPublish.text = "PUBLICAR"
                                                 }
                                                 .addOnFailureListener { e ->
-                                                    Toast.makeText(requireContext(), "Error actualizando historia: ${e.message}", Toast.LENGTH_SHORT).show()
+                                                    Toast.makeText(requireContext(), "Error actualizando publicación: ${e.message}", Toast.LENGTH_SHORT).show()
                                                     btnPublish.isEnabled = true
                                                     btnPublish.text = "PUBLICAR"
                                                 }
@@ -401,7 +402,7 @@ class CreatePostFragment : Fragment() {
 
                         }
                         .addOnFailureListener { e ->
-                            Toast.makeText(requireContext(), "Error creando historia: ${e.message}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(requireContext(), "Error creando publicación: ${e.message}", Toast.LENGTH_SHORT).show()
                             btnPublish.isEnabled = true
                             btnPublish.text = "PUBLICAR"
                         }
