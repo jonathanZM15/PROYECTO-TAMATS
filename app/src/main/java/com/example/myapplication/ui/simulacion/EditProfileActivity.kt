@@ -414,7 +414,9 @@ class EditProfileActivity : AppCompatActivity() {
 
     private fun bitmapToBase64(bitmap: Bitmap): String {
         val byteArrayOutputStream = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 80, byteArrayOutputStream)
+        // Usar calidad 60 para reducir significativamente el tamaño del archivo
+        // Esto evita el error TransactionTooLargeException
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 60, byteArrayOutputStream)
         val byteArray = byteArrayOutputStream.toByteArray()
         return Base64.encodeToString(byteArray, Base64.DEFAULT)
     }
@@ -449,9 +451,9 @@ class EditProfileActivity : AppCompatActivity() {
                         prefs.edit(commit = true) {
                             if (email.isNotBlank()) putString("user_email", email)
                             val name = profileData["name"]?.toString() ?: ""
-                            val photo = profileData["photo"]?.toString() ?: ""
                             if (name.isNotEmpty()) putString("user_name", name)
-                            if (photo.isNotEmpty()) putString("user_photo", photo)
+                            // NO guardar la foto Base64 en SharedPreferences para evitar TransactionTooLargeException
+                            // La foto se cargará desde Firebase cuando sea necesaria
                         }
                     } catch (_: Exception) {
                     }

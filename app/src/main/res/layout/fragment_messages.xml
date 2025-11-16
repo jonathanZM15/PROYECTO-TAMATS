@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#C7439F">
+
+    <!-- Header del chat con info del usuario -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="12dp"
+        android:gravity="center_vertical"
+        android:background="#9B2B7F">
+
+        <!-- Botón retroceder (única X) -->
+        <ImageButton
+            android:id="@+id/btnBackMessages"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_close"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:scaleType="centerInside"
+            android:contentDescription="Volver"
+            android:tint="@android:color/white" />
+
+        <!-- Foto del usuario -->
+        <ImageView
+            android:id="@+id/ivOtherUserPhoto"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:scaleType="centerCrop"
+            android:contentDescription="Foto del usuario"
+            android:src="@drawable/ic_launcher_foreground"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="12dp" />
+
+        <!-- Nombre del usuario -->
+        <TextView
+            android:id="@+id/tvOtherUserName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Nombre del usuario"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="@android:color/white" />
+
+
+    </LinearLayout>
+
+    <!-- RecyclerView de mensajes -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvMessages"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="8dp"
+        android:clipToPadding="false"
+        android:background="#C7439F" />
+
+    <!-- Input de mensajes -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="12dp"
+        android:gravity="center_vertical"
+        android:background="#9B2B7F">
+
+        <!-- Botón cámara -->
+        <ImageButton
+            android:id="@+id/btnCamera"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_camera_new"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:scaleType="centerInside"
+            android:contentDescription="Tomar foto"
+            android:tint="@android:color/white" />
+
+        <!-- Botón galería -->
+        <ImageButton
+            android:id="@+id/btnGallery"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_gallery_new"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:scaleType="centerInside"
+            android:contentDescription="Seleccionar foto"
+            android:tint="@android:color/white" />
+
+        <!-- EditText para escribir mensaje -->
+        <EditText
+            android:id="@+id/etMessage"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:background="@android:color/white"
+            android:padding="10dp"
+            android:hint="Escribe un mensaje..."
+            android:textSize="14sp"
+            android:textColor="@android:color/black"
+            android:textColorHint="@android:color/darker_gray"
+            android:inputType="textCapSentences|textMultiLine"
+            android:maxLines="3" />
+
+        <!-- Botón enviar -->
+        <ImageButton
+            android:id="@+id/btnSendMessage"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_heart"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:scaleType="centerInside"
+            android:contentDescription="Enviar"
+            android:tint="#FF1493" />
+
+    </LinearLayout>
+
+</LinearLayout>
+

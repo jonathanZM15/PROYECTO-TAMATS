@@ -12,6 +12,9 @@ class ExploreViewModel : ViewModel() {
     // Cache de perfiles
     var cachedProfiles: List<DocumentSnapshot> = emptyList()
 
+    // Favoritos
+    var favoriteEmails: Set<String> = emptySet()
+
     // Estado de carga
     var profilesLoaded: Boolean = false
 

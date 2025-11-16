@@ -176,9 +176,10 @@ class LoginActivity : AppCompatActivity() {
                         putString("user_email", user.email)
                         if (profileData != null) {
                             val name = profileData["name"]?.toString() ?: ""
-                            val photo = profileData["photo"]?.toString() ?: ""
                             if (name.isNotEmpty()) putString("user_name", name) else remove("user_name")
-                            if (photo.isNotEmpty()) putString("user_photo", photo) else remove("user_photo")
+                            // NO guardar user_photo en SharedPreferences para evitar TransactionTooLargeException
+                            // La foto se cargará desde Firebase cuando sea necesaria
+                            remove("user_photo")
                         } else {
                             remove("user_name")
                             remove("user_photo")

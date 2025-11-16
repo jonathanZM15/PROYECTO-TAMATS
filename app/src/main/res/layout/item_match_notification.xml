@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="120dp"
+    android:layout_margin="12dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp"
+    android:backgroundTint="@android:color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:padding="12dp"
+        android:gravity="center_vertical"
+        android:background="@android:color/white">
+
+        <!-- Foto de perfil -->
+        <ImageView
+            android:id="@+id/ivMatchUserPhoto"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:scaleType="centerCrop"
+            android:contentDescription="Foto del usuario"
+            android:src="@drawable/ic_launcher_foreground"
+            android:layout_marginEnd="12dp" />
+
+        <!-- Información del usuario -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tvMatchUserName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Nombre del usuario"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:textColor="@android:color/black"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:id="@+id/tvMatchMessage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="¡Te ha hecho match!"
+                android:textSize="13sp"
+                android:textColor="@android:color/darker_gray" />
+
+        </LinearLayout>
+
+        <!-- Botones de acción -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_marginStart="8dp">
+
+            <!-- Botón corazón -->
+            <ImageButton
+                android:id="@+id/btnMatchAccept"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_heart"
+                android:background="@drawable/button_circular_like"
+                android:scaleType="centerInside"
+                android:contentDescription="Aceptar match"
+                android:layout_marginBottom="4dp" />
+
+            <!-- Botón equis -->
+            <ImageButton
+                android:id="@+id/btnMatchReject"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_close"
+                android:background="@drawable/button_circular_reject"
+                android:scaleType="centerInside"
+                android:contentDescription="Rechazar match" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>
+

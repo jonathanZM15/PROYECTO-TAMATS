@@ -10,6 +10,8 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.myapplication.ui.explore.CreatePostFragment
 import com.example.myapplication.ui.explore.ExploreFragment
+import com.example.myapplication.ui.explore.MatchesFragment
+import com.example.myapplication.ui.explore.ChatsFragment
 import com.example.myapplication.ui.simulacion.ProfileFragment
 
 class MainActivity : AppCompatActivity() {
@@ -86,12 +88,12 @@ class MainActivity : AppCompatActivity() {
         }
 
         ivMatches.setOnClickListener {
-            loadFragment(ExploreFragment(), "Matches") // Placeholder - cambiar cuando tengas MatchesFragment
+            loadFragment(MatchesFragment(), "Matches")
             updateNavigation(ivMatches, tvMatches)
         }
 
         ivChats.setOnClickListener {
-            loadFragment(ExploreFragment(), "Chats") // Placeholder - cambiar cuando tengas ChatsFragment
+            loadFragment(ChatsFragment(), "Chats")
             updateNavigation(ivChats, tvChats)
         }
 

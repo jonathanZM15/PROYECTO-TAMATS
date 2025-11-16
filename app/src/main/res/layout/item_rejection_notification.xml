@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="100dp"
+    android:layout_margin="12dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp"
+    android:backgroundTint="@android:color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:padding="12dp"
+        android:gravity="center_vertical"
+        android:background="@android:color/white">
+
+        <!-- Foto de perfil -->
+        <ImageView
+            android:id="@+id/ivRejectionUserPhoto"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:scaleType="centerCrop"
+            android:contentDescription="Foto del usuario"
+            android:src="@drawable/ic_launcher_foreground"
+            android:layout_marginEnd="12dp" />
+
+        <!-- Información -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tvRejectionUserName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Nombre del usuario"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:textColor="@android:color/black"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:id="@+id/tvRejectionMessage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ha rechazado tu match"
+                android:textSize="13sp"
+                android:textColor="#D32F2F" />
+
+        </LinearLayout>
+
+        <!-- Botones de acción -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_marginStart="8dp">
+
+            <!-- Botón corazón -->
+            <ImageButton
+                android:id="@+id/btnRejectionHeart"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:src="@drawable/ic_heart"
+                android:background="@drawable/button_circular_like"
+                android:scaleType="centerInside"
+                android:contentDescription="Crear chat"
+                android:layout_marginBottom="4dp" />
+
+            <!-- Botón cerrar -->
+            <ImageButton
+                android:id="@+id/btnRejectionClose"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:src="@drawable/ic_close"
+                android:background="@drawable/button_circular_reject"
+                android:scaleType="centerInside"
+                android:contentDescription="Cerrar notificación" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>
+
