@@ -54,6 +54,17 @@
                         android:gravity="center_vertical"
                         android:layout_marginBottom="16dp">
 
+                        <!-- ImageView para foto de perfil (si existe) -->
+                        <ImageView
+                            android:id="@+id/ivUserDetailPhoto"
+                            android:layout_width="72dp"
+                            android:layout_height="72dp"
+                            android:scaleType="centerCrop"
+                            android:visibility="gone"
+                            android:contentDescription="@string/user_photo_desc"
+                            android:src="@drawable/ic_person" />
+
+                        <!-- TextView para iniciales (fallback) -->
                         <TextView
                             android:id="@+id/tvUserDetailAvatar"
                             android:layout_width="72dp"
@@ -142,14 +153,7 @@
                         android:layout_marginBottom="8dp"
                         tools:text="Último acceso: Hoy 14:30" />
 
-                    <TextView
-                        android:id="@+id/tvUserDetailPosts"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textSize="14sp"
-                        android:textColor="@color/admin_text_secondary"
-                        android:layout_marginBottom="16dp"
-                        tools:text="Publicaciones: 25" />
+                    <!-- Eliminado: Publicaciones (no se usa) -->
 
                     <!-- Suspensión Info si aplica -->
                     <LinearLayout

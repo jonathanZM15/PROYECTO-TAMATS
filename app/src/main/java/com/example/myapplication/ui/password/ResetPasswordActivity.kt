@@ -28,7 +28,7 @@ class ResetPasswordActivity : AppCompatActivity() {
     private lateinit var etConfirmNewPassword: TextInputEditText
     private lateinit var btnChangePassword: MaterialButton
     private lateinit var tvCancelReset: TextView
-
+    
     // Indicadores visuales de requisitos
     private lateinit var tvReqLength: TextView
     private lateinit var tvReqUppercase: TextView
@@ -77,7 +77,7 @@ class ResetPasswordActivity : AppCompatActivity() {
         etConfirmNewPassword = findViewById(R.id.etConfirmNewPassword)
         btnChangePassword = findViewById(R.id.btnChangePassword)
         tvCancelReset = findViewById(R.id.tvCancelReset)
-
+        
         tvReqLength = findViewById(R.id.tvReqLength)
         tvReqUppercase = findViewById(R.id.tvReqUppercase)
         tvReqNumber = findViewById(R.id.tvReqNumber)
@@ -113,7 +113,7 @@ class ResetPasswordActivity : AppCompatActivity() {
      */
     private fun updatePasswordRequirements(password: String) {
         val validation = PasswordValidator.validate(password)
-
+        
         val colorValid = ContextCompat.getColor(this, R.color.green_success)
         val colorInvalid = Color.parseColor("#757575")
         val iconValid = R.drawable.ic_check_circle
@@ -172,7 +172,7 @@ class ResetPasswordActivity : AppCompatActivity() {
         lifecycleScope.launch(Dispatchers.IO) {
             try {
                 val user = usuarioDao.getUserByEmail(email!!)
-
+                
                 if (user == null) {
                     withContext(Dispatchers.Main) {
                         Toast.makeText(
@@ -188,14 +188,14 @@ class ResetPasswordActivity : AppCompatActivity() {
 
                 // Cifrar nueva contraseña
                 val encryptedPassword = EncryptionUtil.encryptPassword(newPassword)
-
+                
                 // Actualizar contraseña en Room
                 val updatedUser = user.copy(passwordHash = encryptedPassword)
                 usuarioDao.actualizar(updatedUser)
-
+                
                 // También actualizar en Firebase (opcional pero recomendado)
                 com.example.myapplication.cloud.FirebaseService.actualizarContrasena(email!!, encryptedPassword)
-
+                
                 // Invalidar el token usado
                 invalidateToken(token!!)
 

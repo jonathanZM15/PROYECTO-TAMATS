@@ -14,6 +14,8 @@ import com.google.android.material.button.MaterialButton
 import com.example.myapplication.R
 import com.example.myapplication.admin.models.AdminUser
 import com.example.myapplication.admin.models.AdminUserStatus
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -25,7 +27,7 @@ class UserDetailBottomSheet : BottomSheetDialogFragment() {
         fun newInstance(user: AdminUser): UserDetailBottomSheet {
             return UserDetailBottomSheet().apply {
                 arguments = Bundle().apply {
-                    putSerializable(ARG_USER, user)
+                    putParcelable(ARG_USER, user)
                 }
             }
         }
@@ -35,19 +37,18 @@ class UserDetailBottomSheet : BottomSheetDialogFragment() {
     private var actionListener: OnActionListener? = null
 
     private lateinit var avatarView: TextView
+    private lateinit var avatarImageView: ImageView
     private lateinit var nameView: TextView
     private lateinit var emailView: TextView
     private lateinit var statusBadge: TextView
 
     private lateinit var joinDateView: TextView
     private lateinit var lastLoginView: TextView
-    private lateinit var postsCountView: TextView
     private lateinit var suspensionInfoView: TextView
 
     private lateinit var blockButton: MaterialButton
     private lateinit var suspendButton: MaterialButton
     private lateinit var deleteButton: MaterialButton
-    // viewPostsButton removed: 'Ver publicaciones' feature removed
 
     private lateinit var suspensionContainer: LinearLayout
 
@@ -57,13 +58,12 @@ class UserDetailBottomSheet : BottomSheetDialogFragment() {
         fun onSuspend(user: AdminUser, days: Int)
         fun onRemoveSuspension(user: AdminUser)
         fun onDelete(user: AdminUser)
-        // fun onViewPosts(user: AdminUser) // removed onViewPosts from interface
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        user = arguments?.getSerializable(ARG_USER) as? AdminUser
-            ?: throw IllegalArgumentException("User is required")
+        user = arguments?.getParcelable(ARG_USER) as? AdminUser
+            ?: throw IllegalArgumentException(getString(R.string.admin_error_user_not_found))
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -121,40 +121,116 @@ class UserDetailBottomSheet : BottomSheetDialogFragment() {
 
     private fun initViews(view: View) {
         avatarView = view.findViewById(R.id.tvUserDetailAvatar)
+        avatarImageView = view.findViewById(R.id.ivUserDetailPhoto)
         nameView = view.findViewById(R.id.tvUserDetailName)
         emailView = view.findViewById(R.id.tvUserDetailEmail)
         statusBadge = view.findViewById(R.id.tvUserDetailStatus)
 
         joinDateView = view.findViewById(R.id.tvUserDetailJoinDate)
         lastLoginView = view.findViewById(R.id.tvUserDetailLastLogin)
-        postsCountView = view.findViewById(R.id.tvUserDetailPosts)
         suspensionInfoView = view.findViewById(R.id.tvSuspensionInfo)
 
         blockButton = view.findViewById(R.id.btnBlockUser)
         suspendButton = view.findViewById(R.id.btnSuspendUser)
         deleteButton = view.findViewById(R.id.btnDeleteUser)
-        // btnViewPosts may have been removed from the layout; look it up dynamically by name
-        // val viewPostsResId = resources.getIdentifier("btnViewPosts", "id", requireContext().packageName)
-        // viewPostsButton = if (viewPostsResId != 0) view.findViewById(viewPostsResId) as? MaterialButton else null
 
         suspensionContainer = view.findViewById(R.id.suspensionContainer)
     }
 
     private fun setupUserInfo() {
-        avatarView.text = user.getInitials()
+        // Si hay URL/imagen, cargar con Glide; sino mostrar iniciales
+        val photo = user.profileImageUrl?.trim() ?: ""
+        android.util.Log.d("UserDetailBottomSheet", "setupUserInfo - photo value: '$photo' for user: ${user.email}")
+        if (photo.isNotEmpty()) {
+            try {
+                avatarView.visibility = View.GONE
+                avatarImageView.visibility = View.VISIBLE
 
-        nameView.text = user.name.ifEmpty { "Sin nombre" }
-        emailView.text = user.email.ifEmpty { "Sin email" }
-
-        joinDateView.text = "Registro: ${user.joinDate.ifEmpty { "N/A" }}"
-        lastLoginView.text = "Último acceso: ${user.lastLogin.ifEmpty { "N/A" }}"
-
-        val postsText = when (user.posts) {
-            0 -> "Sin publicaciones"
-            1 -> "1 publicación"
-            else -> "${user.posts} publicaciones"
+                val lower = photo.lowercase()
+                when {
+                    lower.startsWith("http://") || lower.startsWith("https://") || lower.startsWith("data:") -> {
+                        Glide.with(this)
+                            .load(photo)
+                            .circleCrop()
+                            .placeholder(R.drawable.ic_person)
+                            .error(R.drawable.ic_person)
+                            .transition(DrawableTransitionOptions.withCrossFade())
+                            .into(avatarImageView)
+                    }
+                    lower.startsWith("gs://") -> {
+                        // gs:// references: resolver a downloadUrl con Firebase Storage
+                        try {
+                            val storage = com.google.firebase.storage.FirebaseStorage.getInstance()
+                            val ref = storage.getReferenceFromUrl(photo)
+                            ref.downloadUrl
+                                .addOnSuccessListener { uri ->
+                                    Glide.with(this)
+                                        .load(uri)
+                                        .circleCrop()
+                                        .placeholder(R.drawable.ic_person)
+                                        .error(R.drawable.ic_person)
+                                        .transition(DrawableTransitionOptions.withCrossFade())
+                                        .into(avatarImageView)
+                                }
+                                .addOnFailureListener {
+                                    // fallback a iniciales
+                                    avatarView.visibility = View.VISIBLE
+                                    avatarImageView.visibility = View.GONE
+                                    avatarView.text = user.getInitials()
+                                }
+                        } catch (e: Exception) {
+                            avatarView.visibility = View.VISIBLE
+                            avatarImageView.visibility = View.GONE
+                            avatarView.text = user.getInitials()
+                        }
+                    }
+                    photo.contains("/") -> {
+                        // Es probable que sea una ruta relativa en Firebase Storage, intentar obtener downloadUrl
+                        try {
+                            val storage = com.google.firebase.storage.FirebaseStorage.getInstance()
+                            val ref = storage.reference.child(photo)
+                            ref.downloadUrl
+                                .addOnSuccessListener { uri ->
+                                    Glide.with(this)
+                                        .load(uri)
+                                        .circleCrop()
+                                        .placeholder(R.drawable.ic_person)
+                                        .error(R.drawable.ic_person)
+                                        .transition(DrawableTransitionOptions.withCrossFade())
+                                        .into(avatarImageView)
+                                }
+                                .addOnFailureListener {
+                                    // Si falla, seguir con intento Base64
+                                    tryLoadBase64OrFallback(photo)
+                                }
+                        } catch (e: Exception) {
+                            tryLoadBase64OrFallback(photo)
+                        }
+                    }
+                    else -> {
+                        // Intentar decodificar Base64 puro (sin prefijo)
+                        tryLoadBase64OrFallback(photo)
+                    }
+                }
+            } catch (e: Exception) {
+                avatarView.visibility = View.VISIBLE
+                avatarImageView.visibility = View.GONE
+                avatarView.text = user.getInitials()
+            }
+        } else {
+            avatarView.visibility = View.VISIBLE
+            avatarImageView.visibility = View.GONE
+            avatarView.text = user.getInitials()
         }
-        postsCountView.text = postsText
+
+        nameView.text = user.name.ifEmpty { getString(R.string.admin_user_info_title) }
+        emailView.text = user.email.ifEmpty { getString(R.string.sin_email) }
+
+        val joinDateText = user.joinDate.ifEmpty { getString(R.string.n_a) }
+        val lastLoginText = user.lastLogin.ifEmpty { getString(R.string.n_a) }
+
+        joinDateView.text = "${getString(R.string.label_registration)} $joinDateText"
+        lastLoginView.text = "${getString(R.string.label_last_access)} $lastLoginText"
 
         setupStatusBadge()
         setupSuspensionInfo()
@@ -183,9 +259,9 @@ class UserDetailBottomSheet : BottomSheetDialogFragment() {
             } ?: "N/A"
 
             val suspensionText = """
-                ⏰ Suspensión activa
-                Días restantes: $daysLeft
-                Termina: $endDate
+                ⏰ ${getString(R.string.admin_suspension_active)}
+                ${getString(R.string.admin_days_left)}: $daysLeft
+                ${getString(R.string.admin_ends)}: $endDate
             """.trimIndent()
 
             suspensionInfoView.text = suspensionText
@@ -198,15 +274,13 @@ class UserDetailBottomSheet : BottomSheetDialogFragment() {
         setupBlockButton()
         setupSuspendButton()
         setupDeleteButton()
-        // Setup view posts only if the button exists in the layout
-        // if (viewPostsButton != null) setupViewPostsButton()
     }
 
     private fun setupBlockButton() {
         if (user.blocked) {
-            blockButton.text = "Desbloquear Usuario"
+            blockButton.text = getString(R.string.admin_unblock_user)
         } else {
-            blockButton.text = "Bloquear Usuario"
+            blockButton.text = getString(R.string.admin_block_user)
         }
 
         blockButton.setOnClickListener {
@@ -220,13 +294,13 @@ class UserDetailBottomSheet : BottomSheetDialogFragment() {
 
     private fun setupSuspendButton() {
         if (user.isCurrentlySuspended()) {
-            suspendButton.text = "Remover Suspensión"
+            suspendButton.text = getString(R.string.admin_remove_suspension)
 
             suspendButton.setOnClickListener {
                 showRemoveSuspensionConfirmation()
             }
         } else {
-            suspendButton.text = "Suspender Usuario"
+            suspendButton.text = getString(R.string.admin_suspend_user)
 
             suspendButton.setOnClickListener {
                 showSuspensionOptions()
@@ -261,34 +335,40 @@ class UserDetailBottomSheet : BottomSheetDialogFragment() {
 
     private fun showBlockConfirmation() {
         AlertDialog.Builder(requireContext())
-            .setTitle("Bloquear Usuario")
-            .setMessage("¿Estás seguro de que quieres bloquear a ${user.name}?\n\nEl usuario no podrá acceder a la aplicación.")
-            .setPositiveButton("Bloquear") { _, _ ->
+            .setTitle(getString(R.string.admin_confirm_block_title))
+            .setMessage(getString(R.string.admin_confirm_block_message, user.name))
+            .setPositiveButton(getString(R.string.admin_block_user)) { _, _ ->
                 actionListener?.onBlock(user)
                 dismiss()
             }
-            .setNegativeButton("Cancelar", null)
+            .setNegativeButton(getString(R.string.admin_cancel), null)
             .show()
     }
 
     private fun showUnblockConfirmation() {
         AlertDialog.Builder(requireContext())
-            .setTitle("Desbloquear Usuario")
-            .setMessage("¿Estás seguro de que quieres desbloquear a ${user.name}?")
-            .setPositiveButton("Desbloquear") { _, _ ->
+            .setTitle(getString(R.string.admin_confirm_unblock_title))
+            .setMessage(getString(R.string.admin_confirm_unblock_message, user.name))
+            .setPositiveButton(getString(R.string.admin_unblock_user)) { _, _ ->
                 actionListener?.onUnblock(user)
                 dismiss()
             }
-            .setNegativeButton("Cancelar", null)
+            .setNegativeButton(getString(R.string.admin_cancel), null)
             .show()
     }
 
     private fun showSuspensionOptions() {
-        val options = arrayOf("1 día", "3 días", "7 días", "30 días", "Personalizado")
+        val options = arrayOf(
+            getString(R.string.admin_suspension_1_day),
+            getString(R.string.admin_suspension_3_days),
+            getString(R.string.admin_suspension_7_days),
+            getString(R.string.admin_suspension_30_days),
+            getString(R.string.admin_suspension_custom)
+        )
         val days = arrayOf(1, 3, 7, 30, -1)
 
         AlertDialog.Builder(requireContext())
-            .setTitle("Suspender Usuario")
+            .setTitle(getString(R.string.admin_suspension_options_title))
             .setItems(options) { _, which ->
                 if (days[which] == -1) {
                     showCustomSuspensionDialog()
@@ -296,80 +376,102 @@ class UserDetailBottomSheet : BottomSheetDialogFragment() {
                     showSuspensionConfirmation(days[which])
                 }
             }
-            .setNegativeButton("Cancelar", null)
+            .setNegativeButton(getString(R.string.admin_cancel), null)
             .show()
     }
 
     private fun showCustomSuspensionDialog() {
         val input = EditText(requireContext()).apply {
-            hint = "Número de días (1-365)"
+            hint = getString(R.string.admin_suspension_custom_hint)
             inputType = android.text.InputType.TYPE_CLASS_NUMBER
         }
 
         AlertDialog.Builder(requireContext())
-            .setTitle("Suspensión Personalizada")
-            .setMessage("Ingresa el número de días:")
+            .setTitle(getString(R.string.admin_suspension_custom_title))
+            .setMessage(getString(R.string.admin_suspension_custom_message))
             .setView(input)
-            .setPositiveButton("Suspender") { _, _ ->
+            .setPositiveButton(getString(R.string.admin_suspend_user)) { _, _ ->
                 val daysText = input.text.toString()
                 val days = daysText.toIntOrNull()
 
                 when {
                     days == null -> {
-                        Toast.makeText(requireContext(), "Número inválido", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), getString(R.string.admin_error_invalid_days), Toast.LENGTH_SHORT).show()
                     }
                     days < 1 || days > 365 -> {
-                        Toast.makeText(requireContext(), "Debe ser entre 1 y 365 días", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), getString(R.string.admin_error_days_range), Toast.LENGTH_SHORT).show()
                     }
                     else -> {
                         showSuspensionConfirmation(days)
                     }
                 }
             }
-            .setNegativeButton("Cancelar", null)
+            .setNegativeButton(getString(R.string.admin_cancel), null)
             .show()
     }
 
     private fun showSuspensionConfirmation(days: Int) {
-        val dayText = if (days == 1) "día" else "días"
+        val dayText = if (days == 1) getString(R.string.admin_suspension_day) else getString(R.string.admin_suspension_days)
 
         AlertDialog.Builder(requireContext())
-            .setTitle("Confirmar Suspensión")
-            .setMessage("¿Suspender a ${user.name} por $days $dayText?")
-            .setPositiveButton("Suspender") { _, _ ->
+            .setTitle(getString(R.string.admin_suspension_confirm_title))
+            .setMessage(getString(R.string.admin_suspension_confirm_message, user.name, days, dayText))
+            .setPositiveButton(getString(R.string.admin_confirm)) { _, _ ->
                 actionListener?.onSuspend(user, days)
                 dismiss()
             }
-            .setNegativeButton("Cancelar", null)
+            .setNegativeButton(getString(R.string.admin_cancel), null)
             .show()
     }
 
     private fun showRemoveSuspensionConfirmation() {
         AlertDialog.Builder(requireContext())
-            .setTitle("Remover Suspensión")
-            .setMessage("¿Estás seguro de que quieres remover la suspensión de ${user.name}?")
-            .setPositiveButton("Remover") { _, _ ->
+            .setTitle(getString(R.string.admin_remove_suspension))
+            .setMessage(getString(R.string.admin_suspension_removed_success))
+            .setPositiveButton(getString(R.string.admin_confirm)) { _, _ ->
                 actionListener?.onRemoveSuspension(user)
                 dismiss()
             }
-            .setNegativeButton("Cancelar", null)
+            .setNegativeButton(getString(R.string.admin_cancel), null)
             .show()
     }
 
     private fun showDeleteConfirmation() {
         AlertDialog.Builder(requireContext())
-            .setTitle("⚠️ Eliminar Usuario")
-            .setMessage(
-                "Esta acción eliminará permanentemente la cuenta de ${user.name} " +
-                "y todos sus datos asociados.\n\n" +
-                "⚠️ Esta acción NO se puede deshacer."
-            )
-            .setPositiveButton("Eliminar") { _, _ ->
+            .setTitle(getString(R.string.admin_confirm_delete_title))
+            .setMessage(getString(R.string.admin_confirm_delete_message, user.name))
+            .setPositiveButton(getString(R.string.admin_delete_user)) { _, _ ->
                 actionListener?.onDelete(user)
                 dismiss()
             }
-            .setNegativeButton("Cancelar", null)
+            .setNegativeButton(getString(R.string.admin_cancel), null)
             .show()
+    }
+
+    private fun tryLoadBase64OrFallback(photo: String) {
+        val decoded = try {
+            android.util.Base64.decode(photo, android.util.Base64.DEFAULT)
+        } catch (e: Exception) {
+            null
+        }
+
+        if (decoded != null) {
+            val bmp = android.graphics.BitmapFactory.decodeByteArray(decoded, 0, decoded.size)
+            if (bmp != null) {
+                Glide.with(this)
+                    .load(bmp)
+                    .circleCrop()
+                    .placeholder(R.drawable.ic_person)
+                    .error(R.drawable.ic_person)
+                    .into(avatarImageView)
+                return
+            }
+        }
+
+        // fallback final: iniciales
+        avatarView.visibility = View.VISIBLE
+        avatarImageView.visibility = View.GONE
+        avatarView.text = user.getInitials()
     }
 
     fun setOnActionListener(listener: OnActionListener) {

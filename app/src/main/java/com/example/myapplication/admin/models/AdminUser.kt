@@ -1,5 +1,7 @@
 package com.example.myapplication.admin.models
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 import java.io.Serializable
 
 /**
@@ -16,6 +18,7 @@ import java.io.Serializable
  * @property posts Número de publicaciones del usuario
  * @property profileImageUrl URL de la imagen de perfil
  */
+@Parcelize
 data class AdminUser(
     val id: String = "",
     val name: String = "",
@@ -27,7 +30,7 @@ data class AdminUser(
     val lastLogin: String = "",
     val posts: Int = 0,
     val profileImageUrl: String = ""
-) : Serializable {
+) : Parcelable {
 
     /**
      * Calcula el estado actual del usuario
@@ -120,4 +123,3 @@ sealed class AdminUserStatus {
         is SUSPENDED -> "badge_suspended"
     }
 }
-

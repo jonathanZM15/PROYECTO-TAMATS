@@ -14,6 +14,9 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -90,7 +93,7 @@ class AdminActivity : AppCompatActivity() {
      */
     private fun setupToolbar() {
         supportActionBar?.apply {
-            title = "Panel de Administración"
+            title = getString(R.string.admin_panel_title)
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowHomeEnabled(true)
         }
@@ -103,6 +106,16 @@ class AdminActivity : AppCompatActivity() {
         recyclerView = findViewById(R.id.recyclerViewAdminUsers)
         searchInput = findViewById(R.id.searchInputAdmin)
         val btnMenu = findViewById<ImageButton>(R.id.btnMenuAdmin)
+        val header = findViewById<android.view.View>(R.id.headerContainer)
+
+        // Ajustar automáticamente padding top según Insets (notch/status bar)
+        ViewCompat.setOnApplyWindowInsetsListener(header) { v, insets ->
+            val sysInsets = insets.getInsets(WindowInsetsCompat.Type.statusBars())
+            // Añadir un padding extra de 6dp para separarlo un poco más
+            val extra = (6 * resources.displayMetrics.density).toInt()
+            v.updatePadding(top = sysInsets.top + extra)
+            insets
+        }
 
         // Inicializar ViewModel
         viewModel = ViewModelProvider(this)[AdminViewModel::class.java]
@@ -250,15 +263,15 @@ class AdminActivity : AppCompatActivity() {
      * Maneja el toggle rápido de estado de usuario
      */
     private fun handleQuickToggle(user: AdminUser) {
-        val action = if (user.blocked) "desbloquear" else "bloquear"
+        val action = if (user.blocked) getString(R.string.admin_unblock_user) else getString(R.string.admin_block_user)
 
         AlertDialog.Builder(this)
-            .setTitle("Confirmar acción")
-            .setMessage("¿Estás seguro de que quieres $action a ${user.name}?")
-            .setPositiveButton("Sí") { _, _ ->
+            .setTitle(getString(R.string.confirm_action_title))
+            .setMessage(getString(R.string.confirm_action_message, action.lowercase(), user.name))
+            .setPositiveButton(getString(R.string.admin_yes)) { _, _ ->
                 viewModel.toggleUserStatus(user)
             }
-            .setNegativeButton("Cancelar", null)
+            .setNegativeButton(getString(R.string.admin_cancel), null)
             .show()
     }
 
@@ -325,17 +338,13 @@ class AdminActivity : AppCompatActivity() {
      */
     private fun showDeleteConfirmation(user: AdminUser) {
         AlertDialog.Builder(this)
-            .setTitle("⚠️ Eliminar Usuario")
-            .setMessage(
-                "Esta acción eliminará permanentemente la cuenta de ${user.name} " +
-                "y todos sus datos asociados.\n\n" +
-                "⚠️ Esta acción NO se puede deshacer."
-            )
-            .setPositiveButton("Eliminar Definitivamente") { _, _ ->
+            .setTitle(getString(R.string.admin_confirm_delete_title))
+            .setMessage(getString(R.string.admin_confirm_delete_message, user.name))
+            .setPositiveButton(getString(R.string.confirm_delete_definitive)) { _, _ ->
                 // Segunda confirmación
                 showFinalDeleteConfirmation(user)
             }
-            .setNegativeButton("Cancelar", null)
+            .setNegativeButton(getString(R.string.admin_cancel), null)
             .show()
     }
 
@@ -344,21 +353,21 @@ class AdminActivity : AppCompatActivity() {
      */
     private fun showFinalDeleteConfirmation(user: AdminUser) {
         val input = EditText(this).apply {
-            hint = "Escribe 'ELIMINAR' para confirmar"
+            hint = getString(R.string.delete_confirm_hint)
         }
 
         AlertDialog.Builder(this)
-            .setTitle("Confirmación Final")
-            .setMessage("Escribe 'ELIMINAR' para confirmar la eliminación de ${user.name}")
+            .setTitle(getString(R.string.confirm_action_title))
+            .setMessage(getString(R.string.admin_confirm_delete_message, user.name))
             .setView(input)
-            .setPositiveButton("Confirmar") { _, _ ->
-                if (input.text.toString() == "ELIMINAR") {
+            .setPositiveButton(getString(R.string.admin_confirm)) { _, _ ->
+                if (input.text.toString() == getString(R.string.delete_confirm_keyword)) {
                     viewModel.deleteUser(user.id)
                 } else {
-                    Toast.makeText(this, "Confirmación incorrecta", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.admin_error_confirmation_incorrect), Toast.LENGTH_SHORT).show()
                 }
             }
-            .setNegativeButton("Cancelar", null)
+            .setNegativeButton(getString(R.string.admin_cancel), null)
             .show()
     }
 
@@ -375,9 +384,9 @@ class AdminActivity : AppCompatActivity() {
      */
     private fun showErrorDialog(error: String) {
         AlertDialog.Builder(this)
-            .setTitle("Error")
+            .setTitle(getString(R.string.dialog_ok))
             .setMessage(error)
-            .setPositiveButton("OK", null)
+            .setPositiveButton(getString(R.string.dialog_ok), null)
             .show()
     }
 
@@ -438,9 +447,9 @@ class AdminActivity : AppCompatActivity() {
      */
     private fun logout() {
         AlertDialog.Builder(this)
-            .setTitle("Cerrar Sesión")
-            .setMessage("¿Estás seguro de que quieres cerrar la sesión de administrador?")
-            .setPositiveButton("Sí, cerrar sesión") { _, _ ->
+            .setTitle(getString(R.string.confirm_logout_title))
+            .setMessage(getString(R.string.confirm_logout_message))
+            .setPositiveButton(getString(R.string.yes_logout)) { _, _ ->
                 // Cerrar sesión en Firebase y limpiar SharedPreferences
                 try {
                     FirebaseService.logout(this)
@@ -455,7 +464,7 @@ class AdminActivity : AppCompatActivity() {
                 startActivity(intent)
                 finish()
             }
-            .setNegativeButton("Cancelar", null)
+            .setNegativeButton(getString(R.string.admin_cancel), null)
             .show()
     }
 
@@ -465,17 +474,18 @@ class AdminActivity : AppCompatActivity() {
     private fun showStatsDialog() {
         val stats = viewModel.userStats.value
         if (stats != null) {
-            val message = """
-                Total de usuarios: ${stats["total"] ?: 0}
-                Usuarios activos: ${stats["active"] ?: 0}
-                Usuarios bloqueados: ${stats["blocked"] ?: 0}
-                Usuarios suspendidos: ${stats["suspended"] ?: 0}
-            """.trimIndent()
+            val message = getString(
+                R.string.stats_message,
+                stats["total"] ?: 0,
+                stats["active"] ?: 0,
+                stats["blocked"] ?: 0,
+                stats["suspended"] ?: 0
+            )
 
             AlertDialog.Builder(this)
-                .setTitle("📊 Estadísticas de Usuarios")
+                .setTitle(getString(R.string.stats_title))
                 .setMessage(message)
-                .setPositiveButton("OK", null)
+                .setPositiveButton(getString(R.string.dialog_ok), null)
                 .show()
         }
     }

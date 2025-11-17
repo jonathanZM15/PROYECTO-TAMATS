@@ -93,6 +93,11 @@
 
     <string name="admin_block_user">Bloquear Usuario</string>
     <string name="admin_unblock_user">Desbloquear Usuario</string>
+    <string name="admin_suspension_active">Suspensión activa</string>
+    <string name="admin_days_left">Días restantes</string>
+    <string name="admin_ends">Termina</string>
+    <string name="label_registration">Registro:</string>
+    <string name="label_last_access">Último acceso:</string>
     <string name="admin_suspend_user">Suspender Usuario</string>
     <string name="admin_remove_suspension">Remover Suspensión</string>
     <string name="admin_delete_user">Eliminar Usuario</string>
@@ -167,4 +172,25 @@
     <string name="no_publications_message">Este usuario aún no ha creado publicaciones</string>
     <string name="publications_label">Publicaciones:</string>
 
+    <!-- Admin Activity Dialog Strings -->
+    <string name="confirm_logout_title">Cerrar Sesión</string>
+    <string name="confirm_logout_message">¿Estás seguro de que quieres cerrar la sesión de administrador?</string>
+    <string name="yes_logout">Sí, cerrar sesión</string>
+    <string name="cancel">Cancelar</string>
+    <string name="dialog_ok">OK</string>
+    <string name="confirm_action_title">Confirmar acción</string>
+    <string name="confirm_action_message">¿Estás seguro de que quieres %1$s a %2$s?</string>
+    <string name="confirm_delete_definitive">Eliminar Definitivamente</string>
+    <string name="confirmation_incorrect">Confirmación incorrecta</string>
+    <string name="stats_title">📊 Estadísticas de Usuarios</string>
+    <string name="stats_message">Total de usuarios: %1$d\nUsuarios activos: %2$d\nUsuarios bloqueados: %3$d\nUsuarios suspendidos: %4$d</string>
+
+    <!-- Nuevas cadenas para confirmación de eliminación y textos 'Sin email' y 'N/A' -->
+    <string name="delete_confirm_keyword">ELIMINAR</string>
+    <string name="delete_confirm_hint">Escribe \&#39;ELIMINAR\&#39; para confirmar</string>
+    <string name="sin_email">Sin email</string>
+    <string name="n_a">N/A</string>
+
+    <!-- Descripciones accesibles -->
+    <string name="user_photo_desc">Foto de perfil del usuario</string>
 </resources>

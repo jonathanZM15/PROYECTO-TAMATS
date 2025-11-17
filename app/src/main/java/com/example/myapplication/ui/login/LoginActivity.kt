@@ -108,7 +108,8 @@ class LoginActivity : AppCompatActivity() {
             if (localUser != null) {
                 // Verificar la contraseña cifrada usando EncryptionUtil
                 if (EncryptionUtil.verifyPassword(password, localUser.passwordHash)) {
-                    navigateToProfile(localUser)
+                    // Antes de navegar, chequear estado en Firestore (por si fue bloqueado/suspendido/eliminado)
+                    checkUserStateAndProceed(localUser.email, localUser)
                 } else {
                     Toast.makeText(this@LoginActivity, "Credenciales incorrectas.", Toast.LENGTH_LONG).show()
                 }
@@ -124,7 +125,8 @@ class LoginActivity : AppCompatActivity() {
                         lifecycleScope.launch(Dispatchers.IO) {
                             usuarioDao.insertar(firebaseUser)
                             withContext(Dispatchers.Main) {
-                                navigateToProfile(firebaseUser)
+                                // Chequear estado en Firestore antes de permitir entrada
+                                checkUserStateAndProceed(firebaseUser.email, firebaseUser)
                             }
                         }
                     } else {
@@ -135,6 +137,65 @@ class LoginActivity : AppCompatActivity() {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    /**
+     * Verifica en Firebase el estado del usuario (blocked/suspended/existence) y navega o muestra Toast con motivo
+     */
+    private fun checkUserStateAndProceed(email: String, userEntity: UsuarioEntity) {
+        FirebaseService.getUserProfile(email) { profileData ->
+            runOnUiThread {
+                // Si profileData es null: usuario eliminado o no tiene perfil en Firestore
+                if (profileData == null) {
+                    Toast.makeText(this, "No fue posible iniciar sesión: cuenta no encontrada (eliminada).", Toast.LENGTH_LONG).show()
+                    return@runOnUiThread
+                }
+
+                // Revisar campos 'blocked' y 'suspended'
+                val blocked = profileData["blocked"] as? Boolean ?: false
+                val suspended = profileData["suspended"] as? Boolean ?: false
+                val suspensionEnd = when (val v = profileData["suspensionEnd"]) {
+                    is com.google.firebase.Timestamp -> v.toDate().time
+                    is Number -> v.toLong()
+                    else -> null
+                }
+
+                if (blocked) {
+                    Toast.makeText(this, "Tu cuenta ha sido bloqueada. Contacta al soporte para más información.", Toast.LENGTH_LONG).show()
+                    return@runOnUiThread
+                }
+
+                if (suspended) {
+                    // Si suspensionEnd existe y es futuro, mostrar días restantes
+                    if (suspensionEnd != null && System.currentTimeMillis() < suspensionEnd) {
+                        val daysLeft = ((suspensionEnd - System.currentTimeMillis()) / (1000 * 60 * 60 * 24)).toInt() + 1
+                        Toast.makeText(this, "Tu cuenta está suspendida. Días restantes: $daysLeft", Toast.LENGTH_LONG).show()
+                        return@runOnUiThread
+                    } else {
+                        // Si suspensionEnd no existe o ya pasó, permitir continuar
+                    }
+                }
+
+                // Si llegó hasta aquí, el usuario está activo → proceder con el flujo normal
+                try {
+                    val prefs = getSharedPreferences("user_data", MODE_PRIVATE)
+                    prefs.edit(commit = true) {
+                        putString("user_email", userEntity.email)
+                        // name/photo se guardan posteriormente si existen
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+
+                // Navegar a MainActivity o EditProfile según profileData
+                val intent = Intent(this, com.example.myapplication.MainActivity::class.java).apply {
+                    putExtra("fragment", "profile")
+                }
+                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+                startActivity(intent)
+                finish()
             }
         }
     }
@@ -320,5 +381,3 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 }
-
-
