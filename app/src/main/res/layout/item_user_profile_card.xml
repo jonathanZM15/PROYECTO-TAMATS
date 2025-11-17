@@ -2,121 +2,190 @@
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="520dp"
+    android:layout_height="wrap_content"
     android:layout_margin="16dp"
     app:cardCornerRadius="20dp"
-    app:cardElevation="8dp"
+    app:cardElevation="10dp"
     android:backgroundTint="@android:color/white">
 
-    <FrameLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-        <!-- Foto de perfil en la parte superior -->
-        <ImageView
-            android:id="@+id/ivUserProfilePhoto"
+        <!-- Contenedor de la foto LIMPIA -->
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="320dp"
-            android:scaleType="centerCrop"
-            android:src="@drawable/ic_launcher_foreground"
-            android:contentDescription="Foto de perfil del usuario" />
+            android:layout_height="480dp">
 
-        <!-- Gradiente oscuro con transparencia en la parte inferior (sobre la foto) -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:layout_gravity="bottom"
-            android:background="@drawable/gradient_dark_bottom" />
+            <!-- Foto de perfil COMPLETA sin nada encima -->
+            <ImageView
+                android:id="@+id/ivUserProfilePhoto"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_launcher_foreground"
+                android:contentDescription="Foto de perfil del usuario" />
 
-        <!-- Contenedor con información del usuario con fondo semi-transparente -->
+            <!-- Badge de edad en esquina superior derecha -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|end"
+                android:layout_margin="16dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="6dp"
+                app:cardBackgroundColor="#E91E63">
+
+                <TextView
+                    android:id="@+id/tvUserAge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="25"
+                    android:textSize="17sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/white"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp" />
+
+            </androidx.cardview.widget.CardView>
+
+        </FrameLayout>
+
+        <!-- Información del usuario ABAJO de la foto -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
             android:orientation="vertical"
-            android:padding="16dp"
-            android:background="#99000000">
+            android:padding="18dp"
+            android:background="@android:color/white">
 
-            <!-- Nombre del usuario -->
+            <!-- Nombre -->
             <TextView
                 android:id="@+id/tvUserName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Aquí va el nombre de usuario"
+                android:text="Nombre"
                 android:textStyle="bold"
-                android:textSize="18sp"
-                android:textColor="@android:color/white"
-                android:layout_marginBottom="4dp" />
+                android:textSize="26sp"
+                android:textColor="#212121"
+                android:letterSpacing="0.01"
+                android:layout_marginBottom="6dp" />
 
-            <!-- Ciudad -->
+            <!-- Ciudad con emoji -->
             <TextView
                 android:id="@+id/tvUserCity"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Ciudad"
-                android:textSize="13sp"
-                android:textColor="@android:color/white"
-                android:alpha="0.9"
-                android:layout_marginBottom="8dp" />
+                android:text="📍 Ciudad"
+                android:textSize="15sp"
+                android:textColor="#757575"
+                android:layout_marginBottom="14dp" />
 
-            <!-- Descripción del usuario -->
-            <TextView
-                android:id="@+id/tvUserDescription"
+            <!-- Descripción en card -->
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Descripción que dio el usuario de como es, que le gusta y otras cosas que haya puesto los cuales solo deben ser hasta 30 palabras"
-                android:textSize="12sp"
-                android:textColor="@android:color/white"
-                android:alpha="0.85"
-                android:ellipsize="end"
-                android:maxLines="4"
-                android:layout_marginBottom="12dp" />
+                app:cardCornerRadius="14dp"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="#FAFAFA"
+                android:layout_marginBottom="18dp">
 
-            <!-- Botones de acción en la parte inferior -->
+                <TextView
+                    android:id="@+id/tvUserDescription"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Descripción del usuario..."
+                    android:textSize="14sp"
+                    android:textColor="#424242"
+                    android:ellipsize="end"
+                    android:maxLines="3"
+                    android:padding="14dp"
+                    android:lineSpacingMultiplier="1.3" />
+
+            </androidx.cardview.widget.CardView>
+
+            <!-- Botones de acción ABAJO -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center"
-                android:layout_marginTop="8dp">
+                android:layout_marginTop="6dp"
+                android:layout_marginBottom="8dp">
 
-                <!-- Botón no me gusta (X) -->
-                <ImageButton
-                    android:id="@+id/btnReject"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:src="@drawable/ic_close"
-                    android:background="@drawable/button_circular_reject"
-                    android:scaleType="centerInside"
-                    android:contentDescription="No me gusta"
-                    android:layout_marginEnd="16dp" />
+                <!-- Botón Rechazar -->
+                <androidx.cardview.widget.CardView
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    app:cardCornerRadius="32dp"
+                    app:cardElevation="6dp"
+                    app:cardBackgroundColor="@android:color/white"
+                    android:layout_marginEnd="18dp">
 
-                <!-- Botón me gusta (Corazón) -->
-                <ImageButton
-                    android:id="@+id/btnLike"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:src="@drawable/ic_heart"
-                    android:background="@drawable/button_circular_like"
-                    android:scaleType="centerInside"
-                    android:contentDescription="Me gusta"
-                    android:layout_marginEnd="16dp" />
+                    <ImageButton
+                        android:id="@+id/btnReject"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/ic_close"
+                        android:background="@android:color/transparent"
+                        android:scaleType="centerInside"
+                        android:contentDescription="No me gusta"
+                        android:padding="18dp"
+                        app:tint="#EF5350" />
 
-                <!-- Botón favorito (Estrella) -->
-                <ImageButton
-                    android:id="@+id/btnFavorite"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:src="@drawable/ic_star"
-                    android:background="@drawable/button_circular_favorite"
-                    android:scaleType="centerInside"
-                    android:contentDescription="Favorito" />
+                </androidx.cardview.widget.CardView>
+
+                <!-- Botón Me Gusta (más grande) -->
+                <androidx.cardview.widget.CardView
+                    android:layout_width="74dp"
+                    android:layout_height="74dp"
+                    app:cardCornerRadius="37dp"
+                    app:cardElevation="10dp"
+                    app:cardBackgroundColor="#E91E63"
+                    android:layout_marginEnd="18dp">
+
+                    <ImageButton
+                        android:id="@+id/btnLike"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/ic_heart"
+                        android:background="@android:color/transparent"
+                        android:scaleType="centerInside"
+                        android:contentDescription="Me gusta"
+                        android:padding="20dp"
+                        app:tint="@android:color/white" />
+
+                </androidx.cardview.widget.CardView>
+
+                <!-- Botón Favorito -->
+                <androidx.cardview.widget.CardView
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    app:cardCornerRadius="32dp"
+                    app:cardElevation="6dp"
+                    app:cardBackgroundColor="@android:color/white">
+
+                    <ImageButton
+                        android:id="@+id/btnFavorite"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/ic_star"
+                        android:background="@android:color/transparent"
+                        android:scaleType="centerInside"
+                        android:contentDescription="Favorito"
+                        android:padding="18dp"
+                        app:tint="#FFB300" />
+
+                </androidx.cardview.widget.CardView>
 
             </LinearLayout>
 
         </LinearLayout>
 
-    </FrameLayout>
+    </LinearLayout>
 
 </androidx.cardview.widget.CardView>
 

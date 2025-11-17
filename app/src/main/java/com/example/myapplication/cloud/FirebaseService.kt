@@ -537,4 +537,22 @@ object FirebaseService {
                 callback(false, "Error al eliminar usuario: ${e.message}")
             }
     }
+
+    /**
+     * Actualiza la contraseña de un usuario en Firebase
+     */
+    fun actualizarContrasena(email: String, newPasswordHash: String, callback: ((Boolean, String) -> Unit)? = null) {
+        val docId = email.replace(Regex("[^a-zA-Z0-9._-]"), "_")
+
+        db.collection("usuarios").document(docId)
+            .update("passwordHash", newPasswordHash)
+            .addOnSuccessListener {
+                Log.d("FirebaseService", "✅ Contraseña actualizada para: $email")
+                callback?.invoke(true, "Contraseña actualizada exitosamente")
+            }
+            .addOnFailureListener { e ->
+                Log.e("FirebaseService", "❌ Error actualizando contraseña: ${e.message}", e)
+                callback?.invoke(false, "Error al actualizar contraseña: ${e.message}")
+            }
+    }
 }

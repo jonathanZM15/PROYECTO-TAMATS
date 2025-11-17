@@ -22,7 +22,9 @@ class ExploreFragment : Fragment() {
     private lateinit var profileAdapter: ProfileAdapter
     private lateinit var recyclerView: RecyclerView
     private lateinit var searchView: SearchView
+    private lateinit var searchContainer: View // Contenedor de la barra de búsqueda
     private var allFilteredProfiles: List<DocumentSnapshot> = emptyList()
+    private var isSearchBarVisible = true // Estado de visibilidad de la barra
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -42,8 +44,9 @@ class ExploreFragment : Fragment() {
         recyclerView = view.findViewById(R.id.rvProfiles)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-        // Inicializar SearchView
+        // Inicializar SearchView y su contenedor
         searchView = view.findViewById(R.id.svSearchExplore)
+        searchContainer = view.findViewById(R.id.searchBarContainer)
         setupSearchView()
 
         profileAdapter = ProfileAdapter({ email ->
@@ -54,8 +57,8 @@ class ExploreFragment : Fragment() {
         }
         recyclerView.adapter = profileAdapter
 
-        // Configurar paginación al hacer scroll
-        setupPaginationListener()
+        // Configurar paginación y ocultamiento de barra al hacer scroll
+        setupScrollListeners()
 
         // Cargar perfiles solo si no se han cargado antes
         if (!viewModel.profilesLoaded) {
@@ -131,21 +134,58 @@ class ExploreFragment : Fragment() {
         }
     }
 
-    private fun setupPaginationListener() {
+    private fun setupScrollListeners() {
         recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 val layoutManager = recyclerView.layoutManager as LinearLayoutManager
                 val totalItems = layoutManager.itemCount
                 val lastVisible = layoutManager.findLastVisibleItemPosition()
 
-                // Si faltan 5 items para llegar al final y no estamos cargando, cargar más
+                // PAGINACIÓN: Si faltan 5 items para llegar al final y no estamos cargando, cargar más
                 if (lastVisible >= totalItems - 5 && !viewModel.isLoadingMore &&
                     viewModel.currentPage * ExploreViewModel.PROFILES_PER_PAGE < viewModel.totalProfiles) {
                     Log.d("ExploreFragment", "Detectado scroll hacia abajo, cargando siguiente lote...")
                     loadNextBatch()
                 }
+
+                // OCULTAR/MOSTRAR BARRA DE BÚSQUEDA
+                if (dy > 20 && isSearchBarVisible) {
+                    // Scroll hacia ABAJO - OCULTAR barra de búsqueda
+                    hideSearchBar()
+                } else if (dy < -20 && !isSearchBarVisible) {
+                    // Scroll hacia ARRIBA - MOSTRAR barra de búsqueda
+                    showSearchBar()
+                }
             }
         })
+    }
+
+    private fun hideSearchBar() {
+        // Ocultar la barra de búsqueda con animación suave
+        searchContainer.animate()
+            .translationY(-searchContainer.height.toFloat())
+            .alpha(0f)
+            .setDuration(300)
+            .withEndAction {
+                searchContainer.visibility = View.GONE
+                isSearchBarVisible = false
+            }
+            .start()
+        Log.d("ExploreFragment", "Ocultando barra de búsqueda")
+    }
+
+    private fun showSearchBar() {
+        // Mostrar la barra de búsqueda con animación suave
+        searchContainer.visibility = View.VISIBLE
+        searchContainer.animate()
+            .translationY(0f)
+            .alpha(1f)
+            .setDuration(300)
+            .withEndAction {
+                isSearchBarVisible = true
+            }
+            .start()
+        Log.d("ExploreFragment", "Mostrando barra de búsqueda")
     }
 
     private fun recargarYReorganizarPerfiles() {

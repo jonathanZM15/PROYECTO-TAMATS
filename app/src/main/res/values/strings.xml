@@ -50,6 +50,7 @@
     <string name="hint_city">Ingresa tu ciudad</string>
     <string name="label_description">Descripción (Opcional)</string>
     <string name="hint_description">Cuéntanos sobre ti…</string>
+    <string name="word_count_default">0/30 palabras</string>
     <string name="label_interests">Intereses</string>
     <string name="save_profile">Guardar Perfil</string>
     <string name="interest_deporte">Deporte</string>

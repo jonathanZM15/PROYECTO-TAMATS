@@ -4,149 +4,205 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:paddingTop="24dp"
-    android:paddingBottom="100dp"
     android:background="@drawable/splash_gradient_background">
 
-    <!-- Título -->
-    <TextView
-        android:id="@+id/tvCreateTitle"
+    <!-- Header con título centrado -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Crea una Historia"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:textColor="@android:color/white"
+        android:orientation="horizontal"
         android:gravity="center"
-        android:paddingBottom="16dp" />
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Crea una Historia"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"
+            android:letterSpacing="0.02" />
+
+    </LinearLayout>
 
     <!-- Contenedor principal con scroll -->
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:fillViewport="true">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp">
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingBottom="20dp">
 
-            <!-- Card con información del usuario y texto -->
+            <!-- Card principal con degradado sutil -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="8dp"
-                android:layout_marginBottom="16dp">
+                app:cardCornerRadius="24dp"
+                app:cardElevation="12dp"
+                android:layout_marginBottom="20dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="12dp">
+                    android:background="@android:color/white"
+                    android:padding="20dp">
 
-                    <!-- Header usuario -->
+                    <!-- Header usuario con diseño mejorado -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:paddingBottom="8dp">
+                        android:paddingBottom="16dp">
 
-                        <ImageView
-                            android:id="@+id/ivUserAvatar"
-                            android:layout_width="56dp"
-                            android:layout_height="56dp"
-                            android:src="@mipmap/ic_launcher"
-                            android:scaleType="centerCrop"
-                            android:contentDescription="Avatar del usuario"
-                            android:background="@drawable/circle_background" />
+                        <!-- Avatar con borde -->
+                        <FrameLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content">
 
-                        <TextView
-                            android:id="@+id/tvUserName"
+                            <ImageView
+                                android:id="@+id/ivUserAvatar"
+                                android:layout_width="60dp"
+                                android:layout_height="60dp"
+                                android:src="@mipmap/ic_launcher"
+                                android:scaleType="centerCrop"
+                                android:contentDescription="Avatar del usuario"
+                                android:background="@drawable/circle_background" />
+
+                        </FrameLayout>
+
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Usuario"
-                            android:textStyle="bold"
-                            android:textColor="@android:color/black"
-                            android:textSize="16sp"
-                            android:layout_marginStart="12dp" />
+                            android:orientation="vertical"
+                            android:layout_marginStart="14dp">
+
+                            <TextView
+                                android:id="@+id/tvUserName"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Usuario"
+                                android:textStyle="bold"
+                                android:textColor="@android:color/black"
+                                android:textSize="18sp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Comparte tu momento ✨"
+                                android:textColor="@android:color/darker_gray"
+                                android:textSize="13sp"
+                                android:layout_marginTop="2dp" />
+
+                        </LinearLayout>
 
                     </LinearLayout>
 
-                    <!-- EditText para el texto (opcional) -->
-                    <androidx.cardview.widget.CardView
+                    <!-- Campo de texto con diseño limpio -->
+                    <EditText
+                        android:id="@+id/etPostText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:cardCornerRadius="12dp"
-                        app:cardElevation="4dp"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginBottom="12dp">
+                        android:minHeight="100dp"
+                        android:hint="¿Qué estás pensando? (opcional)"
+                        android:gravity="top|start"
+                        android:inputType="textMultiLine|textCapSentences"
+                        android:padding="16dp"
+                        android:background="@drawable/edit_text_background"
+                        android:textColor="@android:color/black"
+                        android:textSize="15sp"
+                        android:layout_marginBottom="20dp"
+                        android:maxHeight="200dp" />
 
-                        <EditText
-                            android:id="@+id/etPostText"
-                            android:layout_width="match_parent"
-                            android:layout_height="120dp"
-                            android:hint="¿Qué estás pensando? (opcional)"
-                            android:gravity="top|start"
-                            android:inputType="textMultiLine"
-                            android:padding="16dp"
-                            android:background="@android:color/transparent"
-                            android:textColor="@android:color/black"
-                            android:textSize="16dp" />
-
-                    </androidx.cardview.widget.CardView>
-
-                    <!-- Botones para elegir foto o tomar foto -->
+                    <!-- Botones de acción con iconos -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center"
-                        android:layout_marginBottom="8dp">
+                        android:layout_marginBottom="20dp">
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnPickGallery"
                             android:layout_width="0dp"
-                            android:layout_height="48dp"
+                            android:layout_height="52dp"
                             android:layout_weight="1"
-                            android:text="Galería"
-                            app:cornerRadius="24dp"
-                            android:layout_marginEnd="8dp" />
+                            android:text="📷 Galería"
+                            android:textSize="15sp"
+                            android:textStyle="bold"
+                            android:textAllCaps="false"
+                            app:cornerRadius="26dp"
+                            app:backgroundTint="#7E57C2"
+                            android:layout_marginEnd="8dp"
+                            android:elevation="4dp" />
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnTakePhoto"
                             android:layout_width="0dp"
-                            android:layout_height="48dp"
+                            android:layout_height="52dp"
                             android:layout_weight="1"
-                            android:text="Cámara"
-                            app:cornerRadius="24dp"
-                            android:layout_marginStart="8dp" />
+                            android:text="📸 Cámara"
+                            android:textSize="15sp"
+                            android:textStyle="bold"
+                            android:textAllCaps="false"
+                            app:cornerRadius="26dp"
+                            app:backgroundTint="#7E57C2"
+                            android:layout_marginStart="8dp"
+                            android:elevation="4dp" />
 
                     </LinearLayout>
 
-                    <!-- Grid de fotos -->
+                    <!-- Título para la galería -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="📸 Tus Fotos"
+                        android:textStyle="bold"
+                        android:textColor="#7E57C2"
+                        android:textSize="16sp"
+                        android:layout_marginBottom="12dp" />
+
+                    <!-- Grid de fotos con diseño mejorado -->
                     <androidx.cardview.widget.CardView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:cardCornerRadius="12dp"
-                        app:cardElevation="4dp"
-                        android:backgroundTint="#F0EAFB">
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="#F5F0FF">
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:orientation="vertical"
-                            android:padding="12dp">
+                            android:padding="16dp">
 
                             <androidx.recyclerview.widget.RecyclerView
                                 android:id="@+id/rvPhotos"
                                 android:layout_width="match_parent"
-                                android:layout_height="220dp"
+                                android:layout_height="240dp"
                                 android:overScrollMode="never" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Toca los botones de arriba para agregar fotos 📷"
+                                android:textColor="@android:color/darker_gray"
+                                android:textSize="12sp"
+                                android:layout_gravity="center_horizontal"
+                                android:layout_marginTop="8dp"
+                                android:gravity="center" />
 
                         </LinearLayout>
 
@@ -160,20 +216,32 @@
 
     </ScrollView>
 
-    <!-- Botón Publicar como overlay -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnPublish"
+    <!-- Botón Publicar con diseño limpio -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:layout_marginStart="32dp"
-        android:layout_marginEnd="32dp"
-        android:layout_marginTop="16dp"
-        android:text="PUBLICAR"
-        android:textAllCaps="true"
-        android:textStyle="bold"
-        android:textColor="@android:color/white"
-        app:cornerRadius="32dp"
-        android:background="@drawable/btn_publish_gradient"
-        android:elevation="12dp" />
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="24dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnPublish"
+            android:layout_width="wrap_content"
+            android:layout_height="56dp"
+            android:text="PUBLICAR HISTORIA"
+            android:textAllCaps="false"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="@android:color/white"
+            android:paddingStart="40dp"
+            android:paddingEnd="40dp"
+            app:cornerRadius="28dp"
+            app:backgroundTint="#9C27B0"
+            android:elevation="8dp" />
+
+    </LinearLayout>
 
 </LinearLayout>

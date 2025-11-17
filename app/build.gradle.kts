@@ -37,6 +37,18 @@ android {
         // Forzar language version 1.9 para compatibilidad con KAPT actualmente
         freeCompilerArgs += listOf("-language-version", "1.9")
     }
+
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "META-INF/NOTICE.md"
+            excludes += "META-INF/LICENSE.md"
+            excludes += "META-INF/NOTICE"
+            excludes += "META-INF/LICENSE"
+            excludes += "META-INF/NOTICE.txt"
+            excludes += "META-INF/LICENSE.txt"
+        }
+    }
 }
 
 dependencies {
@@ -86,5 +98,9 @@ dependencies {
 
     // RecyclerView para mejor rendimiento en listas
     implementation("androidx.recyclerview:recyclerview:1.3.2")
+
+    // JavaMail para envío de correos SMTP
+    implementation("com.sun.mail:android-mail:1.6.7")
+    implementation("com.sun.mail:android-activation:1.6.7")
 
 }

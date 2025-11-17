@@ -139,8 +139,6 @@ class EditProfileActivity : AppCompatActivity() {
         setupListeners()
         loadProfileData()
 
-        val saveContainer = findViewById<LinearLayout>(R.id.saveButtonContainer)
-        saveContainer?.bringToFront()
 
         window.setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
     }
@@ -471,7 +469,5 @@ class EditProfileActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        val saveContainer = findViewById<LinearLayout>(R.id.saveButtonContainer)
-        saveContainer?.bringToFront()
     }
 }

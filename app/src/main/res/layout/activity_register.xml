@@ -1,256 +1,241 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/splash_gradient_background"
+    android:fillViewport="true"
+    android:background="@drawable/splash_gradient_background">
+
+<androidx.constraintlayout.widget.ConstraintLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     tools:context=".ui.register.RegisterActivity">
 
     <ImageView
         android:id="@+id/ivRegisterBackgroundOverlay"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:alpha="1.0"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:alpha="0.5"
         android:scaleType="centerCrop"
         android:src="@drawable/imagen_login"
+        android:contentDescription="@string/app_name"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/clRegisterFormCard"
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cvRegisterFormCard"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
         android:layout_marginEnd="24dp"
+        android:layout_marginTop="30dp"
         android:layout_marginBottom="16dp"
-        android:background="@drawable/register_card_background"
-        android:padding="24dp"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="8dp"
+        app:cardBackgroundColor="@color/register_card_background_color"
         app:layout_constraintBottom_toTopOf="@id/tvCopyrightRegister"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.5">
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
         <TextView
             android:id="@+id/tvRegisterTitle"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="¡Forma Parte de Nosotros!"
+            android:text="¡Bienvenido de Nuevo!"
             android:textColor="@color/black"
             android:textSize="24sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:gravity="center"
+            android:letterSpacing="0.02" />
 
-        <!-- Nombre -->
         <TextView
             android:id="@+id/tvLabelName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:text="Nombre:"
-            android:textColor="@color/black"
-            android:textSize="12sp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvRegisterTitle" />
+            android:textColor="#666666"
+            android:textSize="13sp"
+            android:textStyle="bold" />
 
         <EditText
             android:id="@+id/etName"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:background="@drawable/edit_text_rounded_background"
             android:hint="Ingresa tu nombre completo"
             android:inputType="textPersonName|textCapWords"
+            android:autofillHints="name"
             android:maxLength="50"
-            android:padding="10dp"
+            android:padding="12dp"
             android:textColor="@color/black"
-            android:textColorHint="#757575"
-            android:textSize="14sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvLabelName" />
+            android:textColorHint="#999999"
+            android:textSize="15sp" />
 
-        <!-- Correo Electrónico -->
         <TextView
             android:id="@+id/tvLabelEmail"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="10dp"
             android:text="Correo Electrónico:"
-            android:textColor="@color/black"
-            android:textSize="12sp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/etName" />
+            android:textColor="#666666"
+            android:textSize="13sp"
+            android:textStyle="bold" />
 
         <EditText
             android:id="@+id/etEmailRegister"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:background="@drawable/edit_text_rounded_background"
             android:hint="tu.correo@example.com"
             android:inputType="textEmailAddress"
-            android:padding="10dp"
+            android:autofillHints="emailAddress"
+            android:padding="12dp"
             android:textColor="@color/black"
-            android:textColorHint="#757575"
-            android:textSize="14sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvLabelEmail" />
+            android:textColorHint="#999999"
+            android:textSize="15sp" />
 
-        <!-- Fecha de nacimiento -->
         <TextView
             android:id="@+id/tvLabelBirthDate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="10dp"
             android:text="Fecha de nacimiento (Mayor de 18):"
-            android:textColor="@color/black"
-            android:textSize="12sp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/etEmailRegister" />
+            android:textColor="#666666"
+            android:textSize="13sp"
+            android:textStyle="bold" />
 
         <EditText
             android:id="@+id/etBirthDate"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:background="@drawable/edit_text_rounded_background"
             android:focusable="false"
             android:hint="DD/MM/AAAA"
-            android:inputType="date"
-            android:padding="10dp"
+            android:inputType="none"
+            android:padding="12dp"
             android:textColor="@color/black"
-            android:textColorHint="#757575"
-            android:textSize="14sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvLabelBirthDate" />
+            android:textColorHint="#999999"
+            android:textSize="15sp" />
 
-        <!-- Genero -->
         <TextView
             android:id="@+id/tvLabelGender"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Genero:"
-            android:textColor="@color/black"
-            android:textSize="12sp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/etBirthDate" />
+            android:layout_marginTop="10dp"
+            android:text="Género:"
+            android:textColor="#666666"
+            android:textSize="13sp"
+            android:textStyle="bold" />
 
         <Spinner
             android:id="@+id/spinnerGender"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:background="@drawable/edit_text_rounded_background"
             android:entries="@array/gender_options"
-            android:minHeight="40dp"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvLabelGender" />
+            android:minHeight="46dp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp" />
 
-        <!-- Contraseña -->
         <TextView
             android:id="@+id/tvLabelPassword"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="10dp"
             android:text="Contraseña (8 caracteres):"
-            android:textColor="@color/black"
-            android:textSize="12sp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/spinnerGender" />
+            android:textColor="#666666"
+            android:textSize="13sp"
+            android:textStyle="bold" />
 
         <EditText
             android:id="@+id/etPasswordRegister"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:background="@drawable/edit_text_rounded_background"
             android:hint="Exactamente 8 caracteres"
             android:inputType="textPassword"
+            android:autofillHints="password"
             android:maxLength="8"
-            android:padding="10dp"
+            android:padding="12dp"
             android:textColor="@color/black"
-            android:textColorHint="#757575"
-            android:textSize="14sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvLabelPassword" />
+            android:textColorHint="#999999"
+            android:textSize="15sp" />
 
-        <!-- Confirmar Contraseña -->
         <TextView
             android:id="@+id/tvLabelConfirmPassword"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="10dp"
             android:text="Confirmar Contraseña:"
-            android:textColor="@color/black"
-            android:textSize="12sp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/etPasswordRegister" />
+            android:textColor="#666666"
+            android:textSize="13sp"
+            android:textStyle="bold" />
 
         <EditText
             android:id="@+id/etConfirmPassword"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:background="@drawable/edit_text_rounded_background"
             android:hint="Vuelve a escribir la contraseña"
             android:inputType="textPassword"
+            android:autofillHints="password"
             android:maxLength="8"
-            android:padding="10dp"
+            android:padding="12dp"
             android:textColor="@color/black"
-            android:textColorHint="#757575"
-            android:textSize="14sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvLabelConfirmPassword" />
+            android:textColorHint="#999999"
+            android:textSize="15sp" />
 
         <LinearLayout
             android:id="@+id/llTermsContainer"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="12dp"
             android:orientation="horizontal"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/etConfirmPassword">
+            android:gravity="start">
 
             <CheckBox
                 android:id="@+id/cbTerms"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Aceptar términos y condiciones"
-                android:textColor="@color/black"
-                android:textSize="12sp" />
+                android:text="Aceptar términos"
+                android:textColor="#666666"
+                android:textSize="13sp" />
 
             <TextView
                 android:id="@+id/tvViewTerms"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
+                android:layout_marginStart="4dp"
                 android:text="Ver"
                 android:textColor="@color/tamats_pink"
                 android:textStyle="bold"
-                android:textSize="12sp"
+                android:textSize="13sp"
                 android:clickable="true"
                 android:focusable="true"
-                android:paddingTop="8dp" />
+                android:paddingTop="12dp" />
         </LinearLayout>
-
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnRegister"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:backgroundTint="@android:color/black"
@@ -259,26 +244,21 @@
             android:text="Registrar"
             android:textColor="@android:color/white"
             android:textSize="16sp"
-            app:cornerRadius="24dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/llTermsContainer" />
+            android:textStyle="bold"
+            app:cornerRadius="24dp" />
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_marginTop="16dp"
-            app:layout_constraintTop_toBottomOf="@id/btnRegister"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent">
+            android:gravity="center">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="¿Ya tienes una cuenta? "
-                android:textColor="@color/black"
+                android:textColor="#666666"
                 android:textSize="14sp"/>
 
             <TextView
@@ -291,18 +271,25 @@
                 android:textSize="14sp"/>
         </LinearLayout>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
+    </androidx.cardview.widget.CardView>
 
     <TextView
         android:id="@+id/tvCopyrightRegister"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="20dp"
         android:text="© 2025 TAMATS. Todos los derechos reservados."
         android:textColor="@android:color/white"
         android:textSize="12sp"
+        android:shadowColor="#80000000"
+        android:shadowDx="0"
+        android:shadowDy="2"
+        android:shadowRadius="4"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>
+

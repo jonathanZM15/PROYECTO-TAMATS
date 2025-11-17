@@ -128,33 +128,79 @@ class RegisterActivity : AppCompatActivity() {
             )
 
             scope.launch {
-                val isRegistered = usuarioDao.isEmailRegistered(email)
-                withContext(Dispatchers.Main) {
-                    if (isRegistered) {
-                        etEmailRegister.error = "Este correo ya está registrado."
-                        Toast.makeText(this@RegisterActivity, "El correo ya existe.", Toast.LENGTH_LONG).show()
-                    } else {
-                        try {
-                            usuarioDao.insertar(newUser)
-                            firebaseService.guardarUsuario(newUser)
+                // Verificar en base de datos local (Room)
+                val isRegisteredLocally = usuarioDao.isEmailRegistered(email)
 
-                            Toast.makeText(this@RegisterActivity, "¡Registro Exitoso! Ahora inicia sesión.", Toast.LENGTH_LONG).show()
+                if (isRegisteredLocally) {
+                    withContext(Dispatchers.Main) {
+                        etEmailRegister.error = "Este correo ya está registrado"
+                        Toast.makeText(
+                            this@RegisterActivity,
+                            "❌ Ya existe una cuenta con este correo electrónico.\n¿Olvidaste tu contraseña?",
+                            Toast.LENGTH_LONG
+                        ).show()
+                        android.util.Log.w("RegisterActivity", "⚠️ Intento de registro con correo duplicado (local): $email")
+                    }
+                    return@launch
+                }
 
-                            // Guardar sesión automáticamente para mantener al usuario logueado
-                            val prefs = getSharedPreferences("user_data", MODE_PRIVATE)
-                            prefs.edit().apply {
-                                putString("user_email", email)
-                                putString("user_name", name)
-                                apply()
+                // Verificar también en Firebase (por si el usuario se registró en otro dispositivo)
+                FirebaseService.findUserByEmail(email) { firebaseUser ->
+                    if (firebaseUser != null) {
+                        runOnUiThread {
+                            etEmailRegister.error = "Este correo ya está registrado"
+                            Toast.makeText(
+                                this@RegisterActivity,
+                                "❌ Ya existe una cuenta con este correo en la nube.\nIntenta iniciar sesión.",
+                                Toast.LENGTH_LONG
+                            ).show()
+                            android.util.Log.w("RegisterActivity", "⚠️ Intento de registro con correo duplicado (Firebase): $email")
+                        }
+                        return@findUserByEmail
+                    }
+
+                    // Correo NO está duplicado, proceder con el registro
+                    runOnUiThread {
+                        scope.launch {
+                            try {
+                                // Guardar en Room (local)
+                                usuarioDao.insertar(newUser)
+
+                                // Guardar en Firebase (nube)
+                                firebaseService.guardarUsuario(newUser)
+
+                                withContext(Dispatchers.Main) {
+                                    Toast.makeText(
+                                        this@RegisterActivity,
+                                        "✅ ¡Registro Exitoso! Completa tu perfil.",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                    android.util.Log.d("RegisterActivity", "✅ Usuario registrado exitosamente: $email")
+
+                                    // Guardar sesión automáticamente
+                                    val prefs = getSharedPreferences("user_data", MODE_PRIVATE)
+                                    prefs.edit().apply {
+                                        putString("user_email", email)
+                                        putString("user_name", name)
+                                        apply()
+                                    }
+
+                                    // Redirigir a EditProfileActivity para completar perfil
+                                    val intent = Intent(this@RegisterActivity, com.example.myapplication.ui.simulacion.EditProfileActivity::class.java)
+                                    intent.putExtra("userEmail", email)
+                                    startActivity(intent)
+                                    finish()
+                                }
+                            } catch (e: Exception) {
+                                withContext(Dispatchers.Main) {
+                                    Toast.makeText(
+                                        this@RegisterActivity,
+                                        "❌ Error al guardar: ${e.message}",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                    android.util.Log.e("RegisterActivity", "❌ Error al registrar usuario: ${e.message}", e)
+                                }
                             }
-
-                            // Redirigir a EditProfileActivity para completar perfil
-                            val intent = Intent(this@RegisterActivity, com.example.myapplication.ui.simulacion.EditProfileActivity::class.java)
-                            intent.putExtra("userEmail", email)
-                            startActivity(intent)
-                            finish()
-                        } catch (e: Exception) {
-                            Toast.makeText(this@RegisterActivity, "Error al guardar el usuario: ${e.message}", Toast.LENGTH_LONG).show()
                         }
                     }
                 }
@@ -195,13 +241,18 @@ class RegisterActivity : AppCompatActivity() {
         }
 
         val password = etPasswordRegister.text.toString()
-        if (password.length != 8) {
-            etPasswordRegister.error = "La contraseña debe ser de exactamente 8 caracteres."
+        val confirmPassword = etConfirmPassword.text.toString()
+
+        // Validar contraseña con PasswordValidator
+        val passwordValidation = com.example.myapplication.util.PasswordValidator.validate(password)
+        if (!passwordValidation.isValid) {
+            etPasswordRegister.error = com.example.myapplication.util.PasswordValidator.getErrorMessage(passwordValidation)
             isValid = false
         }
 
-        if (etConfirmPassword.text.toString() != password) {
-            etConfirmPassword.error = "Las contraseñas no coinciden."
+        // Verificar que las contraseñas coincidan
+        if (!com.example.myapplication.util.PasswordValidator.passwordsMatch(password, confirmPassword)) {
+            etConfirmPassword.error = "Las contraseñas no coinciden"
             isValid = false
         }
 

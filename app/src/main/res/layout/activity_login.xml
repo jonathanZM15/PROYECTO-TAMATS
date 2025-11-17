@@ -1,18 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/splash_gradient_background"
+    android:fillViewport="true"
+    android:background="@drawable/splash_gradient_background">
+
+<androidx.constraintlayout.widget.ConstraintLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     tools:context=".ui.login.LoginActivity">
 
     <ImageView
         android:id="@+id/ivLoginBackgroundOverlay"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:src="@drawable/imagen_login"
         android:scaleType="centerCrop"
+        android:contentDescription="@string/app_name"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -23,172 +29,127 @@
         android:id="@+id/tvLoginTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="60dp"
         android:text="@string/login_main_title"
         android:textColor="@color/tamats_pink"
-        android:textSize="38sp"
+        android:textSize="48sp"
         android:textStyle="bold"
+        android:letterSpacing="0.05"
+        android:shadowColor="#40000000"
+        android:shadowDx="0"
+        android:shadowDy="4"
+        android:shadowRadius="8"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/clLoginFormCard"
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cvLoginFormCard"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
         android:layout_marginEnd="24dp"
-        android:layout_marginTop="16dp"
-        android:background="@drawable/register_card_background"
-        android:padding="24dp"
+        android:layout_marginTop="32dp"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="12dp"
+        app:cardBackgroundColor="@color/register_card_background_color"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvLoginTitle">
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
         <TextView
             android:id="@+id/tvWelcome"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/login_welcome_back"
             android:textColor="@color/black"
             android:textSize="22sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:gravity="center"
+            android:letterSpacing="0.02" />
 
         <EditText
             android:id="@+id/etEmail"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="20dp"
             android:background="@drawable/edit_text_rounded_background"
             android:hint="@string/login_email_hint"
             android:inputType="textEmailAddress"
+            android:autofillHints="emailAddress"
             android:padding="14dp"
             android:textColor="@android:color/black"
-            android:textColorHint="#757575"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvWelcome" />
+            android:textColorHint="#999999"
+            android:textSize="15sp" />
 
         <EditText
             android:id="@+id/etPassword"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:background="@drawable/edit_text_rounded_background"
             android:hint="@string/login_password_hint"
             android:inputType="textPassword"
+            android:autofillHints="password"
             android:padding="14dp"
             android:textColor="@android:color/black"
-            android:textColorHint="#757575"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/etEmail" />
+            android:textColorHint="#999999"
+            android:textSize="15sp" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnLogin"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:backgroundTint="@android:color/black"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
-            android:text="@string/login_button_text"
-            android:textColor="@android:color/white"
-            android:textSize="15sp"
-            app:cornerRadius="24dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/etPassword" />
-
+        <!-- Enlace Olvidé mi contraseña - Mejorado -->
         <TextView
-            android:id="@+id/tvOrDivider"
+            android:id="@+id/tvForgotPassword"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="@string/login_or_divider"
-            android:textColor="@color/black"
+            android:layout_gravity="end"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="4dp"
+            android:text="¿Olvidaste tu contraseña?"
+            android:textColor="#9C27B0"
             android:textSize="14sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/btnLogin" />
+            android:textStyle="bold"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="8dp" />
 
+        <!-- Botón de Login - Ancho según contenido, centrado -->
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnFacebook"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:backgroundTint="@android:color/white"
-            android:padding="12dp"
-            android:text="@string/login_facebook_button"
-            android:textColor="@android:color/black"
-            android:textSize="14sp"
-            app:cornerRadius="24dp"
-            app:icon="@drawable/facebook_com"
-            app:iconTint="@android:color/black"
-            app:iconGravity="textStart"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvOrDivider" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnGoogle"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:backgroundTint="@android:color/white"
-            android:padding="12dp"
-            android:text="@string/login_google_button"
-            android:textColor="@android:color/black"
-            android:textSize="14sp"
-            app:cornerRadius="24dp"
-            app:icon="@drawable/gmail_com"
-            app:iconTint="@android:color/black"
-            app:iconGravity="textStart"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/btnFacebook" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnTwitter"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:backgroundTint="@android:color/white"
-            android:padding="12dp"
-            android:text="@string/login_twitter_button"
-            android:textColor="@android:color/black"
-            android:textSize="14sp"
-            app:cornerRadius="24dp"
-            app:icon="@drawable/x_com"
-            app:iconTint="@android:color/black"
-            app:iconGravity="textStart"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/btnGoogle" />
+            android:id="@+id/btnLogin"
+            android:layout_width="wrap_content"
+            android:layout_height="56dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="28dp"
+            android:backgroundTint="@android:color/black"
+            android:text="@string/login_button_text"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:paddingStart="48dp"
+            android:paddingEnd="48dp"
+            app:cornerRadius="28dp"
+            app:elevation="6dp"
+            app:iconGravity="textStart" />
 
         <LinearLayout
             android:id="@+id/llRegister"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="20dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/btnTwitter"
-            app:layout_constraintBottom_toBottomOf="parent"> <!-- Asegura que sea el último elemento del card -->
+            android:layout_marginTop="18dp"
+            android:gravity="center">
 
             <TextView
                 android:id="@+id/tvNewUserPrompt"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/login_new_user_prompt"
-                android:textColor="@color/black"
+                android:textColor="#666666"
                 android:textSize="14sp" />
 
             <TextView
@@ -202,20 +163,27 @@
                 android:textStyle="bold"/>
         </LinearLayout>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
+    </androidx.cardview.widget.CardView>
 
     <TextView
         android:id="@+id/tvCopyright"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="20dp"
         android:text="@string/login_copyright"
         android:textColor="@android:color/white"
         android:textSize="12sp"
+        android:shadowColor="#80000000"
+        android:shadowDx="0"
+        android:shadowDy="2"
+        android:shadowRadius="4"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/clLoginFormCard"
+        app:layout_constraintTop_toBottomOf="@id/cvLoginFormCard"
         app:layout_constraintVertical_bias="1.0"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

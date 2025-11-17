@@ -29,6 +29,10 @@
     <color name="admin_primary_light">#F5EEF8</color>
     <color name="admin_accent">#FF2D7A</color>
 
+    <!-- Colores para validación de contraseña -->
+    <color name="green_success">#4CAF50</color>
+    <color name="red_error">#F44336</color>
+
     <color name="admin_background">#FFFFFF</color>
     <color name="admin_surface">#FFFFFF</color>
     <color name="admin_card_background">#FFFFFF</color>

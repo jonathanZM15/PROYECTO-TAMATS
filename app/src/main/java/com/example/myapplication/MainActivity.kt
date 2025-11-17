@@ -80,7 +80,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupNavigationListeners() {
-        val fabCenter = findViewById<com.google.android.material.button.MaterialButton>(R.id.fabCenter)
+        val fabCenter = findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.fabCenter)
 
         ivExplore.setOnClickListener {
             loadFragment(ExploreFragment(), "Explore")

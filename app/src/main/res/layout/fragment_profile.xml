@@ -7,183 +7,340 @@
     android:orientation="vertical"
     android:background="@drawable/splash_gradient_background">
 
-    <!-- Header con título y botón de menú (esquina superior derecha) -->
+    <!-- Header mejorado -->
     <RelativeLayout
-        android:id="@+id/headerContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="8dp">
+        android:padding="20dp">
 
         <TextView
             android:id="@+id/tvProfileTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="MI PERFIL"
+            android:text="Mi Perfil"
             android:textColor="@android:color/white"
-            android:textSize="28sp"
+            android:textSize="32sp"
             android:textStyle="bold"
+            android:letterSpacing="0.02"
             android:layout_alignParentStart="true"
-            android:layout_centerVertical="true"
-            android:layout_marginStart="8dp" />
+            android:layout_centerVertical="true" />
 
-        <ImageButton
-            android:id="@+id/btnMenuProfile"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+        <androidx.cardview.widget.CardView
+            android:layout_width="44dp"
+            android:layout_height="44dp"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_expand_custom"
-            android:contentDescription="Menú perfil"
-            app:tint="@android:color/white"
-            android:layout_marginEnd="8dp" />
+            app:cardCornerRadius="22dp"
+            app:cardElevation="6dp"
+            app:cardBackgroundColor="@android:color/white">
+
+            <ImageButton
+                android:id="@+id/btnMenuProfile"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@android:color/transparent"
+                android:src="@drawable/ic_expand_custom"
+                android:contentDescription="Menú perfil"
+                app:tint="#9C27B0"
+                android:padding="10dp" />
+
+        </androidx.cardview.widget.CardView>
 
     </RelativeLayout>
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:fillViewport="false">
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true"
+        android:clipToPadding="false">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingBottom="20dp">
 
-            <ImageView
-                android:id="@+id/ivProfilePhotoView"
-                android:layout_width="120dp"
-                android:layout_height="120dp"
+            <!-- Foto de perfil con borde elegante -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="140dp"
+                android:layout_height="140dp"
                 android:layout_gravity="center_horizontal"
-                android:src="@drawable/ic_launcher_foreground"
-                android:scaleType="centerCrop"
-                android:contentDescription="Foto de perfil"
-                android:layout_marginBottom="24dp" />
+                app:cardCornerRadius="70dp"
+                app:cardElevation="12dp"
+                android:layout_marginBottom="20dp">
 
+                <ImageView
+                    android:id="@+id/ivProfilePhotoView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_launcher_foreground"
+                    android:scaleType="centerCrop"
+                    android:contentDescription="Foto de perfil" />
+
+            </androidx.cardview.widget.CardView>
+
+            <!-- Card de información personal mejorada -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="4dp"
-                android:layout_marginBottom="16dp">
+                app:cardCornerRadius="20dp"
+                app:cardElevation="8dp"
+                android:layout_marginBottom="20dp"
+                app:cardBackgroundColor="@android:color/white">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="20dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <!-- Nombre -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Nombre"
-                        android:textStyle="bold"
-                        android:textColor="@android:color/black"
-                        android:textSize="14sp"
-                        android:layout_marginBottom="4dp" />
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="16dp">
 
-                    <TextView
-                        android:id="@+id/tvViewName"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@android:color/black"
-                        android:textSize="16sp"
-                        android:layout_marginBottom="16dp"
-                        tools:text="María González" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="👤 "
+                            android:textSize="20sp" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Edad"
-                        android:textStyle="bold"
-                        android:textColor="@android:color/black"
-                        android:textSize="14sp"
-                        android:layout_marginBottom="4dp" />
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
 
-                    <TextView
-                        android:id="@+id/tvViewAge"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@android:color/black"
-                        android:textSize="16sp"
-                        android:layout_marginBottom="16dp"
-                        tools:text="28" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Nombre"
+                                android:textSize="12sp"
+                                android:textColor="#9E9E9E"
+                                android:layout_marginBottom="2dp" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Ciudad"
-                        android:textStyle="bold"
-                        android:textColor="@android:color/black"
-                        android:textSize="14sp"
-                        android:layout_marginBottom="4dp" />
+                            <TextView
+                                android:id="@+id/tvViewName"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="#212121"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                tools:text="Kelly" />
 
-                    <TextView
-                        android:id="@+id/tvViewCity"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@android:color/black"
-                        android:textSize="16sp"
-                        android:layout_marginBottom="16dp"
-                        tools:text="Madrid, España" />
+                        </LinearLayout>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Descripción"
-                        android:textStyle="bold"
-                        android:textColor="@android:color/black"
-                        android:textSize="14sp"
-                        android:layout_marginBottom="4dp" />
+                    </LinearLayout>
 
-                    <TextView
-                        android:id="@+id/tvViewDescription"
-                        android:layout_width="wrap_content"
+                    <!-- Línea separadora -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#F0F0F0"
+                        android:layout_marginBottom="16dp" />
+
+                    <!-- Edad -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textColor="@android:color/black"
-                        android:textSize="16sp"
-                        android:layout_marginBottom="16dp"
-                        tools:text="Amante del café, los viajes y las buenas conversaciones." />
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="🎂 "
+                            android:textSize="20sp" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Edad"
+                                android:textSize="12sp"
+                                android:textColor="#9E9E9E"
+                                android:layout_marginBottom="2dp" />
+
+                            <TextView
+                                android:id="@+id/tvViewAge"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="#212121"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                tools:text="24" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                    <!-- Línea separadora -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#F0F0F0"
+                        android:layout_marginBottom="16dp" />
+
+                    <!-- Ciudad -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="📍 "
+                            android:textSize="20sp" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Ciudad"
+                                android:textSize="12sp"
+                                android:textColor="#9E9E9E"
+                                android:layout_marginBottom="2dp" />
+
+                            <TextView
+                                android:id="@+id/tvViewCity"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="#212121"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                tools:text="manta" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                    <!-- Línea separadora -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#F0F0F0"
+                        android:layout_marginBottom="16dp" />
+
+                    <!-- Descripción -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="start|top">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="💭 "
+                            android:textSize="20sp" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Descripción"
+                                android:textSize="12sp"
+                                android:textColor="#9E9E9E"
+                                android:layout_marginBottom="4dp" />
+
+                            <TextView
+                                android:id="@+id/tvViewDescription"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="#424242"
+                                android:textSize="15sp"
+                                android:lineSpacingMultiplier="1.3"
+                                tools:text="miau" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
 
                 </LinearLayout>
 
             </androidx.cardview.widget.CardView>
 
-            <TextView
-                android:layout_width="wrap_content"
+            <!-- Intereses mejorados -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Intereses"
-                android:textStyle="bold"
-                android:textColor="@android:color/white"
-                android:textSize="18sp"
-                android:layout_marginBottom="12dp" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="12dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="💜 Intereses"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/white"
+                    android:textSize="22sp"
+                    android:letterSpacing="0.01" />
+
+            </LinearLayout>
 
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="4dp"
-                android:layout_marginBottom="16dp">
+                app:cardCornerRadius="16dp"
+                app:cardElevation="6dp"
+                android:layout_marginBottom="20dp"
+                app:cardBackgroundColor="@android:color/white">
 
                 <LinearLayout
                     android:id="@+id/interestsViewContainer"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="12dp" />
+                    android:padding="16dp" />
 
             </androidx.cardview.widget.CardView>
 
-            <!-- NUEVO: Historias del usuario -->
-            <TextView
-                android:layout_width="wrap_content"
+            <!-- Historias mejoradas -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Historias"
-                android:textStyle="bold"
-                android:textColor="@android:color/white"
-                android:textSize="18sp"
-                android:layout_marginBottom="8dp" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="12dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="📸 Historias"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/white"
+                    android:textSize="22sp"
+                    android:letterSpacing="0.01" />
+
+            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/storiesContainer"
@@ -191,6 +348,16 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:paddingBottom="12dp" />
+
+            <!-- RecyclerView para mostrar las publicaciones del usuario -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvProfilePosts"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clipToPadding="false"
+                android:nestedScrollingEnabled="false"
+                android:paddingTop="8dp"
+                android:paddingBottom="80dp" />
 
             <!-- Mensaje cuando no hay publicaciones -->
             <TextView
@@ -207,14 +374,5 @@
 
     </ScrollView>
 
-    <!-- RecyclerView para mostrar las publicaciones del usuario -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvProfilePosts"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:clipToPadding="false"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp" />
 
 </LinearLayout>

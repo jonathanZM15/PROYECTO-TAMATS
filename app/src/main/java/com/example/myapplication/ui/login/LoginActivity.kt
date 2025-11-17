@@ -34,6 +34,7 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var etPassword: EditText
     private lateinit var btnLogin: MaterialButton
     private lateinit var tvRegisterLink: TextView
+    private lateinit var tvForgotPassword: TextView
 
     private val db by lazy { AppDatabase.getInstance(applicationContext) }
     private val usuarioDao by lazy { db.usuarioDao() }
@@ -66,6 +67,7 @@ class LoginActivity : AppCompatActivity() {
         etPassword = findViewById(R.id.etPassword)
         btnLogin = findViewById(R.id.btnLogin)
         tvRegisterLink = findViewById(R.id.tvRegisterLink)
+        tvForgotPassword = findViewById(R.id.tvForgotPassword)
 
         setupListeners()
     }
@@ -76,6 +78,9 @@ class LoginActivity : AppCompatActivity() {
         }
         btnLogin.setOnClickListener {
             handleLoginAttempt()
+        }
+        tvForgotPassword.setOnClickListener {
+            showForgotPasswordDialog()
         }
     }
 
@@ -208,4 +213,112 @@ class LoginActivity : AppCompatActivity() {
             }
         }
     }
+
+    private fun showForgotPasswordDialog() {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_forgot_password, null)
+        val etRecoveryEmail = dialogView.findViewById<EditText>(R.id.etRecoveryEmail)
+
+        val dialog = androidx.appcompat.app.AlertDialog.Builder(this)
+            .setView(dialogView)
+            .create()
+
+        dialogView.findViewById<MaterialButton>(R.id.btnSendRecovery).setOnClickListener {
+            val email = etRecoveryEmail.text.toString().trim()
+
+            if (email.isEmpty()) {
+                etRecoveryEmail.error = "Ingresa tu correo electrónico"
+                return@setOnClickListener
+            }
+
+            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                etRecoveryEmail.error = "Ingresa un correo válido"
+                return@setOnClickListener
+            }
+
+            sendPasswordResetEmail(email, dialog)
+        }
+
+        dialogView.findViewById<MaterialButton>(R.id.btnCancelRecovery).setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+    private fun sendPasswordResetEmail(email: String, dialog: androidx.appcompat.app.AlertDialog) {
+        // Mostrar loading
+        val btnSend = dialog.findViewById<MaterialButton>(R.id.btnSendRecovery)
+        btnSend?.isEnabled = false
+        btnSend?.text = "Verificando..."
+
+        // PRIMERO: Verificar que el correo exista en la base de datos
+        lifecycleScope.launch(Dispatchers.IO) {
+            val userExists = usuarioDao.getUserByEmail(email) != null
+
+            withContext(Dispatchers.Main) {
+                if (!userExists) {
+                    // Correo NO existe en la BD
+                    btnSend?.isEnabled = true
+                    btnSend?.text = "Enviar"
+                    Toast.makeText(
+                        this@LoginActivity,
+                        "❌ No existe una cuenta registrada con este correo electrónico",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    android.util.Log.w("PasswordReset", "⚠️ Intento de recuperación para correo no registrado: $email")
+                    return@withContext
+                }
+
+                // Correo SÍ existe, continuar con el envío
+                btnSend?.text = "Enviando..."
+
+                // Generar token único de recuperación
+                val resetToken = java.util.UUID.randomUUID().toString()
+                val timestamp = System.currentTimeMillis()
+
+                // Crear link de recuperación
+                val resetLink = "tamats://reset?token=$resetToken&email=$email"
+
+                // Guardar token en SharedPreferences (expira en 1 hora)
+                val prefs = getSharedPreferences("password_reset", MODE_PRIVATE)
+                prefs.edit().apply {
+                    putString("token_$resetToken", email)
+                    putLong("timestamp_$resetToken", timestamp)
+                    apply()
+                }
+
+                // Enviar correo usando SMTP (EmailService)
+                lifecycleScope.launch(Dispatchers.IO) {
+                    val emailSent = com.example.myapplication.util.EmailService.sendPasswordResetEmail(
+                        toEmail = email,
+                        resetLink = resetLink
+                    )
+
+                    withContext(Dispatchers.Main) {
+                        btnSend?.isEnabled = true
+                        btnSend?.text = "Enviar"
+
+                        if (emailSent) {
+                            Toast.makeText(
+                                this@LoginActivity,
+                                "✅ ¡Correo enviado a $email!\nRevisa tu bandeja (puede tardar 30 seg)",
+                                Toast.LENGTH_LONG
+                            ).show()
+                            dialog.dismiss()
+                            android.util.Log.d("PasswordReset", "✅ Email sent to: $email, Token: $resetToken")
+                        } else {
+                            Toast.makeText(
+                                this@LoginActivity,
+                                "❌ Error al enviar. Verifica tu conexión a internet",
+                                Toast.LENGTH_LONG
+                            ).show()
+                            android.util.Log.e("PasswordReset", "❌ Failed to send email to: $email")
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
+
+
