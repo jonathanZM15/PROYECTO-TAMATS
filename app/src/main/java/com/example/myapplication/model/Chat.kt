@@ -13,6 +13,14 @@ data class Chat(
     val user2Photo: String = "",
     val lastMessage: String = "",
     val lastMessageTimestamp: Timestamp = Timestamp.now(),
-    val createdAt: Timestamp = Timestamp.now()
-)
+    val createdAt: Timestamp = Timestamp.now(),
+    val chatType: String = "regular" // "support" o "regular"
+) {
+    // Propiedades calculadas
+    val isSupportChat: Boolean
+        get() = chatType == "support"
+
+    val isPinned: Boolean
+        get() = chatType == "support"
+}
 

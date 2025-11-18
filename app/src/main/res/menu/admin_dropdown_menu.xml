@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
+        android:id="@+id/action_chats_dropdown"
+        android:title="Chats de Soporte"
+        android:icon="@drawable/ic_chat" />
+    <item
+        android:id="@+id/action_broadcast_dropdown"
+        android:title="Enviar Mensaje a Todos"
+        android:icon="@drawable/ic_send" />
+    <item
         android:id="@+id/action_logout_dropdown"
         android:title="Cerrar Sesión"
         android:icon="@drawable/ic_close" />

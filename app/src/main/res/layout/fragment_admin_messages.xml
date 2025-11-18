@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/white">
+
+    <!-- Header con info del usuario -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="12dp"
+        android:background="@color/primary"
+        android:gravity="center_vertical">
+
+        <ImageButton
+            android:id="@+id/btnAdminBackMessages"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackground"
+            android:src="@drawable/ic_back"
+            android:contentDescription="Retroceder"
+            android:scaleType="centerInside" />
+
+        <ImageView
+            android:id="@+id/ivAdminOtherUserPhoto"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="8dp"
+            android:scaleType="centerCrop"
+            android:contentDescription="Foto del usuario" />
+
+        <TextView
+            android:id="@+id/tvAdminOtherUserName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="12dp"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/white" />
+    </LinearLayout>
+
+    <!-- RecyclerView para mensajes -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvAdminMessages"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:paddingBottom="8dp" />
+
+    <!-- Input de mensaje -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:gravity="center_vertical"
+        android:background="@color/light_gray">
+
+        <EditText
+            android:id="@+id/etAdminMessage"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Escribe un mensaje..."
+            android:padding="12dp"
+            android:background="@drawable/edit_text_background"
+            android:inputType="text"
+            android:maxLines="3" />
+
+        <ImageButton
+            android:id="@+id/btnAdminSendMessage"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="8dp"
+            android:background="?attr/selectableItemBackground"
+            android:src="@drawable/ic_send"
+            android:contentDescription="Enviar"
+            android:scaleType="centerInside" />
+    </LinearLayout>
+</LinearLayout>
+

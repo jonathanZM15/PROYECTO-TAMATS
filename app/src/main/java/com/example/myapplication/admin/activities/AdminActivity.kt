@@ -84,6 +84,13 @@ class AdminActivity : AppCompatActivity() {
         // Cargar datos iniciales
         viewModel.loadUsers()
 
+        // Configurar listener para cuando se regresa de un fragment
+        supportFragmentManager.addOnBackStackChangedListener {
+            if (supportFragmentManager.backStackEntryCount == 0) {
+                showUsersView()
+            }
+        }
+
         // Procesar intent si viene con datos específicos
         handleIntent(intent)
     }
@@ -140,6 +147,14 @@ class AdminActivity : AppCompatActivity() {
 
         popupMenu.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
+                R.id.action_chats_dropdown -> {
+                    openAdminChats()
+                    true
+                }
+                R.id.action_broadcast_dropdown -> {
+                    openBroadcastMessage()
+                    true
+                }
                 R.id.action_logout_dropdown -> {
                     logout()
                     true
@@ -156,6 +171,46 @@ class AdminActivity : AppCompatActivity() {
         }
 
         popupMenu.show()
+    }
+
+    /**
+     * Abre la pantalla de chats de soporte
+     */
+    private fun openAdminChats() {
+        hideUsersView()
+        val fragment = com.example.myapplication.admin.fragments.AdminChatsFragment()
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.main_container, fragment)
+            .addToBackStack(null)
+            .commit()
+    }
+
+    /**
+     * Abre la pantalla de mensajes masivos
+     */
+    private fun openBroadcastMessage() {
+        hideUsersView()
+        val fragment = com.example.myapplication.admin.fragments.BroadcastMessageFragment()
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.main_container, fragment)
+            .addToBackStack(null)
+            .commit()
+    }
+
+    /**
+     * Oculta la vista de usuarios
+     */
+    private fun hideUsersView() {
+        val scrollView = findViewById<android.widget.ScrollView>(R.id.scrollAdminPanel)
+        scrollView?.visibility = android.view.View.GONE
+    }
+
+    /**
+     * Muestra la vista de usuarios
+     */
+    private fun showUsersView() {
+        val scrollView = findViewById<android.widget.ScrollView>(R.id.scrollAdminPanel)
+        scrollView?.visibility = android.view.View.VISIBLE
     }
 
     /**

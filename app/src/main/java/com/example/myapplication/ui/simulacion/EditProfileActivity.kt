@@ -476,6 +476,14 @@ class EditProfileActivity : AppCompatActivity() {
                         }
                     } catch (_: Exception) {
                     }
+
+                    // Crear chat de soporte automáticamente
+                    createSupportChat(
+                        email,
+                        profileData["name"]?.toString() ?: "Usuario",
+                        profileData["photo"]?.toString() ?: ""
+                    )
+
                     val intent = Intent(this, com.example.myapplication.MainActivity::class.java)
                     intent.putExtra("fragment", "profile")
                     intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
@@ -486,6 +494,47 @@ class EditProfileActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun createSupportChat(userEmail: String, userName: String, userPhoto: String) {
+        val db = com.google.firebase.firestore.FirebaseFirestore.getInstance()
+        val adminEmail = "yendermejia0@gmail.com"
+        val adminName = "Soporte"
+        val adminPhoto = ""
+
+        // Verificar si el chat de soporte ya existe
+        db.collection("chats")
+            .whereEqualTo("user1Email", adminEmail)
+            .whereEqualTo("user2Email", userEmail)
+            .whereEqualTo("chatType", "support")
+            .get()
+            .addOnSuccessListener { snapshot ->
+                if (snapshot.documents.isEmpty()) {
+                    // No existe, crear nuevo chat de soporte
+                    val chat = com.example.myapplication.model.Chat(
+                        user1Email = adminEmail,
+                        user1Name = adminName,
+                        user1Photo = adminPhoto,
+                        user2Email = userEmail,
+                        user2Name = userName,
+                        user2Photo = userPhoto,
+                        chatType = "support",
+                        lastMessage = "¡Bienvenido! Este es tu chat de soporte."
+                    )
+
+                    db.collection("chats")
+                        .add(chat)
+                        .addOnSuccessListener {
+                            android.util.Log.d("EditProfileActivity", "Chat de soporte creado: ${it.id}")
+                        }
+                        .addOnFailureListener { e ->
+                            android.util.Log.e("EditProfileActivity", "Error creando chat de soporte: ${e.message}")
+                        }
+                }
+            }
+            .addOnFailureListener { e ->
+                android.util.Log.e("EditProfileActivity", "Error verificando chat de soporte: ${e.message}")
+            }
     }
 
     override fun onResume() {

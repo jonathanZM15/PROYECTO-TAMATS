@@ -195,4 +195,22 @@
 
     <!-- Descripciones accesibles -->
     <string name="user_photo_desc">Foto de perfil del usuario</string>
+
+    <!-- Strings para Sistema de Chats -->
+    <string name="admin_chats_title">Chats de Soporte</string>
+    <string name="admin_chats_search_hint">Buscar usuario por nombre o email</string>
+    <string name="admin_chats_empty_title">No hay chats de soporte</string>
+    <string name="admin_chats_empty_message">Los chats de soporte aparecerán aquí</string>
+    <string name="chat_support_label">SOPORTE</string>
+    <string name="chat_message_hint">Escribe un mensaje...</string>
+    <string name="chat_welcome_message">¡Bienvenido! Este es tu chat de soporte.</string>
+    <string name="broadcast_title">Enviar Mensaje a Todos</string>
+    <string name="broadcast_hint">Escribe el mensaje que será enviado a todos los usuarios...</string>
+    <string name="broadcast_recipient_count">Destinatarios: %d usuarios</string>
+    <string name="broadcast_send_button">Enviar a Todos</string>
+    <string name="broadcast_cancel_button">Cancelar</string>
+    <string name="broadcast_success">Mensaje enviado a %d usuarios</string>
+    <string name="broadcast_error">Error enviando mensaje: %s</string>
+    <string name="broadcast_empty_message">El mensaje no puede estar vacío</string>
+    <string name="broadcast_no_users">No hay usuarios para enviar el mensaje</string>
 </resources>

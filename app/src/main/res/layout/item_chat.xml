@@ -33,15 +33,36 @@
             android:orientation="vertical"
             android:gravity="center_vertical">
 
-            <TextView
-                android:id="@+id/tvChatUserName"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Nombre del usuario"
-                android:textStyle="bold"
-                android:textSize="16sp"
-                android:textColor="@android:color/black"
-                android:layout_marginBottom="4dp" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/tvChatUserName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Nombre del usuario"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:textColor="@android:color/black"
+                    android:layout_marginBottom="4dp" />
+
+                <TextView
+                    android:id="@+id/tvSupportBadge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="SOPORTE"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/white"
+                    android:background="@drawable/badge_support_background"
+                    android:paddingHorizontal="6dp"
+                    android:paddingVertical="2dp"
+                    android:layout_marginStart="8dp"
+                    android:visibility="gone" />
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/tvChatLastMessage"

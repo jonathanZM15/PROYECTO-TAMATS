@@ -26,6 +26,11 @@ class ChatsAdapter(
         private val tvUserName: TextView = itemView.findViewById(R.id.tvChatUserName)
         private val tvLastMessage: TextView = itemView.findViewById(R.id.tvChatLastMessage)
         private val tvTimestamp: TextView = itemView.findViewById(R.id.tvChatTimestamp)
+        private val tvSupportBadge: TextView? = try {
+            itemView.findViewById(R.id.tvSupportBadge)
+        } catch (e: Exception) {
+            null
+        }
 
         fun bind(chat: Chat) {
             // Determinar quién es el "otro usuario" según quién esté logeado
@@ -50,6 +55,12 @@ class ChatsAdapter(
             calendar.time = chat.lastMessageTimestamp.toDate()
             val formatter = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
             tvTimestamp.text = formatter.format(calendar.time)
+
+            // Mostrar badge de soporte si aplica
+            tvSupportBadge?.apply {
+                visibility = if (chat.isSupportChat && chat.isPinned) View.VISIBLE else View.GONE
+                text = "SOPORTE"
+            }
 
             // Cargar foto con Glide
             if (!otherUserPhoto.isNullOrEmpty()) {

@@ -18,7 +18,6 @@ class ChatsViewModel : ViewModel() {
 
     fun loadChats(currentUserEmail: String) {
         // Escuchar en tiempo real los chats donde el usuario es user1 o user2
-        // Pero ahora usamos un ID consistente basado en ambos emails
         db.collection("chats")
             .whereEqualTo("user1Email", currentUserEmail)
             .addSnapshotListener { snapshot, e ->
@@ -56,16 +55,30 @@ class ChatsViewModel : ViewModel() {
                                     Log.e("ChatsViewModel", "Error parseando chat user2: ${ex.message}", ex)
                                 }
                             }
-                            // Ordenar por timestamp descendente (más recientes primero)
-                            chatList.sortByDescending { it.lastMessageTimestamp.toDate() }
-                            _chats.value = chatList
-                            Log.d("ChatsViewModel", "Chats cargados: ${chatList.size}")
+                            // Separar chats de soporte (isPinned) de los demás
+                            val supportChats = chatList.filter { it.isPinned && it.isSupportChat }.toMutableList()
+                            val regularChats = chatList.filterNot { it.isPinned && it.isSupportChat }.toMutableList()
+
+                            // Ordenar cada grupo por timestamp
+                            supportChats.sortByDescending { it.lastMessageTimestamp.toDate() }
+                            regularChats.sortByDescending { it.lastMessageTimestamp.toDate() }
+
+                            // Combinar: soporte primero, luego los demás
+                            val finalList = supportChats + regularChats
+                            _chats.value = finalList
+                            Log.d("ChatsViewModel", "Chats cargados: ${finalList.size}")
                         }
                         .addOnFailureListener { e2 ->
                             Log.e("ChatsViewModel", "Error cargando chats como user2: ${e2.message}")
-                            // Ordenar por timestamp descendente (más recientes primero)
-                            chatList.sortByDescending { it.lastMessageTimestamp.toDate() }
-                            _chats.value = chatList
+                            // Separar y ordenar aunque haya error
+                            val supportChats = chatList.filter { it.isPinned && it.isSupportChat }.toMutableList()
+                            val regularChats = chatList.filterNot { it.isPinned && it.isSupportChat }.toMutableList()
+
+                            supportChats.sortByDescending { it.lastMessageTimestamp.toDate() }
+                            regularChats.sortByDescending { it.lastMessageTimestamp.toDate() }
+
+                            val finalList = supportChats + regularChats
+                            _chats.value = finalList
                         }
                 }
             }

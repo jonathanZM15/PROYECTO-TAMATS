@@ -42,7 +42,14 @@
 
     </LinearLayout>
 
-    <!-- Main Content -->
+    <!-- Main Fragment Container -->
+    <FrameLayout
+        android:id="@+id/main_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <!-- Default Users View (Hidden when fragments are shown) -->
     <ScrollView
         android:id="@+id/scrollAdminPanel"
         android:layout_width="match_parent"

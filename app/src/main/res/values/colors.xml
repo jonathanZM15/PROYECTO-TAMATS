@@ -67,4 +67,12 @@
     <color name="admin_gradient_start">#7B1FA2</color>
     <color name="admin_gradient_end">#FF2D7A</color>
 
+    <!-- Colores para Chats y Mensajes -->
+    <color name="message_sent_bg">#DCF8C6</color>
+    <color name="message_received_bg">#FFFFFF</color>
+    <color name="primary">#7B1FA2</color>
+    <color name="light_gray">#F5F5F5</color>
+    <color name="text_secondary">#999999</color>
+    <color name="search_view_background">#F5F5F5</color>
+
 </resources>

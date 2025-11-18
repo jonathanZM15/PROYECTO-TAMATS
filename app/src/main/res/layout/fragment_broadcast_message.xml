@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@color/white">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Enviar Mensaje a Todos"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:gravity="center" />
+
+    <TextView
+        android:id="@+id/tvRecipientCount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Destinatarios: 0 usuarios"
+        android:textSize="14sp"
+        android:textColor="@color/text_secondary"
+        android:gravity="center"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="16dp" />
+
+    <EditText
+        android:id="@+id/etBroadcastMessage"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:hint="Escribe el mensaje que será enviado a todos los usuarios..."
+        android:padding="12dp"
+        android:background="@drawable/edit_text_background"
+        android:inputType="textMultiLine"
+        android:gravity="top"
+        android:maxLines="10" />
+
+    <ProgressBar
+        android:id="@+id/progressBarBroadcast"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        android:layout_marginTop="16dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="end"
+        android:layout_marginTop="16dp">
+
+        <ImageButton
+            android:id="@+id/btnCancelBroadcast"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackground"
+            android:src="@drawable/ic_close"
+            android:contentDescription="Cancelar"
+            android:scaleType="centerInside" />
+
+        <Button
+            android:id="@+id/btnSendBroadcast"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Enviar a Todos"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/button_background"
+            android:textColor="@color/white"
+            android:paddingHorizontal="24dp" />
+    </LinearLayout>
+</LinearLayout>
+
