@@ -59,6 +59,7 @@
             android:name=".ui.password.ResetPasswordActivity"
             android:exported="true"
             android:launchMode="singleTop">
+
             <!-- Deep Link personalizado: tamats://reset -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
@@ -68,6 +69,22 @@
                     android:scheme="tamats"
                     android:host="reset" />
             </intent-filter>
+
+            <!-- App Links HTTP/HTTPS (funciona desde correos) -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="http"
+                    android:host="tamats.app"
+                    android:pathPrefix="/reset" />
+                <data
+                    android:scheme="https"
+                    android:host="tamats.app"
+                    android:pathPrefix="/reset" />
+            </intent-filter>
+
             <!-- Deep Link de Firebase (respaldo) -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />

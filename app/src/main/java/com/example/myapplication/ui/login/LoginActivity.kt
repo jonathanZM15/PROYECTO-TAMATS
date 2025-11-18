@@ -362,9 +362,13 @@ class LoginActivity : AppCompatActivity() {
         val resetToken = java.util.UUID.randomUUID().toString()
         val timestamp = System.currentTimeMillis()
 
-        // Crear deep link simple (funciona mejor desde correos)
+        // Crear enlace HTTPS que funciona desde correos
+        // Gmail y otros clientes reconocen HTTPS, no esquemas personalizados
         val encodedEmail = android.net.Uri.encode(email)
-        val resetLink = "tamats://reset?token=$resetToken&email=$encodedEmail"
+        val resetLink = "https://tamats.app/reset?token=$resetToken&email=$encodedEmail"
+
+        // También guardar el deep link como alternativa
+        val deepLink = "tamats://reset?token=$resetToken&email=$encodedEmail"
 
         // Guardar token en SharedPreferences (expira en 1 hora)
         val prefs = getSharedPreferences("password_reset", MODE_PRIVATE)

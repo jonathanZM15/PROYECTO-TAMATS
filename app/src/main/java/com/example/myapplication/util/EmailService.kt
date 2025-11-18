@@ -59,7 +59,9 @@ object EmailService {
      */
     private suspend fun sendEmail(to: String, subject: String, body: String): Boolean = withContext(Dispatchers.IO) {
         try {
-            // Configurar propiedades SMTP
+            Log.d("EmailService", "📧 Intentando enviar correo a: $to")
+
+            // Configurar propiedades SMTP con timeouts
             val props = Properties().apply {
                 put("mail.smtp.host", SMTP_HOST)
                 put("mail.smtp.port", SMTP_PORT)
@@ -67,14 +69,28 @@ object EmailService {
                 put("mail.smtp.starttls.enable", "true")
                 put("mail.smtp.starttls.required", "true")
                 put("mail.smtp.ssl.protocols", "TLSv1.2")
+
+                // Timeouts aumentados
+                put("mail.smtp.connectiontimeout", "60000") // 60 segundos
+                put("mail.smtp.timeout", "60000") // 60 segundos
+                put("mail.smtp.writetimeout", "60000") // 60 segundos
+
+                // Configuración adicional
+                put("mail.smtp.ssl.trust", SMTP_HOST)
+                put("mail.smtp.socketFactory.fallback", "false")
             }
+
+            Log.d("EmailService", "🔧 Configuración SMTP lista")
 
             // Crear sesión con autenticación
             val session = Session.getInstance(props, object : Authenticator() {
                 override fun getPasswordAuthentication(): PasswordAuthentication {
+                    Log.d("EmailService", "🔐 Autenticando con Gmail...")
                     return PasswordAuthentication(EMAIL_FROM, EMAIL_PASSWORD)
                 }
             })
+
+            Log.d("EmailService", "📝 Creando mensaje...")
 
             // Crear mensaje
             val message = MimeMessage(session).apply {
@@ -84,15 +100,28 @@ object EmailService {
                 setText(body, "UTF-8", "html")
             }
 
+            Log.d("EmailService", "📤 Enviando correo...")
+
             // Enviar
             Transport.send(message)
+
             Log.d("EmailService", "✅ Correo enviado exitosamente a: $to")
             true
         } catch (e: MessagingException) {
-            Log.e("EmailService", "❌ Error enviando correo: ${e.message}", e)
+            Log.e("EmailService", "❌ Error de mensajería: ${e.message}", e)
+            Log.e("EmailService", "Causa: ${e.cause?.message}")
+            false
+        } catch (e: java.net.ConnectException) {
+            Log.e("EmailService", "❌ Error de conexión: No se puede conectar a SMTP", e)
+            Log.e("EmailService", "Verifica: 1) Internet activo, 2) No hay firewall bloqueando puerto 587")
+            false
+        } catch (e: java.net.SocketTimeoutException) {
+            Log.e("EmailService", "❌ Timeout: La conexión tardó demasiado", e)
+            Log.e("EmailService", "Verifica tu velocidad de internet")
             false
         } catch (e: Exception) {
             Log.e("EmailService", "❌ Error inesperado: ${e.message}", e)
+            Log.e("EmailService", "Tipo: ${e.javaClass.simpleName}")
             false
         }
     }
@@ -277,35 +306,24 @@ object EmailService {
                         <div class="steps">
                             <p style="margin-top: 0; color: #9C27B0; font-weight: bold; font-size: 16px;">📱 Para cambiar tu contraseña:</p>
                             <div class="step">Abre este correo desde tu dispositivo móvil</div>
-                            <div class="step">Presiona el botón morado de abajo</div>
-                            <div class="step">Si no funciona, copia el enlace de texto y ábrelo en Chrome</div>
-                            <div class="step">La app TAMATS se abrirá automáticamente</div>
+                            <div class="step">Toca el botón morado "Abrir TAMATS"</div>
+                            <div class="step">Android te preguntará "¿Abrir con TAMATS?"</div>
+                            <div class="step">Confirma y la app se abrirá automáticamente</div>
                             <div class="step">Ingresa tu nueva contraseña</div>
                         </div>
                         
                         <div class="button-container">
-                            <a href="$resetLink" class="button" style="color: white;">
+                            <a href="$resetLink" class="button" style="color: white; text-decoration: none;">
                                 📱 Abrir TAMATS
                             </a>
                         </div>
                         
                         <div class="note">
-                            <p style="margin: 5px 0;"><strong>📝 Si el botón no funciona:</strong></p>
-                            <p style="margin: 10px 0; word-break: break-all; background: #f0f0f0; padding: 10px; border-radius: 5px; font-family: monospace; font-size: 12px;">
-                                $resetLink
-                            </p>
-                            <p style="margin: 5px 0; font-size: 13px;">
-                                1. Copia el enlace de arriba (mantén presionado y selecciona "Copiar")<br>
-                                2. Pégalo en el navegador Chrome de tu móvil<br>
-                                3. Presiona Enter y confirma "Abrir con TAMATS"
-                            </p>
-                        </div>
-                        
-                        <div class="note" style="background: #fff3cd; border-left-color: #ffc107;">
                             <p style="margin: 5px 0;"><strong>⏰ Importante:</strong></p>
                             <p style="margin: 5px 0;">• Abre este correo desde tu teléfono móvil</p>
                             <p style="margin: 5px 0;">• Asegúrate de tener TAMATS instalada</p>
                             <p style="margin: 5px 0;">• <strong>Este enlace expirará en 1 hora</strong></p>
+                            <p style="margin: 5px 0;">• Si el botón no funciona, mantén presionado sobre él y selecciona "Abrir enlace"</p>
                         </div>
                     </div>
                     
