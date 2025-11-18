@@ -157,45 +157,105 @@ object EmailService {
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <style>
-                    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
-                    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                    .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-                    .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+                    body { 
+                        font-family: Arial, sans-serif; 
+                        line-height: 1.6; 
+                        color: #333; 
+                        margin: 0; 
+                        padding: 0;
+                        background-color: #f4f4f4;
+                    }
+                    .container { 
+                        max-width: 600px; 
+                        margin: 20px auto; 
+                        background: white;
+                        border-radius: 10px;
+                        overflow: hidden;
+                        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                    }
+                    .header { 
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                        color: white; 
+                        padding: 40px 20px; 
+                        text-align: center;
+                    }
+                    .header h1 {
+                        margin: 0;
+                        font-size: 32px;
+                    }
+                    .header h2 {
+                        margin: 10px 0 0 0;
+                        font-size: 20px;
+                        font-weight: normal;
+                    }
+                    .content { 
+                        padding: 40px 30px;
+                    }
+                    .content h2 {
+                        color: #333;
+                        margin-top: 0;
+                    }
+                    .button-container {
+                        text-align: center;
+                        margin: 40px 0;
+                    }
                     .button { 
                         display: inline-block; 
                         background: #9C27B0; 
                         color: white !important; 
-                        padding: 16px 40px; 
+                        padding: 18px 50px; 
                         text-decoration: none; 
-                        border-radius: 25px; 
-                        margin: 20px 0;
-                        font-size: 16px;
+                        border-radius: 30px; 
+                        font-size: 18px;
                         font-weight: bold;
-                        box-shadow: 0 4px 6px rgba(156, 39, 176, 0.3);
+                        box-shadow: 0 4px 15px rgba(156, 39, 176, 0.4);
+                        transition: all 0.3s ease;
                     }
-                    .button:hover { background: #7B1FA2; }
-                    .footer { text-align: center; margin-top: 20px; color: #777; font-size: 12px; }
-                    .warning { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 15px 0; border-radius: 4px; }
-                    .steps { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; }
-                    .step { margin: 10px 0; padding-left: 25px; position: relative; }
-                    .step:before { content: "✓"; position: absolute; left: 0; color: #9C27B0; font-weight: bold; }
-                    .link-box { 
-                        background: white; 
-                        border: 2px dashed #9C27B0; 
+                    .warning { 
+                        background: #fff3cd; 
+                        border-left: 4px solid #ffc107; 
                         padding: 15px; 
                         margin: 20px 0; 
-                        border-radius: 8px;
-                        word-break: break-all;
-                        font-family: monospace;
-                        font-size: 12px;
-                        color: #9C27B0;
+                        border-radius: 4px;
                     }
-                    .info-box {
+                    .steps {
+                        background: #f8f9fa;
+                        padding: 20px;
+                        border-radius: 8px;
+                        margin: 25px 0;
+                    }
+                    .step {
+                        margin: 12px 0;
+                        padding-left: 30px;
+                        position: relative;
+                        font-size: 15px;
+                    }
+                    .step:before {
+                        content: "✓";
+                        position: absolute;
+                        left: 0;
+                        color: #9C27B0;
+                        font-weight: bold;
+                        font-size: 18px;
+                    }
+                    .footer { 
+                        text-align: center; 
+                        padding: 30px 20px;
+                        background: #f8f9fa;
+                        color: #666;
+                        font-size: 13px;
+                    }
+                    .footer p {
+                        margin: 5px 0;
+                    }
+                    .note {
                         background: #e3f2fd;
                         border-left: 4px solid #2196F3;
                         padding: 15px;
-                        margin: 15px 0;
+                        margin: 20px 0;
                         border-radius: 4px;
+                        font-size: 14px;
+                        color: #555;
                     }
                 </style>
             </head>
@@ -205,6 +265,7 @@ object EmailService {
                         <h1>🔐 TAMATS</h1>
                         <h2>Recuperación de Contraseña</h2>
                     </div>
+                    
                     <div class="content">
                         <h2>¡Hola!</h2>
                         <p>Recibimos una solicitud para restablecer la contraseña de tu cuenta en <strong>TAMATS</strong>.</p>
@@ -214,33 +275,31 @@ object EmailService {
                         </div>
                         
                         <div class="steps">
-                            <h3 style="margin-top: 0; color: #9C27B0;">📱 Opción 1 - Click directo (recomendado):</h3>
-                            <div class="step">Abre este correo desde tu dispositivo móvil con TAMATS instalada</div>
-                            <div class="step">Toca el botón morado de abajo</div>
-                            <div class="step">La app se abrirá automáticamente</div>
+                            <p style="margin-top: 0; color: #9C27B0; font-weight: bold; font-size: 16px;">📱 Para cambiar tu contraseña:</p>
+                            <div class="step">Abre este correo desde tu dispositivo móvil</div>
+                            <div class="step">Presiona el botón morado de abajo</div>
+                            <div class="step">La app TAMATS se abrirá automáticamente</div>
+                            <div class="step">Ingresa tu nueva contraseña</div>
                         </div>
                         
-                        <p style="text-align: center; margin: 30px 0;">
-                            <a href="$resetLink" class="button" style="color: white;">📱 Abrir TAMATS y Cambiar Contraseña</a>
-                        </p>
-                        
-                        <div class="info-box">
-                            <h3 style="margin-top: 0; color: #2196F3;">🔧 Opción 2 - Si el botón no funciona:</h3>
-                            <p style="margin: 5px 0;">1. Copia el siguiente enlace (mantén presionado y selecciona "Copiar"):</p>
-                            <div class="link-box">$resetLink</div>
-                            <p style="margin: 5px 0;">2. Abre la app TAMATS manualmente</p>
-                            <p style="margin: 5px 0;">3. Ve a "Olvidé mi contraseña"</p>
-                            <p style="margin: 5px 0;">4. Pega el enlace cuando se te solicite (próximamente)</p>
+                        <div class="button-container">
+                            <a href="$resetLink" class="button">
+                                📱 Abrir TAMATS
+                            </a>
                         </div>
                         
-                        <p style="font-size: 12px; color: #666; text-align: center; margin-top: 30px;">
-                            <strong>⏰ Este enlace expirará en 1 hora</strong> por motivos de seguridad.
-                        </p>
+                        <div class="note">
+                            <p style="margin: 5px 0;"><strong>📝 Nota importante:</strong></p>
+                            <p style="margin: 5px 0;">• Abre este correo desde tu teléfono móvil</p>
+                            <p style="margin: 5px 0;">• Asegúrate de tener TAMATS instalada</p>
+                            <p style="margin: 5px 0;">• <strong>Este enlace expirará en 1 hora</strong></p>
+                        </div>
                     </div>
+                    
                     <div class="footer">
-                        <p>💜 Gracias por ser parte de TAMATS</p>
+                        <p><strong>💜 Gracias por ser parte de TAMATS</strong></p>
                         <p>© 2025 TAMATS. Todos los derechos reservados.</p>
-                        <p style="font-size: 10px; margin-top: 10px;">Este es un correo automático, por favor no respondas.</p>
+                        <p style="margin-top: 15px; font-size: 11px;">Este es un correo automático, por favor no respondas.</p>
                     </div>
                 </div>
             </body>

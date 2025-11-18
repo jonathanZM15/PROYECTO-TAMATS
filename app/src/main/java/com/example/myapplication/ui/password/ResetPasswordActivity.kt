@@ -44,12 +44,21 @@ class ResetPasswordActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_reset_password)
 
+        // Log para depuración
+        android.util.Log.d("ResetPassword", "Activity iniciada")
+        android.util.Log.d("ResetPassword", "Intent data: ${intent.data}")
+        android.util.Log.d("ResetPassword", "Intent action: ${intent.action}")
+
         // Obtener datos del Intent (desde Deep Link)
         email = intent.data?.getQueryParameter("email") ?: intent.getStringExtra("email")
         token = intent.data?.getQueryParameter("token") ?: intent.getStringExtra("token")
 
+        android.util.Log.d("ResetPassword", "Email: $email")
+        android.util.Log.d("ResetPassword", "Token: $token")
+
         // Validar que tengamos los datos necesarios
         if (email.isNullOrEmpty() || token.isNullOrEmpty()) {
+            android.util.Log.e("ResetPassword", "❌ Datos faltantes - Email: $email, Token: $token")
             Toast.makeText(this, "❌ Link inválido o expirado", Toast.LENGTH_LONG).show()
             finish()
             return
@@ -57,6 +66,7 @@ class ResetPasswordActivity : AppCompatActivity() {
 
         // Validar que el token sea válido y no haya expirado
         if (!isTokenValid(token!!)) {
+            android.util.Log.e("ResetPassword", "❌ Token inválido o expirado")
             Toast.makeText(
                 this,
                 "❌ Este enlace ha expirado.\nSolicita uno nuevo desde 'Olvidé mi contraseña'",
@@ -66,6 +76,7 @@ class ResetPasswordActivity : AppCompatActivity() {
             return
         }
 
+        android.util.Log.d("ResetPassword", "✅ Token válido, mostrando UI")
         initializeViews()
         setupListeners()
         displayEmail()
