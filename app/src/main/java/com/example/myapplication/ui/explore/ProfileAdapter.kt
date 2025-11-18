@@ -162,15 +162,20 @@ class ProfileAdapter(
             currentUserName: String,
             profile: ProfileItem
         ) {
-            // Obtener la foto del usuario actual desde Firebase
+            // Obtener la foto y nombre del usuario actual desde Firebase
             db.collection("userProfiles")
                 .whereEqualTo("email", currentUserEmail)
                 .get()
                 .addOnSuccessListener { userProfileDocs ->
                     var currentUserPhoto = ""
+                    var realUserName = currentUserName
 
                     if (userProfileDocs.documents.isNotEmpty()) {
                         currentUserPhoto = userProfileDocs.documents[0].data?.get("photo")?.toString() ?: ""
+                        val nameFromDb = userProfileDocs.documents[0].data?.get("name")?.toString() ?: ""
+                        if (nameFromDb.isNotEmpty()) {
+                            realUserName = nameFromDb
+                        }
                     }
 
                     // Si no encontró en userProfiles, buscar en usuarios
@@ -181,20 +186,25 @@ class ProfileAdapter(
                             .addOnSuccessListener { usuariosDocs ->
                                 if (usuariosDocs.documents.isNotEmpty()) {
                                     currentUserPhoto = usuariosDocs.documents[0].data?.get("photo")?.toString() ?: ""
+                                    val nameFromDb = usuariosDocs.documents[0].data?.get("name")?.toString() ?: ""
+                                    if (nameFromDb.isNotEmpty()) {
+                                        realUserName = nameFromDb
+                                    }
                                 }
-                                saveMatch(currentUserEmail, currentUserName, currentUserPhoto, profile)
+                                saveMatch(currentUserEmail, realUserName, currentUserPhoto, profile)
                             }
                             .addOnFailureListener { e ->
                                 Log.e("ProfileAdapter", "Error obteniendo foto de usuarios: ${e.message}")
-                                saveMatch(currentUserEmail, currentUserName, "", profile)
+                                saveMatch(currentUserEmail, realUserName, "", profile)
                             }
                     } else {
-                        saveMatch(currentUserEmail, currentUserName, currentUserPhoto, profile)
+                        saveMatch(currentUserEmail, realUserName, currentUserPhoto, profile)
                     }
                 }
                 .addOnFailureListener { e ->
                     Log.e("ProfileAdapter", "Error obteniendo foto de userProfiles: ${e.message}")
                     // Continuar sin foto
+                    var realUserName = currentUserName
                     db.collection("usuarios")
                         .whereEqualTo("email", currentUserEmail)
                         .get()
@@ -202,12 +212,16 @@ class ProfileAdapter(
                             var currentUserPhoto = ""
                             if (usuariosDocs.documents.isNotEmpty()) {
                                 currentUserPhoto = usuariosDocs.documents[0].data?.get("photo")?.toString() ?: ""
+                                val nameFromDb = usuariosDocs.documents[0].data?.get("name")?.toString() ?: ""
+                                if (nameFromDb.isNotEmpty()) {
+                                    realUserName = nameFromDb
+                                }
                             }
-                            saveMatch(currentUserEmail, currentUserName, currentUserPhoto, profile)
+                            saveMatch(currentUserEmail, realUserName, currentUserPhoto, profile)
                         }
                         .addOnFailureListener { e2 ->
                             Log.e("ProfileAdapter", "Error en fallback: ${e2.message}")
-                            saveMatch(currentUserEmail, currentUserName, "", profile)
+                            saveMatch(currentUserEmail, realUserName, "", profile)
                         }
                 }
         }

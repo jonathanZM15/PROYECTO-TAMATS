@@ -204,6 +204,11 @@ class MessagesFragment : Fragment() {
         messagesAdapter = MessagesAdapter(currentUserEmail)
         rvMessages.adapter = messagesAdapter
 
+        // Asignar el nombre del usuario obtenido del bundle
+        if (otherUserName.isNotEmpty()) {
+            tvOtherUserName.text = otherUserName
+        }
+
         if (chatId.isNotEmpty()) {
             // Cargar mensajes
             messagesViewModel.loadMessages(chatId)
