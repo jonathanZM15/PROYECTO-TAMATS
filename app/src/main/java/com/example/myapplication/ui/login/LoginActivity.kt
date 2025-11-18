@@ -393,50 +393,13 @@ class LoginActivity : AppCompatActivity() {
                 dialog.dismiss()
                 android.util.Log.d("PasswordReset", "✅ Correo enviado: $email, Token: $resetToken")
             } else {
-                // Error al enviar correo - Mostrar enlace de prueba
+                // Error al enviar correo
                 android.util.Log.e("PasswordReset", "❌ Error enviando correo a: $email")
-
-                // MODO DE PRUEBA: Mostrar diálogo con el enlace para probarlo manualmente
-                val testDialog = androidx.appcompat.app.AlertDialog.Builder(this@LoginActivity)
-                    .setTitle("⚠️ Error al enviar correo")
-                    .setMessage(
-                        "No se pudo conectar al servidor SMTP.\n\n" +
-                        "🔧 MODO DE PRUEBA:\n" +
-                        "El enlace de recuperación se guardó correctamente.\n\n" +
-                        "Token: ${resetToken.take(8)}...\n\n" +
-                        "Para probar el deep link, usa ADB:\n" +
-                        "adb shell am start -W -a android.intent.action.VIEW -d \"tamats://reset?token=$resetToken&email=$encodedEmail\"\n\n" +
-                        "O presiona 'Probar Deep Link' para abrir directamente."
-                    )
-                    .setPositiveButton("Probar Deep Link") { _, _ ->
-                        // Crear intent para probar el deep link directamente
-                        val testIntent = Intent(Intent.ACTION_VIEW).apply {
-                            data = android.net.Uri.parse("tamats://reset?token=$resetToken&email=$encodedEmail")
-                        }
-                        try {
-                            startActivity(testIntent)
-                            android.util.Log.d("PasswordReset", "🧪 Abriendo deep link de prueba")
-                        } catch (e: Exception) {
-                            Toast.makeText(
-                                this@LoginActivity,
-                                "❌ Error al abrir deep link: ${e.message}",
-                                Toast.LENGTH_LONG
-                            ).show()
-                            android.util.Log.e("PasswordReset", "Error abriendo deep link", e)
-                        }
-                    }
-                    .setNegativeButton("Cerrar", null)
-                    .setNeutralButton("Copiar Token") { _, _ ->
-                        // Copiar al portapapeles
-                        val clipboard = getSystemService(CLIPBOARD_SERVICE) as android.content.ClipboardManager
-                        val clip = android.content.ClipData.newPlainText("Reset Token", resetToken)
-                        clipboard.setPrimaryClip(clip)
-                        Toast.makeText(this@LoginActivity, "✅ Token copiado", Toast.LENGTH_SHORT).show()
-                    }
-                    .create()
-
-                testDialog.show()
-                dialog.dismiss()
+                Toast.makeText(
+                    this@LoginActivity,
+                    "❌ Error al enviar el correo.\nVerifica tu conexión a internet e inténtalo de nuevo.",
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
     }
