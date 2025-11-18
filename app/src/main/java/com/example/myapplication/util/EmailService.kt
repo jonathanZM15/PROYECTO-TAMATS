@@ -278,18 +278,31 @@ object EmailService {
                             <p style="margin-top: 0; color: #9C27B0; font-weight: bold; font-size: 16px;">📱 Para cambiar tu contraseña:</p>
                             <div class="step">Abre este correo desde tu dispositivo móvil</div>
                             <div class="step">Presiona el botón morado de abajo</div>
+                            <div class="step">Si no funciona, copia el enlace de texto y ábrelo en Chrome</div>
                             <div class="step">La app TAMATS se abrirá automáticamente</div>
                             <div class="step">Ingresa tu nueva contraseña</div>
                         </div>
                         
                         <div class="button-container">
-                            <a href="$resetLink" class="button">
+                            <a href="$resetLink" class="button" style="color: white;">
                                 📱 Abrir TAMATS
                             </a>
                         </div>
                         
                         <div class="note">
-                            <p style="margin: 5px 0;"><strong>📝 Nota importante:</strong></p>
+                            <p style="margin: 5px 0;"><strong>📝 Si el botón no funciona:</strong></p>
+                            <p style="margin: 10px 0; word-break: break-all; background: #f0f0f0; padding: 10px; border-radius: 5px; font-family: monospace; font-size: 12px;">
+                                $resetLink
+                            </p>
+                            <p style="margin: 5px 0; font-size: 13px;">
+                                1. Copia el enlace de arriba (mantén presionado y selecciona "Copiar")<br>
+                                2. Pégalo en el navegador Chrome de tu móvil<br>
+                                3. Presiona Enter y confirma "Abrir con TAMATS"
+                            </p>
+                        </div>
+                        
+                        <div class="note" style="background: #fff3cd; border-left-color: #ffc107;">
+                            <p style="margin: 5px 0;"><strong>⏰ Importante:</strong></p>
                             <p style="margin: 5px 0;">• Abre este correo desde tu teléfono móvil</p>
                             <p style="margin: 5px 0;">• Asegúrate de tener TAMATS instalada</p>
                             <p style="margin: 5px 0;">• <strong>Este enlace expirará en 1 hora</strong></p>
