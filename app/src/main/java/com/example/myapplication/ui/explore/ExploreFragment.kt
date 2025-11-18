@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.R
+import com.example.myapplication.util.AgeCalculator
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.Timestamp
@@ -606,13 +607,22 @@ class ExploreFragment : Fragment() {
                     val doc = viewModel.cachedProfiles[i]
                     val data = doc.data ?: continue
 
+                    // Calcular edad desde birthDate si existe, si no usar age directamente
+                    val birthDate = data["birthDate"]?.toString()
+                    val age = if (!birthDate.isNullOrEmpty()) {
+                        AgeCalculator.calculateAge(birthDate)
+                    } else {
+                        data["age"]?.toString()?.toIntOrNull() ?: 0
+                    }
+
                     val item = ProfileItem(
                         documentSnapshot = doc,
                         name = data["name"]?.toString() ?: "Usuario",
                         email = data["email"]?.toString() ?: "",
                         city = data["city"]?.toString() ?: "Ciudad no especificada",
                         description = data["description"]?.toString() ?: "Sin descripción",
-                        photoBase64 = data["photo"]?.toString()
+                        photoBase64 = data["photo"]?.toString(),
+                        age = age
                     )
                     profiles.add(item)
                 } catch (e: Exception) {

@@ -1,6 +1,7 @@
 package com.example.myapplication.ui.simulacion
 
 import android.Manifest
+import android.app.DatePickerDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -21,6 +22,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.launch
 import com.example.myapplication.R
 import com.example.myapplication.cloud.FirebaseService
+import com.example.myapplication.util.AgeCalculator
 import com.google.android.material.button.MaterialButton
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -31,7 +33,7 @@ class EditProfileActivity : AppCompatActivity() {
 
     private lateinit var ivProfilePhoto: ImageView
     private lateinit var etProfileName: EditText
-    private lateinit var etProfileAge: EditText
+    private lateinit var etProfileBirthDate: EditText
     private lateinit var etProfileCity: EditText
     private lateinit var etProfileDescription: EditText
     private lateinit var tvWordCount: TextView
@@ -146,7 +148,7 @@ class EditProfileActivity : AppCompatActivity() {
     private fun initializeViews() {
         ivProfilePhoto = findViewById(R.id.ivProfilePhoto)
         etProfileName = findViewById(R.id.etProfileName)
-        etProfileAge = findViewById(R.id.etProfileAge)
+        etProfileBirthDate = findViewById(R.id.etProfileAge)
         etProfileCity = findViewById(R.id.etProfileCity)
         etProfileDescription = findViewById(R.id.etProfileDescription)
         tvWordCount = findViewById(R.id.tvWordCount)
@@ -170,6 +172,7 @@ class EditProfileActivity : AppCompatActivity() {
     private fun setupListeners() {
         btnChangePhoto.setOnClickListener { showPhotoOptions() }
         btnSaveProfile.setOnClickListener { saveProfile() }
+        etProfileBirthDate.setOnClickListener { showDatePickerDialog() }
 
         etProfileDescription.addTextChangedListener(object : android.text.TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -178,6 +181,31 @@ class EditProfileActivity : AppCompatActivity() {
             }
             override fun afterTextChanged(s: android.text.Editable?) {}
         })
+    }
+
+    private fun showDatePickerDialog() {
+        val calendar = Calendar.getInstance()
+        val year = calendar.get(Calendar.YEAR)
+        val month = calendar.get(Calendar.MONTH)
+        val day = calendar.get(Calendar.DAY_OF_MONTH)
+
+        val datePickerDialog = DatePickerDialog(
+            this,
+            { _, selectedYear, selectedMonth, selectedDay ->
+                val date = "${selectedDay.toString().padStart(2, '0')}/${(selectedMonth + 1).toString().padStart(2, '0')}/${selectedYear}"
+                etProfileBirthDate.setText(date)
+            },
+            year,
+            month,
+            day
+        )
+
+        // Restricción de edad mínima de 18 años
+        val maxDate = Calendar.getInstance()
+        maxDate.add(Calendar.YEAR, -18)
+        datePickerDialog.datePicker.maxDate = maxDate.timeInMillis
+
+        datePickerDialog.show()
     }
 
     private fun showPhotoOptions() {
@@ -280,7 +308,7 @@ class EditProfileActivity : AppCompatActivity() {
                 try {
                     if (profileData != null && profileData.isNotEmpty()) {
                         profileData["name"]?.toString()?.let { if (it.isNotEmpty()) etProfileName.setText(it) }
-                        profileData["age"]?.toString()?.let { if (it.isNotEmpty()) etProfileAge.setText(it) }
+                        profileData["birthDate"]?.toString()?.let { if (it.isNotEmpty()) etProfileBirthDate.setText(it) }
                         profileData["city"]?.toString()?.let { if (it.isNotEmpty()) etProfileCity.setText(it) }
                         profileData["description"]?.toString()?.let {
                             if (it.isNotEmpty()) {
@@ -332,7 +360,7 @@ class EditProfileActivity : AppCompatActivity() {
 
     private fun saveProfile() {
         val name = etProfileName.text.toString().trim()
-        val age = etProfileAge.text.toString().trim()
+        val birthDate = etProfileBirthDate.text.toString().trim()
         val city = etProfileCity.text.toString().trim()
         val description = etProfileDescription.text.toString().trim()
 
@@ -340,8 +368,8 @@ class EditProfileActivity : AppCompatActivity() {
             Toast.makeText(this, "Por favor ingresa tu nombre", Toast.LENGTH_SHORT).show()
             return
         }
-        if (age.isEmpty()) {
-            Toast.makeText(this, "Por favor ingresa tu edad", Toast.LENGTH_SHORT).show()
+        if (birthDate.isEmpty()) {
+            Toast.makeText(this, "Por favor ingresa tu fecha de nacimiento", Toast.LENGTH_SHORT).show()
             return
         }
         if (city.isEmpty()) {
@@ -363,6 +391,9 @@ class EditProfileActivity : AppCompatActivity() {
             return
         }
 
+        // Calcular la edad automáticamente desde la fecha de nacimiento
+        val age = AgeCalculator.calculateAge(birthDate)
+
         val interests = getSelectedInterests()
         val photoBase64 = bitmapToBase64(selectedBitmap!!)
         val prefs = getSharedPreferences("user_data", MODE_PRIVATE)
@@ -370,7 +401,8 @@ class EditProfileActivity : AppCompatActivity() {
 
         val profileData: Map<String, Any> = mapOf(
             "name" to name,
-            "age" to (age.toIntOrNull() ?: 0),
+            "age" to age,
+            "birthDate" to birthDate,
             "city" to city,
             "description" to description,
             "interests" to interests,

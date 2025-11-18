@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.myapplication.R
+import com.example.myapplication.util.AgeCalculator
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.Timestamp
@@ -24,7 +25,8 @@ data class ProfileItem(
     val email: String,
     val city: String,
     val description: String,
-    val photoBase64: String?
+    val photoBase64: String?,
+    val age: Int = 0
 )
 
 class ProfileAdapter(
@@ -41,6 +43,7 @@ class ProfileAdapter(
         private val tvUserName: TextView = itemView.findViewById(R.id.tvUserName)
         private val tvUserCity: TextView = itemView.findViewById(R.id.tvUserCity)
         private val tvUserDescription: TextView = itemView.findViewById(R.id.tvUserDescription)
+        private val tvUserAge: TextView = itemView.findViewById(R.id.tvUserAge)
         private val ivUserProfilePhoto: ImageView = itemView.findViewById(R.id.ivUserProfilePhoto)
         private val btnLike: ImageButton = itemView.findViewById(R.id.btnLike)
         private val btnReject: ImageButton = itemView.findViewById(R.id.btnReject)
@@ -50,6 +53,7 @@ class ProfileAdapter(
             tvUserName.text = profile.name
             tvUserCity.text = profile.city
             tvUserDescription.text = profile.description
+            tvUserAge.text = profile.age.toString()
 
             // Click listener para el nombre
             tvUserName.setOnClickListener {

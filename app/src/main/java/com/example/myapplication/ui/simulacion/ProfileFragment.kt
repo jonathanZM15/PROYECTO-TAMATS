@@ -24,6 +24,7 @@ import com.example.myapplication.cloud.FirebaseService
 import com.example.myapplication.ui.explore.Post
 import com.example.myapplication.ui.explore.PostAdapter
 import com.example.myapplication.ui.explore.ImagePagerAdapter
+import com.example.myapplication.util.AgeCalculator
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import android.graphics.Color
@@ -211,7 +212,16 @@ class ProfileFragment : Fragment() {
 
                     // Cargar datos básicos
                     tvViewName.text = userData["name"]?.toString() ?: "Sin nombre"
-                    tvViewAge.text = userData["age"]?.toString() ?: "N/A"
+
+                    // Calcular edad desde birthDate si existe, si no usar age directamente
+                    val birthDate = userData["birthDate"]?.toString()
+                    val age = if (!birthDate.isNullOrEmpty()) {
+                        AgeCalculator.calculateAge(birthDate)
+                    } else {
+                        userData["age"]?.toString()?.toIntOrNull() ?: 0
+                    }
+                    tvViewAge.text = age.toString()
+
                     tvViewCity.text = userData["city"]?.toString() ?: "N/A"
                     tvViewDescription.text = userData["description"]?.toString() ?: "Sin descripción"
 
@@ -258,7 +268,16 @@ class ProfileFragment : Fragment() {
 
                             // Cargar datos básicos
                             tvViewName.text = userData["name"]?.toString() ?: "Sin nombre"
-                            tvViewAge.text = userData["age"]?.toString() ?: "N/A"
+
+                            // Calcular edad desde birthDate si existe, si no usar age directamente
+                            val birthDate = userData["birthDate"]?.toString()
+                            val age = if (!birthDate.isNullOrEmpty()) {
+                                AgeCalculator.calculateAge(birthDate)
+                            } else {
+                                userData["age"]?.toString()?.toIntOrNull() ?: 0
+                            }
+                            tvViewAge.text = age.toString()
+
                             tvViewCity.text = userData["city"]?.toString() ?: "N/A"
                             tvViewDescription.text = userData["description"]?.toString() ?: "Sin descripción"
 

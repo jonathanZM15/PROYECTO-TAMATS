@@ -46,6 +46,8 @@
     <string name="hint_name">Ingresa tu nombre</string>
     <string name="label_age">Edad</string>
     <string name="hint_age">Ingresa tu edad</string>
+    <string name="label_birthDate">Fecha de Nacimiento</string>
+    <string name="hint_birthDate">dd/MM/yyyy</string>
     <string name="label_city">Ciudad</string>
     <string name="hint_city">Ingresa tu ciudad</string>
     <string name="label_description">Descripción (Opcional)</string>
