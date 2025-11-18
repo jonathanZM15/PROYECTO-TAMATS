@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.myapplication.model.Message
 import com.example.myapplication.model.BroadcastMessage
+import com.example.myapplication.model.Chat
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.Timestamp
 
@@ -135,61 +136,118 @@ class AdminMessagesViewModel : ViewModel() {
         var failureCount = 0
 
         for (userEmail in userEmails) {
-            // Buscar o crear chat de soporte
+            // Buscar chat de soporte existente
             db.collection("chats")
                 .whereEqualTo("user1Email", adminEmail)
                 .whereEqualTo("user2Email", userEmail)
-                .whereEqualTo("isSupportChat", true)
+                .whereEqualTo("chatType", "support")
                 .get()
                 .addOnSuccessListener { snapshot ->
                     if (snapshot.documents.isNotEmpty()) {
                         val chatId = snapshot.documents[0].id
-                        // Crear mensaje
-                        val message = Message(
-                            chatId = chatId,
-                            senderEmail = adminEmail,
-                            senderName = adminName,
-                            content = content,
-                            timestamp = Timestamp.now()
-                        )
-                        db.collection("messages")
-                            .add(message)
-                            .addOnSuccessListener {
-                                updateChatLastMessage(chatId, content)
-                                successCount++
-                                if (successCount + failureCount == userEmails.size) {
-                                    if (failureCount == 0) {
-                                        _broadcastSent.value = true
-                                        onSuccess()
-                                    } else {
-                                        onFailure(Exception("Se enviaron $successCount de ${userEmails.size} mensajes"))
-                                    }
-                                }
-                            }
-                            .addOnFailureListener { e ->
-                                failureCount++
-                                if (successCount + failureCount == userEmails.size) {
-                                    if (successCount > 0) {
-                                        _broadcastSent.value = true
-                                        onSuccess()
-                                    } else {
-                                        onFailure(e)
-                                    }
-                                }
-                            }
+                        // Chat existe, enviar mensaje
+                        sendMessageToChat(chatId, adminEmail, adminName, content, userEmails.size, { successCount++; checkBroadcastComplete(successCount, failureCount, userEmails.size, onSuccess, onFailure) }, { failureCount++; checkBroadcastComplete(successCount, failureCount, userEmails.size, onSuccess, onFailure) })
                     } else {
-                        failureCount++
-                        if (successCount + failureCount == userEmails.size) {
-                            onFailure(Exception("No se encontraron chats de soporte"))
-                        }
+                        Log.d("AdminMessagesViewModel", "Chat de soporte no encontrado para: $userEmail. Creando uno nuevo...")
+                        // Chat no existe, crear uno
+                        createSupportChatAndSendMessage(adminEmail, adminName, userEmail, content, userEmails.size, { successCount++; checkBroadcastComplete(successCount, failureCount, userEmails.size, onSuccess, onFailure) }, { failureCount++; checkBroadcastComplete(successCount, failureCount, userEmails.size, onSuccess, onFailure) })
                     }
                 }
                 .addOnFailureListener { e ->
+                    Log.e("AdminMessagesViewModel", "Error buscando chat de soporte: ${e.message}")
                     failureCount++
-                    if (successCount + failureCount == userEmails.size) {
-                        onFailure(e)
-                    }
+                    checkBroadcastComplete(successCount, failureCount, userEmails.size, onSuccess, onFailure)
                 }
+        }
+    }
+
+    /**
+     * Envía un mensaje a un chat específico
+     */
+    private fun sendMessageToChat(
+        chatId: String,
+        adminEmail: String,
+        adminName: String,
+        content: String,
+        totalUsers: Int,
+        onSuccess: () -> Unit,
+        onFailure: () -> Unit
+    ) {
+        val message = Message(
+            chatId = chatId,
+            senderEmail = adminEmail,
+            senderName = adminName,
+            content = content,
+            timestamp = Timestamp.now()
+        )
+        db.collection("messages")
+            .add(message)
+            .addOnSuccessListener {
+                updateChatLastMessage(chatId, content)
+                onSuccess()
+            }
+            .addOnFailureListener { e ->
+                Log.e("AdminMessagesViewModel", "Error enviando mensaje: ${e.message}")
+                onFailure()
+            }
+    }
+
+    /**
+     * Crea un chat de soporte y envía el mensaje
+     */
+    private fun createSupportChatAndSendMessage(
+        adminEmail: String,
+        adminName: String,
+        userEmail: String,
+        content: String,
+        totalUsers: Int,
+        onSuccess: () -> Unit,
+        onFailure: () -> Unit
+    ) {
+        val chat = Chat(
+            user1Email = adminEmail,
+            user1Name = adminName,
+            user1Photo = "",
+            user2Email = userEmail,
+            user2Name = userEmail,
+            user2Photo = "",
+            chatType = "support",
+            lastMessage = content
+        )
+
+        db.collection("chats")
+            .add(chat)
+            .addOnSuccessListener { docRef ->
+                Log.d("AdminMessagesViewModel", "Chat de soporte creado: ${docRef.id}")
+                sendMessageToChat(docRef.id, adminEmail, adminName, content, totalUsers, onSuccess, onFailure)
+            }
+            .addOnFailureListener { e ->
+                Log.e("AdminMessagesViewModel", "Error creando chat de soporte: ${e.message}")
+                onFailure()
+            }
+    }
+
+    /**
+     * Verifica si el broadcast está completo
+     */
+    private fun checkBroadcastComplete(
+        successCount: Int,
+        failureCount: Int,
+        totalUsers: Int,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        if (successCount + failureCount == totalUsers) {
+            if (failureCount == 0) {
+                _broadcastSent.value = true
+                onSuccess()
+            } else if (successCount > 0) {
+                _broadcastSent.value = true
+                onSuccess()
+                Log.w("AdminMessagesViewModel", "Broadcast parcial: se enviaron $successCount de $totalUsers mensajes")
+            } else {
+                onFailure(Exception("Error enviando mensajes a todos los usuarios"))
+            }
         }
     }
 

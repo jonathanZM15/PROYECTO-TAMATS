@@ -155,6 +155,10 @@ class AdminActivity : AppCompatActivity() {
                     openBroadcastMessage()
                     true
                 }
+                R.id.action_back_home_dropdown -> {
+                    returnToHome()
+                    true
+                }
                 R.id.action_logout_dropdown -> {
                     logout()
                     true
@@ -211,6 +215,23 @@ class AdminActivity : AppCompatActivity() {
     private fun showUsersView() {
         val scrollView = findViewById<android.widget.ScrollView>(R.id.scrollAdminPanel)
         scrollView?.visibility = android.view.View.VISIBLE
+    }
+
+    /**
+     * Regresa a la pantalla de inicio (lista de usuarios)
+     */
+    private fun returnToHome() {
+        // Limpiar el back stack de fragments de manera eficiente
+        if (supportFragmentManager.backStackEntryCount > 0) {
+            supportFragmentManager.popBackStack(
+                null,
+                androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE
+            )
+        }
+        // Mostrar la vista de usuarios
+        showUsersView()
+        // Limpiar la búsqueda
+        searchInput.setText("")
     }
 
     /**

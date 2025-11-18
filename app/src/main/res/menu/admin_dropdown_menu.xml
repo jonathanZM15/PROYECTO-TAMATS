@@ -9,6 +9,10 @@
         android:title="Enviar Mensaje a Todos"
         android:icon="@drawable/ic_send" />
     <item
+        android:id="@+id/action_back_home_dropdown"
+        android:title="Volver al Inicio"
+        android:icon="@drawable/ic_back" />
+    <item
         android:id="@+id/action_logout_dropdown"
         android:title="Cerrar Sesión"
         android:icon="@drawable/ic_close" />
