@@ -169,8 +169,15 @@ class KnowFragment : Fragment() {
             llPublicationsContainer?.removeAllViews()
 
             // Cargar publicaciones del usuario
-            if (email.isNotEmpty()) {
-                loadUserPublications(email, llPublicationsContainer)
+            // IMPORTANTE: Usar userEmail del argumento en lugar del email de userData para evitar discrepancias
+            val emailParaBuscar = if (!userEmail.isNullOrEmpty()) userEmail!! else email
+            Log.d("KnowFragment", "displayUserProfile: usando email = '$emailParaBuscar' (userEmail arg: $userEmail, userData email: $email)")
+
+            if (emailParaBuscar.isNotEmpty()) {
+                Log.d("KnowFragment", "Llamando loadUserPublications con email: $emailParaBuscar")
+                loadUserPublications(emailParaBuscar, llPublicationsContainer)
+            } else {
+                Log.e("KnowFragment", "Email vacío en displayUserProfile")
             }
 
             val rvUserStories = view.findViewById<RecyclerView>(R.id.rvUserStories)
@@ -192,18 +199,29 @@ class KnowFragment : Fragment() {
             return
         }
 
-        Log.d("KnowFragment", "loadUserPublications: cargando publicaciones para $email")
+        Log.d("KnowFragment", "===== CARGANDO PUBLICACIONES =====")
+        Log.d("KnowFragment", "Email a buscar: '$email'")
 
-        db.collection("posts")
-            .whereEqualTo("userEmail", email)
-            .orderBy("timestamp", Query.Direction.DESCENDING)
+        // Buscar en la colección 'stories' donde se guardan las publicaciones
+        db.collection("stories")
             .get()
-            .addOnSuccessListener { postDocs ->
-                Log.d("KnowFragment", "loadUserPublications: se encontraron ${postDocs.size()} publicaciones")
+            .addOnSuccessListener { allDocs ->
+                Log.d("KnowFragment", "Total de stories en BD: ${allDocs.size()}")
+
+                // Filtrar manualmente para encontrar publicaciones del usuario
+                val userPosts = allDocs.documents.filter { doc ->
+                    val docEmail = doc.get("userEmail")?.toString() ?: ""
+                    docEmail.equals(email, ignoreCase = true)
+                }.sortedByDescending { doc ->
+                    (doc.get("timestamp") as? Number)?.toLong() ?: 0L
+                }
+
+                Log.d("KnowFragment", "Publicaciones encontradas para usuario: ${userPosts.size}")
+
                 container.removeAllViews()
 
-                if (postDocs.isEmpty) {
-                    Log.d("KnowFragment", "loadUserPublications: sin publicaciones, mostrando mensaje")
+                if (userPosts.isEmpty()) {
+                    Log.d("KnowFragment", "Sin publicaciones para mostrar")
                     val tvNoPost = TextView(requireContext())
                     tvNoPost.text = getString(R.string.no_publications_message)
                     tvNoPost.textSize = 14f
@@ -214,18 +232,22 @@ class KnowFragment : Fragment() {
                     return@addOnSuccessListener
                 }
 
+                // Mostrar header de publicaciones
                 val tvPublicationsLabel = TextView(requireContext())
-                tvPublicationsLabel.text = getString(R.string.publications_label)
+                tvPublicationsLabel.text = "Publicaciones"
                 tvPublicationsLabel.textSize = 16f
                 tvPublicationsLabel.setTextColor(ContextCompat.getColor(requireContext(), R.color.tamats_pink))
                 tvPublicationsLabel.setPadding(16, 16, 16, 8)
                 container.addView(tvPublicationsLabel)
 
-                for (postDoc in postDocs.documents) {
+                // Mostrar cada publicación
+                for (postDoc in userPosts) {
                     try {
                         val postData = postDoc.data ?: continue
                         val postText = postData["text"]?.toString() ?: ""
                         val postImages = postData["images"] as? List<*>
+
+                        Log.d("KnowFragment", "Mostrando publicación: text='$postText', imágenes=${postImages?.size ?: 0}")
 
                         val postView = LayoutInflater.from(requireContext())
                             .inflate(R.layout.item_publication_know, container, false)
@@ -248,10 +270,36 @@ class KnowFragment : Fragment() {
                                 ivImage.scaleType = ImageView.ScaleType.CENTER_CROP
                                 ivImage.contentDescription = "Imagen de publicación"
 
-                                Glide.with(this)
-                                    .load(imageUrl?.toString() ?: "")
-                                    .centerCrop()
-                                    .into(ivImage)
+                                try {
+                                    val imageStr = imageUrl?.toString() ?: ""
+                                    if (imageStr.isNotEmpty()) {
+                                        // Verificar si es Base64 o una URL
+                                        if (imageStr.startsWith("http://") || imageStr.startsWith("https://")) {
+                                            // Es una URL, cargar directamente
+                                            Glide.with(this)
+                                                .load(imageStr)
+                                                .centerCrop()
+                                                .into(ivImage)
+                                        } else {
+                                            // Es Base64, decodificar a Bitmap
+                                            val decoded = Base64.decode(imageStr, Base64.DEFAULT)
+                                            val bitmap = BitmapFactory.decodeByteArray(decoded, 0, decoded.size)
+                                            if (bitmap != null) {
+                                                Glide.with(this)
+                                                    .load(bitmap)
+                                                    .centerCrop()
+                                                    .into(ivImage)
+                                                Log.d("KnowFragment", "Imagen Base64 cargada correctamente")
+                                            } else {
+                                                Log.w("KnowFragment", "Error decodificando imagen Base64")
+                                                ivImage.setImageResource(android.R.drawable.ic_menu_report_image)
+                                            }
+                                        }
+                                    }
+                                } catch (e: Exception) {
+                                    Log.e("KnowFragment", "Error cargando imagen de publicación: ${e.message}")
+                                    ivImage.setImageResource(android.R.drawable.ic_menu_report_image)
+                                }
 
                                 llPostImagesContainer.addView(ivImage)
                             }
@@ -263,25 +311,13 @@ class KnowFragment : Fragment() {
                     }
                 }
 
-                // Agregar mensaje al final indicando que no hay más publicaciones
-                Log.d("KnowFragment", "loadUserPublications: agregando mensaje de fin")
-                val tvEndMessage = TextView(requireContext())
-                tvEndMessage.text = "Ya no hay mas publicaciones para enseñar"
-                tvEndMessage.textSize = 14f
-                tvEndMessage.setTextColor(ContextCompat.getColor(requireContext(), R.color.tamats_pink))
-                tvEndMessage.gravity = Gravity.CENTER
-                tvEndMessage.setPadding(16, 32, 16, 32)
-                tvEndMessage.layoutParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-                )
-                container.addView(tvEndMessage)
-                Log.d("KnowFragment", "loadUserPublications: mensaje agregado, childCount = ${container.childCount}")
+                Log.d("KnowFragment", "Publicaciones renderizadas exitosamente")
             }
             .addOnFailureListener { e ->
-                Log.e("KnowFragment", "Error cargando publicaciones: ${e.message}")
+                Log.e("KnowFragment", "Error cargando publicaciones de Firebase: ${e.message}")
             }
     }
+
 
     private fun loadUserStories(email: String, recyclerView: RecyclerView, parentView: View) {
         val tvNoStories = parentView.findViewById<TextView>(R.id.tvNoStories)

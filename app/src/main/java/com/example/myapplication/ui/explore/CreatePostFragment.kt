@@ -306,9 +306,9 @@ class CreatePostFragment : Fragment() {
                 val FIRESTORE_SAFE_THRESHOLD = 700 * 1024 // 700 KB conservador (máximo Firestore es 1MB por documento)
 
                 if (totalBytes <= FIRESTORE_SAFE_THRESHOLD) {
-                    // Guardar directamente en el documento posts (colección correcta)
-                    android.util.Log.d("CreatePostFragment", "Guardando publicación en collection 'posts': $storyData")
-                    db.collection("posts")
+                    // Guardar en la colección 'stories' para que se muestren en el perfil
+                    android.util.Log.d("CreatePostFragment", "Guardando publicación en collection 'stories': $storyData")
+                    db.collection("stories")
                         .add(storyData)
                         .addOnSuccessListener {
                             Toast.makeText(requireContext(), "Publicación compartida", Toast.LENGTH_SHORT).show()
@@ -326,8 +326,8 @@ class CreatePostFragment : Fragment() {
                         }
 
                 } else {
-                    // Demasiado grande para un solo documento: crear documento posts y guardar imágenes en collection 'postImages'
-                    val postDocRef = db.collection("posts").document()
+                    // Demasiado grande para un solo documento: crear documento en 'stories' y guardar imágenes en collection 'postImages'
+                    val postDocRef = db.collection("stories").document()
                     // Guardar metadata sin imágenes inicialmente
                     val postNoImages = HashMap(storyData)
                     postNoImages["images"] = listOf<String>()
