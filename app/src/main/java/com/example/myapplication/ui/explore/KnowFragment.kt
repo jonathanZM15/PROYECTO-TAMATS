@@ -168,17 +168,20 @@ class KnowFragment : Fragment() {
             val llPublicationsContainer = view.findViewById<LinearLayout>(R.id.llPublicationsContainer)
             llPublicationsContainer?.removeAllViews()
 
-            // Cargar publicaciones del usuario
+            // Cargar publicaciones del usuario (DESACTIVADO - Solo mostrar Historias)
             // IMPORTANTE: Usar userEmail del argumento en lugar del email de userData para evitar discrepancias
             val emailParaBuscar = if (!userEmail.isNullOrEmpty()) userEmail!! else email
             Log.d("KnowFragment", "displayUserProfile: usando email = '$emailParaBuscar' (userEmail arg: $userEmail, userData email: $email)")
 
+            // Publicaciones desactivadas - comentado para solo mostrar Historias
+            /*
             if (emailParaBuscar.isNotEmpty()) {
                 Log.d("KnowFragment", "Llamando loadUserPublications con email: $emailParaBuscar")
                 loadUserPublications(emailParaBuscar, llPublicationsContainer)
             } else {
                 Log.e("KnowFragment", "Email vacío en displayUserProfile")
             }
+            */
 
             val rvUserStories = view.findViewById<RecyclerView>(R.id.rvUserStories)
             rvUserStories.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)

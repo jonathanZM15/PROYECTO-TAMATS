@@ -303,7 +303,7 @@ class CreatePostFragment : Fragment() {
                     totalBytes += try { b64.toByteArray(Charsets.UTF_8).size.toLong() } catch (_: Exception) { 0L }
                 }
 
-                val FIRESTORE_SAFE_THRESHOLD = 700 * 1024 // 700 KB conservador (máximo Firestore es 1MB por documento)
+                val FIRESTORE_SAFE_THRESHOLD = 950 * 1024 // 950 KB conservador (máximo Firestore es 1MB por documento)
 
                 if (totalBytes <= FIRESTORE_SAFE_THRESHOLD) {
                     // Guardar en la colección 'stories' para que se muestren en el perfil
@@ -412,9 +412,9 @@ class CreatePostFragment : Fragment() {
     }
 
     private fun bitmapToBase64(bitmap: android.graphics.Bitmap): String {
-        val maxBytes = 800 * 1024 // 800 KB para margen de seguridad (máximo Firestore es 1MB)
-        var quality = 70 // Empezar con calidad más baja que en perfil
-        
+        val maxBytes = 200 * 1024 // 200 KB por imagen (para 5 imágenes máximo = 1MB total)
+        var quality = 50 // Empezar con calidad más baja para garantizar compresión
+
         // Primero intentar con la imagen original a diferentes calidades
         while (quality >= 20) {
             val baos = java.io.ByteArrayOutputStream()
@@ -431,14 +431,14 @@ class CreatePostFragment : Fragment() {
 
         // Si aún es demasiado grande, redimensionar la imagen agresivamente
         var scaledBitmap = bitmap
-        var scaleFactor = 0.8f
+        var scaleFactor = 0.6f // Empezar con escala menor (60% del tamaño original)
 
         while (scaleFactor > 0.2f) {
             val newWidth = (bitmap.width * scaleFactor).toInt().coerceAtLeast(100)
             val newHeight = (bitmap.height * scaleFactor).toInt().coerceAtLeast(100)
 
             scaledBitmap = android.graphics.Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true)
-            quality = 70
+            quality = 40 // Calidad más baja para escalado
 
             while (quality >= 20) {
                 val baos = java.io.ByteArrayOutputStream()
