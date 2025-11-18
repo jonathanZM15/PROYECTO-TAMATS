@@ -108,7 +108,6 @@ class RegisterActivity : AppCompatActivity() {
     }
 
     private fun handleRegistration() {
-        // (El resto del código de validación y registro permanece igual)
         if (validateFields()) {
             val name = etName.text.toString().trim()
             val email = etEmailRegister.text.toString().trim()
@@ -177,7 +176,7 @@ class RegisterActivity : AppCompatActivity() {
                                     ).show()
                                     android.util.Log.d("RegisterActivity", "✅ Usuario registrado exitosamente: $email")
 
-                                    // Guardar sesión automáticamente
+                                    // Guardar sesión automáticamente para mantener al usuario logueado
                                     val prefs = getSharedPreferences("user_data", MODE_PRIVATE)
                                     prefs.edit().apply {
                                         putString("user_email", email)
@@ -209,50 +208,36 @@ class RegisterActivity : AppCompatActivity() {
     }
 
     private fun validateFields(): Boolean {
-        etName.error = null
-        etEmailRegister.error = null
-        etBirthDate.error = null
-        etPasswordRegister.error = null
-        etConfirmPassword.error = null
         var isValid = true
 
-        if (etName.text.toString().trim().isEmpty()) {
-            etName.error = "El nombre es obligatorio."
+        val name = etName.text.toString().trim()
+        if (name.isEmpty()) {
+            etName.error = "El nombre es requerido"
             isValid = false
         }
 
         val email = etEmailRegister.text.toString().trim()
         if (email.isEmpty()) {
-            etEmailRegister.error = "El correo electrónico es obligatorio."
+            etEmailRegister.error = "El correo es requerido"
             isValid = false
         } else if (!email.matches(emailRegex)) {
-            etEmailRegister.error = "Formato de correo inválido (ej: usuario@dominio.com)."
+            etEmailRegister.error = "Correo inválido"
             isValid = false
         }
 
         if (etBirthDate.text.toString().isEmpty()) {
-            etBirthDate.error = "Debes seleccionar tu fecha de nacimiento."
-            isValid = false
-        }
-
-        if (spinnerGender.selectedItemPosition == 0) {
-            Toast.makeText(this, "Por favor, selecciona tu género.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "La fecha de nacimiento es requerida", Toast.LENGTH_SHORT).show()
             isValid = false
         }
 
         val password = etPasswordRegister.text.toString()
-        val confirmPassword = etConfirmPassword.text.toString()
-
-        // Validar contraseña con PasswordValidator
-        val passwordValidation = com.example.myapplication.util.PasswordValidator.validate(password)
-        if (!passwordValidation.isValid) {
-            etPasswordRegister.error = com.example.myapplication.util.PasswordValidator.getErrorMessage(passwordValidation)
+        if (password.length != 8) {
+            etPasswordRegister.error = "La contraseña debe ser de exactamente 8 caracteres."
             isValid = false
         }
 
-        // Verificar que las contraseñas coincidan
-        if (!com.example.myapplication.util.PasswordValidator.passwordsMatch(password, confirmPassword)) {
-            etConfirmPassword.error = "Las contraseñas no coinciden"
+        if (etConfirmPassword.text.toString() != password) {
+            etConfirmPassword.error = "Las contraseñas no coinciden."
             isValid = false
         }
 

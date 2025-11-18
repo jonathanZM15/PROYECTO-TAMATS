@@ -162,7 +162,11 @@ class MessagesFragment : Fragment() {
         val navBar = activity.findViewById<android.view.View>(R.id.layout_bottom_nav)
         navBar?.visibility = android.view.View.GONE
 
-        // Ampliar el fragmentContainer para que ocupe todo el espacio disponible
+        // Ocultar el botón flotante de crear historia
+        val fabCenter = activity.findViewById<android.view.View>(R.id.fabCenter)
+        fabCenter?.visibility = android.view.View.GONE
+
+        // ...existing code...
         val fragmentContainer = activity.findViewById<android.view.View>(R.id.fragmentContainer)
         val layoutParams = fragmentContainer?.layoutParams as? android.view.ViewGroup.MarginLayoutParams
         if (layoutParams != null) {
@@ -570,6 +574,10 @@ class MessagesFragment : Fragment() {
         val activity = requireActivity()
         val navBar = activity.findViewById<android.view.View>(R.id.layout_bottom_nav)
         navBar?.visibility = android.view.View.VISIBLE
+
+        // Mostrar el botón flotante de crear historia al salir del chat
+        val fabCenter = activity.findViewById<android.view.View>(R.id.fabCenter)
+        fabCenter?.visibility = android.view.View.VISIBLE
 
         // Restaurar el margen del fragmentContainer
         val fragmentContainer = activity.findViewById<android.view.View>(R.id.fragmentContainer)

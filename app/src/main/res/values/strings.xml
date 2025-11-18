@@ -125,13 +125,13 @@
     <string name="photo_of">Foto de %1$s</string>
 
     <string name="admin_suspension_confirm_title">Confirmar Suspensión</string>
-    <string name="admin_suspension_confirm_message">¿Suspender a %s por %d %s?</string>
+    <string name="admin_suspension_confirm_message" formatted="false">¿Suspender a %s por %d %s?</string>
     <string name="admin_suspension_day">día</string>
     <string name="admin_suspension_days">días</string>
 
     <string name="admin_user_blocked_success">Usuario bloqueado exitosamente</string>
     <string name="admin_user_unblocked_success">Usuario desbloqueado exitosamente</string>
-    <string name="admin_user_suspended_success">Usuario suspendido por %d %s</string>
+    <string name="admin_user_suspended_success" formatted="false">Usuario suspendido por %d %s</string>
     <string name="admin_suspension_removed_success">Suspensión removida exitosamente</string>
     <string name="admin_user_deleted_success">Usuario %s eliminado permanentemente</string>
 

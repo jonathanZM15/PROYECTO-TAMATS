@@ -15,15 +15,15 @@ interface UsuarioDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertar(user: UsuarioEntity)
 
-    // Actualizar un usuario existente (para cambiar contraseña, etc.)
+    // 2. Actualizar un usuario existente (para cambiar contraseña, etc.)
     @Update
     suspend fun actualizar(user: UsuarioEntity)
 
-    // 2. Consulta para Login: Obtener un usuario por email.
+    // 3. Obtener un usuario por email
     @Query("SELECT * FROM usuarios WHERE email = :email LIMIT 1")
     suspend fun getUserByEmail(email: String): UsuarioEntity?
 
-    // 3. Consulta para verificar si un email ya existe (útil en RegisterActivity)
+    // 4. Verificar si un email ya está registrado
     @Query("SELECT EXISTS(SELECT 1 FROM usuarios WHERE email = :email)")
     suspend fun isEmailRegistered(email: String): Boolean
 }

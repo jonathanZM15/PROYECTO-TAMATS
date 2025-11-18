@@ -178,17 +178,6 @@ class EditProfileActivity : AppCompatActivity() {
             }
             override fun afterTextChanged(s: android.text.Editable?) {}
         })
-
-        try {
-            val fabCenter = findViewById<MaterialButton>(R.id.fabCenter)
-            fabCenter?.setOnClickListener {
-                val intent = Intent(this, com.example.myapplication.MainActivity::class.java)
-                intent.putExtra("fragment", "create_post")
-                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-                startActivity(intent)
-            }
-        } catch (_: Exception) {
-        }
     }
 
     private fun showPhotoOptions() {
