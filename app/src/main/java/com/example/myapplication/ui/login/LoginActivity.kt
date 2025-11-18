@@ -312,72 +312,93 @@ class LoginActivity : AppCompatActivity() {
         btnSend?.isEnabled = false
         btnSend?.text = "Verificando..."
 
-        // PRIMERO: Verificar que el correo exista en la base de datos
+        // PRIMERO: Verificar que el correo exista en Room o Firebase
         lifecycleScope.launch(Dispatchers.IO) {
-            val userExists = usuarioDao.getUserByEmail(email) != null
+            // Buscar en Room primero
+            val localUser = usuarioDao.getUserByEmail(email)
 
-            withContext(Dispatchers.Main) {
-                if (!userExists) {
-                    // Correo NO existe en la BD
-                    btnSend?.isEnabled = true
-                    btnSend?.text = "Enviar"
-                    Toast.makeText(
-                        this@LoginActivity,
-                        "❌ No existe una cuenta registrada con este correo electrónico",
-                        Toast.LENGTH_LONG
-                    ).show()
-                    android.util.Log.w("PasswordReset", "⚠️ Intento de recuperación para correo no registrado: $email")
-                    return@withContext
-                }
+            if (localUser != null) {
+                // Usuario encontrado en Room, proceder
+                android.util.Log.d("PasswordReset", "✅ Usuario encontrado en Room: $email")
+                sendResetEmail(email, btnSend, dialog)
+            } else {
+                // No está en Room, buscar en Firebase
+                android.util.Log.d("PasswordReset", "🔍 Usuario no en Room, buscando en Firebase: $email")
 
-                // Correo SÍ existe, continuar con el envío
-                btnSend?.text = "Enviando..."
-
-                // Generar token único de recuperación
-                val resetToken = java.util.UUID.randomUUID().toString()
-                val timestamp = System.currentTimeMillis()
-
-                // Crear Intent URL que funciona desde correos electrónicos
-                val encodedEmail = android.net.Uri.encode(email)
-                val resetLink = "intent://reset?token=$resetToken&email=$encodedEmail#Intent;scheme=tamats;package=com.example.myapplication;end"
-
-                // Guardar token en SharedPreferences (expira en 1 hora)
-                val prefs = getSharedPreferences("password_reset", MODE_PRIVATE)
-                prefs.edit().apply {
-                    putString("token_$resetToken", email)
-                    putLong("timestamp_$resetToken", timestamp)
-                    apply()
-                }
-
-                // Enviar correo usando SMTP (EmailService)
-                lifecycleScope.launch(Dispatchers.IO) {
-                    val emailSent = com.example.myapplication.util.EmailService.sendPasswordResetEmail(
-                        toEmail = email,
-                        resetLink = resetLink
-                    )
-
-                    withContext(Dispatchers.Main) {
-                        btnSend?.isEnabled = true
-                        btnSend?.text = "Enviar"
-
-                        if (emailSent) {
-                            Toast.makeText(
-                                this@LoginActivity,
-                                "✅ ¡Correo enviado a $email!\nRevisa tu bandeja (puede tardar 30 seg)",
-                                Toast.LENGTH_LONG
-                            ).show()
-                            dialog.dismiss()
-                            android.util.Log.d("PasswordReset", "✅ Email sent to: $email, Token: $resetToken")
+                withContext(Dispatchers.Main) {
+                    FirebaseService.findUserByEmail(email) { firebaseUser ->
+                        if (firebaseUser != null) {
+                            // Usuario encontrado en Firebase
+                            android.util.Log.d("PasswordReset", "✅ Usuario encontrado en Firebase: $email")
+                            lifecycleScope.launch(Dispatchers.IO) {
+                                // Sincronizar a Room para futuros usos
+                                usuarioDao.insertar(firebaseUser)
+                                android.util.Log.d("PasswordReset", "📥 Usuario sincronizado a Room")
+                                sendResetEmail(email, btnSend, dialog)
+                            }
                         } else {
+                            // Usuario NO existe ni en Room ni en Firebase
+                            android.util.Log.w("PasswordReset", "⚠️ Usuario no registrado: $email")
+                            btnSend?.isEnabled = true
+                            btnSend?.text = "Enviar"
                             Toast.makeText(
                                 this@LoginActivity,
-                                "❌ Error al enviar. Verifica tu conexión a internet",
+                                "❌ No existe una cuenta registrada con este correo electrónico",
                                 Toast.LENGTH_LONG
                             ).show()
-                            android.util.Log.e("PasswordReset", "❌ Failed to send email to: $email")
                         }
                     }
                 }
+            }
+        }
+    }
+
+    private suspend fun sendResetEmail(email: String, btnSend: MaterialButton?, dialog: androidx.appcompat.app.AlertDialog) {
+        withContext(Dispatchers.Main) {
+            btnSend?.text = "Enviando..."
+        }
+
+        // Generar token único de recuperación
+        val resetToken = java.util.UUID.randomUUID().toString()
+        val timestamp = System.currentTimeMillis()
+
+        // Crear Intent URL que funciona desde correos electrónicos
+        val encodedEmail = android.net.Uri.encode(email)
+        val resetLink = "intent://reset?token=$resetToken&email=$encodedEmail#Intent;scheme=tamats;package=com.example.myapplication;end"
+
+        // Guardar token en SharedPreferences (expira en 1 hora)
+        val prefs = getSharedPreferences("password_reset", MODE_PRIVATE)
+        prefs.edit().apply {
+            putString("token_$resetToken", email)
+            putLong("timestamp_$resetToken", timestamp)
+            apply()
+        }
+
+        // Enviar correo usando SMTP (EmailService)
+        val emailSent = com.example.myapplication.util.EmailService.sendPasswordResetEmail(
+            toEmail = email,
+            resetLink = resetLink
+        )
+
+        withContext(Dispatchers.Main) {
+            btnSend?.isEnabled = true
+            btnSend?.text = "Enviar"
+
+            if (emailSent) {
+                Toast.makeText(
+                    this@LoginActivity,
+                    "✅ ¡Correo enviado a $email!\nRevisa tu bandeja de entrada",
+                    Toast.LENGTH_LONG
+                ).show()
+                dialog.dismiss()
+                android.util.Log.d("PasswordReset", "✅ Correo enviado: $email, Token: $resetToken")
+            } else {
+                Toast.makeText(
+                    this@LoginActivity,
+                    "❌ Error al enviar el correo. Verifica tu conexión a internet",
+                    Toast.LENGTH_LONG
+                ).show()
+                android.util.Log.e("PasswordReset", "❌ Error enviando correo a: $email")
             }
         }
     }
