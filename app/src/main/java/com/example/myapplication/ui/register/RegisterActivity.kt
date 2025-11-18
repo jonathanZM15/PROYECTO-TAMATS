@@ -160,47 +160,66 @@ class RegisterActivity : AppCompatActivity() {
 
                     // Correo NO está duplicado, proceder con el registro
                     runOnUiThread {
-                        scope.launch {
-                            try {
-                                // Guardar en Room (local)
-                                usuarioDao.insertar(newUser)
+                        // IMPORTANTE: Crear usuario en Firebase Authentication PRIMERO
+                        val auth = com.google.firebase.auth.FirebaseAuth.getInstance()
+                        auth.createUserWithEmailAndPassword(email, password)
+                            .addOnCompleteListener { authTask ->
+                                if (authTask.isSuccessful) {
+                                    // Usuario creado exitosamente en Firebase Auth
+                                    android.util.Log.d("RegisterActivity", "✅ Usuario creado en Firebase Auth: $email")
 
-                                // Guardar en Firebase (nube)
-                                firebaseService.guardarUsuario(newUser)
+                                    scope.launch {
+                                        try {
+                                            // Guardar en Room (local)
+                                            usuarioDao.insertar(newUser)
 
-                                withContext(Dispatchers.Main) {
-                                    Toast.makeText(
-                                        this@RegisterActivity,
-                                        "✅ ¡Registro Exitoso! Completa tu perfil.",
-                                        Toast.LENGTH_LONG
-                                    ).show()
-                                    android.util.Log.d("RegisterActivity", "✅ Usuario registrado exitosamente: $email")
+                                            // Guardar en Firebase Firestore (nube)
+                                            firebaseService.guardarUsuario(newUser)
 
-                                    // Guardar sesión automáticamente para mantener al usuario logueado
-                                    val prefs = getSharedPreferences("user_data", MODE_PRIVATE)
-                                    prefs.edit().apply {
-                                        putString("user_email", email)
-                                        putString("user_name", name)
-                                        apply()
+                                            withContext(Dispatchers.Main) {
+                                                Toast.makeText(
+                                                    this@RegisterActivity,
+                                                    "✅ ¡Registro Exitoso! Completa tu perfil.",
+                                                    Toast.LENGTH_LONG
+                                                ).show()
+                                                android.util.Log.d("RegisterActivity", "✅ Usuario registrado exitosamente: $email")
+
+                                                // Guardar sesión automáticamente para mantener al usuario logueado
+                                                val prefs = getSharedPreferences("user_data", MODE_PRIVATE)
+                                                prefs.edit().apply {
+                                                    putString("user_email", email)
+                                                    putString("user_name", name)
+                                                    apply()
+                                                }
+
+                                                // Redirigir a EditProfileActivity para completar perfil
+                                                val intent = Intent(this@RegisterActivity, com.example.myapplication.ui.simulacion.EditProfileActivity::class.java)
+                                                intent.putExtra("userEmail", email)
+                                                startActivity(intent)
+                                                finish()
+                                            }
+                                        } catch (e: Exception) {
+                                            withContext(Dispatchers.Main) {
+                                                Toast.makeText(
+                                                    this@RegisterActivity,
+                                                    "❌ Error al guardar: ${e.message}",
+                                                    Toast.LENGTH_LONG
+                                                ).show()
+                                                android.util.Log.e("RegisterActivity", "❌ Error al registrar usuario: ${e.message}", e)
+                                            }
+                                        }
                                     }
-
-                                    // Redirigir a EditProfileActivity para completar perfil
-                                    val intent = Intent(this@RegisterActivity, com.example.myapplication.ui.simulacion.EditProfileActivity::class.java)
-                                    intent.putExtra("userEmail", email)
-                                    startActivity(intent)
-                                    finish()
-                                }
-                            } catch (e: Exception) {
-                                withContext(Dispatchers.Main) {
+                                } else {
+                                    // Error al crear usuario en Firebase Auth
+                                    val errorMessage = authTask.exception?.message ?: "Error desconocido"
+                                    android.util.Log.e("RegisterActivity", "❌ Error creando usuario en Firebase Auth: $errorMessage")
                                     Toast.makeText(
                                         this@RegisterActivity,
-                                        "❌ Error al guardar: ${e.message}",
+                                        "❌ Error al crear usuario: $errorMessage",
                                         Toast.LENGTH_LONG
                                     ).show()
-                                    android.util.Log.e("RegisterActivity", "❌ Error al registrar usuario: ${e.message}", e)
                                 }
                             }
-                        }
                     }
                 }
             }

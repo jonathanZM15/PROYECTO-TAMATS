@@ -108,10 +108,13 @@ class LoginActivity : AppCompatActivity() {
             if (localUser != null) {
                 // Verificar la contraseña cifrada usando EncryptionUtil
                 if (EncryptionUtil.verifyPassword(password, localUser.passwordHash)) {
-                    // Antes de navegar, chequear estado en Firestore (por si fue bloqueado/suspendido/eliminado)
+                    // Contraseña coincide en Room, proceder
                     checkUserStateAndProceed(localUser.email, localUser)
                 } else {
-                    Toast.makeText(this@LoginActivity, "Credenciales incorrectas.", Toast.LENGTH_LONG).show()
+                    // Contraseña no coincide en Room, intentar con Firebase Auth
+                    // (por si el usuario cambió su contraseña recientemente)
+                    android.util.Log.d("LoginActivity", "Contraseña no coincide en Room, intentando con Firebase Auth...")
+                    tryFirebaseAuth(email, password, localUser)
                 }
             } else {
                 Toast.makeText(this@LoginActivity, "Buscando en la nube...", Toast.LENGTH_SHORT).show()
@@ -130,15 +133,54 @@ class LoginActivity : AppCompatActivity() {
                             }
                         }
                     } else {
-                        // Falla la autenticación de Firebase
-                        // Usamos runOnUiThread para asegurar que se ejecuta en el hilo principal
-                        runOnUiThread {
-                            Toast.makeText(this@LoginActivity, "Credenciales incorrectas.", Toast.LENGTH_LONG).show()
+                        // Contraseña no coincide en Firestore tampoco, intentar con Firebase Auth
+                        android.util.Log.d("LoginActivity", "Contraseña no coincide en Firestore, intentando con Firebase Auth...")
+                        if (firebaseUser != null) {
+                            tryFirebaseAuth(email, password, firebaseUser)
+                        } else {
+                            runOnUiThread {
+                                Toast.makeText(this@LoginActivity, "Credenciales incorrectas.", Toast.LENGTH_LONG).show()
+                            }
                         }
                     }
                 }
             }
         }
+    }
+
+    /**
+     * Intenta autenticar al usuario con Firebase Auth
+     * Esto es útil cuando el usuario cambió su contraseña recientemente
+     */
+    private fun tryFirebaseAuth(email: String, password: String, userEntity: UsuarioEntity) {
+        val auth = com.google.firebase.auth.FirebaseAuth.getInstance()
+
+        auth.signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    // Autenticación exitosa con Firebase Auth
+                    android.util.Log.d("LoginActivity", "✅ Autenticación exitosa con Firebase Auth")
+
+                    // Actualizar la contraseña en Room con la nueva contraseña encriptada
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        val encryptedPassword = EncryptionUtil.encryptPassword(password)
+                        val updatedUser = userEntity.copy(passwordHash = encryptedPassword)
+                        usuarioDao.actualizar(updatedUser)
+                        android.util.Log.d("LoginActivity", "✅ Contraseña actualizada en Room")
+
+                        withContext(Dispatchers.Main) {
+                            checkUserStateAndProceed(email, updatedUser)
+                        }
+                    }
+                } else {
+                    // Autenticación fallida
+                    val error = task.exception?.message ?: "Error desconocido"
+                    android.util.Log.e("LoginActivity", "❌ Error autenticando con Firebase: $error")
+                    runOnUiThread {
+                        Toast.makeText(this@LoginActivity, "Credenciales incorrectas.", Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
     }
 
     /**
@@ -310,101 +352,128 @@ class LoginActivity : AppCompatActivity() {
         // Mostrar loading
         val btnSend = dialog.findViewById<MaterialButton>(R.id.btnSendRecovery)
         btnSend?.isEnabled = false
-        btnSend?.text = "Verificando..."
+        btnSend?.text = "Enviando..."
 
-        // PRIMERO: Verificar que el correo exista en Room o Firebase
-        lifecycleScope.launch(Dispatchers.IO) {
-            // Buscar en Room primero
-            val localUser = usuarioDao.getUserByEmail(email)
+        // Validar formato de email
+        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            btnSend?.isEnabled = true
+            btnSend?.text = "Enviar"
+            Toast.makeText(this, "❌ Email inválido", Toast.LENGTH_SHORT).show()
+            return
+        }
 
-            if (localUser != null) {
-                // Usuario encontrado en Room, proceder
-                android.util.Log.d("PasswordReset", "✅ Usuario encontrado en Room: $email")
-                sendResetEmail(email, btnSend, dialog)
-            } else {
-                // No está en Room, buscar en Firebase
-                android.util.Log.d("PasswordReset", "🔍 Usuario no en Room, buscando en Firebase: $email")
+        // Enviar directamente a Firebase Auth (sin verificar en Room primero)
+        android.util.Log.d("PasswordReset", "📧 Enviando email de recuperación a: $email")
+        sendResetEmail(email, btnSend, dialog)
+    }
 
-                withContext(Dispatchers.Main) {
-                    FirebaseService.findUserByEmail(email) { firebaseUser ->
-                        if (firebaseUser != null) {
-                            // Usuario encontrado en Firebase
-                            android.util.Log.d("PasswordReset", "✅ Usuario encontrado en Firebase: $email")
-                            lifecycleScope.launch(Dispatchers.IO) {
-                                // Sincronizar a Room para futuros usos
-                                usuarioDao.insertar(firebaseUser)
-                                android.util.Log.d("PasswordReset", "📥 Usuario sincronizado a Room")
-                                sendResetEmail(email, btnSend, dialog)
+    private fun sendResetEmail(email: String, btnSend: MaterialButton?, dialog: androidx.appcompat.app.AlertDialog) {
+        val auth = com.google.firebase.auth.FirebaseAuth.getInstance()
+
+        // Primero intentar enviar el email de recuperación
+        auth.sendPasswordResetEmail(email)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    // Email enviado exitosamente
+                    android.util.Log.d("PasswordReset", "✅ Email de recuperación enviado por Firebase a: $email")
+                    btnSend?.isEnabled = true
+                    btnSend?.text = "Enviar"
+                    Toast.makeText(
+                        this@LoginActivity,
+                        "✅ ¡Correo enviado a $email!\n\nRevisa tu bandeja de entrada (incluyendo SPAM)",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    dialog.dismiss()
+                } else {
+                    // Error al enviar correo - podría ser que no exista el usuario
+                    val errorMessage = task.exception?.message ?: "Error desconocido"
+                    android.util.Log.e("PasswordReset", "❌ Error enviando correo: $errorMessage")
+
+                    // Si el usuario no existe en Firebase Auth, intentar crearlo
+                    if (errorMessage.contains("no user record", ignoreCase = true)) {
+                        android.util.Log.d("PasswordReset", "🔄 Usuario no existe en Firebase Auth, intentando crearlo...")
+
+                        // Buscar en Room para obtener la contraseña
+                        lifecycleScope.launch(Dispatchers.IO) {
+                            val localUser = usuarioDao.getUserByEmail(email)
+
+                            if (localUser != null) {
+                                // Usuario existe en Room, usar una contraseña temporal para crear en Firebase Auth
+                                withContext(Dispatchers.Main) {
+                                    android.util.Log.d("PasswordReset", "📝 Creando usuario en Firebase Auth...")
+                                    val tempPassword = "TempPass123"
+
+                                    auth.createUserWithEmailAndPassword(email, tempPassword)
+                                        .addOnCompleteListener { createTask ->
+                                            if (createTask.isSuccessful) {
+                                                // Usuario creado exitosamente, ahora enviar el email de recuperación
+                                                android.util.Log.d("PasswordReset", "✅ Usuario creado en Firebase Auth, enviando email de recuperación...")
+
+                                                auth.sendPasswordResetEmail(email)
+                                                    .addOnCompleteListener { retryTask ->
+                                                        btnSend?.isEnabled = true
+                                                        btnSend?.text = "Enviar"
+
+                                                        if (retryTask.isSuccessful) {
+                                                            Toast.makeText(
+                                                                this@LoginActivity,
+                                                                "✅ ¡Correo enviado a $email!\n\nRevisa tu bandeja de entrada (incluyendo SPAM)",
+                                                                Toast.LENGTH_LONG
+                                                            ).show()
+                                                            dialog.dismiss()
+                                                            android.util.Log.d("PasswordReset", "✅ Email de recuperación enviado tras crear usuario")
+                                                        } else {
+                                                            Toast.makeText(
+                                                                this@LoginActivity,
+                                                                "❌ Error enviando correo: ${retryTask.exception?.message}",
+                                                                Toast.LENGTH_LONG
+                                                            ).show()
+                                                        }
+                                                    }
+                                            } else {
+                                                // Error al crear usuario en Firebase Auth
+                                                btnSend?.isEnabled = true
+                                                btnSend?.text = "Enviar"
+                                                val createError = createTask.exception?.message ?: "Error desconocido"
+                                                android.util.Log.e("PasswordReset", "❌ Error creando usuario: $createError")
+                                                Toast.makeText(
+                                                    this@LoginActivity,
+                                                    "❌ $createError",
+                                                    Toast.LENGTH_LONG
+                                                ).show()
+                                            }
+                                        }
+                                }
+                            } else {
+                                btnSend?.isEnabled = true
+                                btnSend?.text = "Enviar"
+                                Toast.makeText(
+                                    this@LoginActivity,
+                                    "❌ No existe cuenta registrada con este email",
+                                    Toast.LENGTH_LONG
+                                ).show()
                             }
-                        } else {
-                            // Usuario NO existe ni en Room ni en Firebase
-                            android.util.Log.w("PasswordReset", "⚠️ Usuario no registrado: $email")
-                            btnSend?.isEnabled = true
-                            btnSend?.text = "Enviar"
-                            Toast.makeText(
-                                this@LoginActivity,
-                                "❌ No existe una cuenta registrada con este correo electrónico",
-                                Toast.LENGTH_LONG
-                            ).show()
                         }
+                    } else {
+                        // Otro tipo de error
+                        btnSend?.isEnabled = true
+                        btnSend?.text = "Enviar"
+
+                        val userFriendlyMessage = when {
+                            errorMessage.contains("invalid email", ignoreCase = true) ->
+                                "Email inválido"
+                            errorMessage.contains("too many requests", ignoreCase = true) ->
+                                "Demasiados intentos. Intenta más tarde"
+                            else -> errorMessage
+                        }
+
+                        Toast.makeText(
+                            this@LoginActivity,
+                            "❌ $userFriendlyMessage",
+                            Toast.LENGTH_LONG
+                        ).show()
                     }
                 }
             }
-        }
-    }
-
-    private suspend fun sendResetEmail(email: String, btnSend: MaterialButton?, dialog: androidx.appcompat.app.AlertDialog) {
-        withContext(Dispatchers.Main) {
-            btnSend?.text = "Enviando..."
-        }
-
-        // Generar token único de recuperación
-        val resetToken = java.util.UUID.randomUUID().toString()
-        val timestamp = System.currentTimeMillis()
-
-        // Crear enlace HTTPS que funciona desde correos
-        // Gmail y otros clientes reconocen HTTPS, no esquemas personalizados
-        val encodedEmail = android.net.Uri.encode(email)
-        val resetLink = "https://tamats.app/reset?token=$resetToken&email=$encodedEmail"
-
-        // También guardar el deep link como alternativa
-        val deepLink = "tamats://reset?token=$resetToken&email=$encodedEmail"
-
-        // Guardar token en SharedPreferences (expira en 1 hora)
-        val prefs = getSharedPreferences("password_reset", MODE_PRIVATE)
-        prefs.edit().apply {
-            putString("token_$resetToken", email)
-            putLong("timestamp_$resetToken", timestamp)
-            apply()
-        }
-
-        // Enviar correo usando SMTP (EmailService)
-        val emailSent = com.example.myapplication.util.EmailService.sendPasswordResetEmail(
-            toEmail = email,
-            resetLink = resetLink
-        )
-
-        withContext(Dispatchers.Main) {
-            btnSend?.isEnabled = true
-            btnSend?.text = "Enviar"
-
-            if (emailSent) {
-                Toast.makeText(
-                    this@LoginActivity,
-                    "✅ ¡Correo enviado a $email!\nRevisa tu bandeja de entrada",
-                    Toast.LENGTH_LONG
-                ).show()
-                dialog.dismiss()
-                android.util.Log.d("PasswordReset", "✅ Correo enviado: $email, Token: $resetToken")
-            } else {
-                // Error al enviar correo
-                android.util.Log.e("PasswordReset", "❌ Error enviando correo a: $email")
-                Toast.makeText(
-                    this@LoginActivity,
-                    "❌ Error al enviar el correo.\nVerifica tu conexión a internet e inténtalo de nuevo.",
-                    Toast.LENGTH_LONG
-                ).show()
-            }
-        }
     }
 }
