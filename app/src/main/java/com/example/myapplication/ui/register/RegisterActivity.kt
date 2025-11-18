@@ -12,6 +12,7 @@ import com.example.myapplication.database.AppDatabase
 import com.example.myapplication.model.UsuarioEntity
 import com.example.myapplication.ui.login.LoginActivity
 import com.example.myapplication.util.EncryptionUtil
+import com.example.myapplication.util.PasswordValidator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -250,8 +251,14 @@ class RegisterActivity : AppCompatActivity() {
         }
 
         val password = etPasswordRegister.text.toString()
-        if (password.length != 8) {
-            etPasswordRegister.error = "La contraseña debe ser de exactamente 8 caracteres."
+        val validation = PasswordValidator.validate(password)
+        if (!validation.isValid) {
+            etPasswordRegister.error = PasswordValidator.getErrorMessage(validation)
+            Toast.makeText(
+                this,
+                "❌ La contraseña no cumple los requisitos:\n${validation.errors.joinToString("\n• ", "• ")}",
+                Toast.LENGTH_LONG
+            ).show()
             isValid = false
         }
 
