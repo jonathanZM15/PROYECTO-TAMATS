@@ -69,7 +69,6 @@ class AdminUserAdapter(
 
             // Información adicional
             joinDateView.text = "Registro: ${user.joinDate.ifEmpty { "N/A" }}"
-            postsCountView.text = "${user.posts} posts"
 
             // Botón de toggle rápido
             setupToggleButton(user)

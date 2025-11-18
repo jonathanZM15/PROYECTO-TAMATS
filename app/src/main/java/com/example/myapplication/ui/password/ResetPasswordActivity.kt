@@ -28,7 +28,7 @@ class ResetPasswordActivity : AppCompatActivity() {
     private lateinit var etConfirmNewPassword: TextInputEditText
     private lateinit var btnChangePassword: MaterialButton
     private lateinit var tvCancelReset: TextView
-    
+
     // Indicadores visuales de requisitos
     private lateinit var tvReqLength: TextView
     private lateinit var tvReqUppercase: TextView
@@ -44,39 +44,52 @@ class ResetPasswordActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_reset_password)
 
-        // Log para depuración
         android.util.Log.d("ResetPassword", "Activity iniciada")
         android.util.Log.d("ResetPassword", "Intent data: ${intent.data}")
         android.util.Log.d("ResetPassword", "Intent action: ${intent.action}")
+        android.util.Log.d("ResetPassword", "Intent extras: ${intent.extras}")
 
-        // Obtener datos del Intent (desde Deep Link)
-        email = intent.data?.getQueryParameter("email") ?: intent.getStringExtra("email")
-        token = intent.data?.getQueryParameter("token") ?: intent.getStringExtra("token")
+        // Extraer email y oobCode del Intent
+        // Firebase envía los parámetros en la URL
+        val intentData = intent.data
 
-        android.util.Log.d("ResetPassword", "Email: $email")
-        android.util.Log.d("ResetPassword", "Token: $token")
+        // Intentar obtener email desde varios lugares
+        var extractedEmail = intentData?.getQueryParameter("email")
+            ?: intent.getStringExtra("email")
+            ?: ""
+
+        // Firebase envía el oobCode como parámetro de query
+        var extractedToken = intentData?.getQueryParameter("oobCode")
+            ?: intent.getStringExtra("oobCode")
+            ?: ""
+
+        android.util.Log.d("ResetPassword", "Email extraído: '$extractedEmail'")
+        android.util.Log.d("ResetPassword", "OobCode extraído: '$extractedToken'")
+
+        // Si no tenemos email, intentar extraerlo de continueUrl
+        if (extractedEmail.isEmpty()) {
+            val continueUrl = intentData?.getQueryParameter("continueUrl")
+            android.util.Log.d("ResetPassword", "ContinueUrl: $continueUrl")
+            if (!continueUrl.isNullOrEmpty()) {
+                val uri = android.net.Uri.parse(continueUrl)
+                extractedEmail = uri.getQueryParameter("email") ?: ""
+                android.util.Log.d("ResetPassword", "Email extraído de continueUrl: '$extractedEmail'")
+            }
+        }
 
         // Validar que tengamos los datos necesarios
-        if (email.isNullOrEmpty() || token.isNullOrEmpty()) {
-            android.util.Log.e("ResetPassword", "❌ Datos faltantes - Email: $email, Token: $token")
+        if (extractedEmail.isEmpty() || extractedToken.isEmpty()) {
+            android.util.Log.e("ResetPassword", "❌ Datos faltantes - Email: '$extractedEmail', OobCode: '$extractedToken'")
             Toast.makeText(this, "❌ Link inválido o expirado", Toast.LENGTH_LONG).show()
             finish()
             return
         }
 
-        // Validar que el token sea válido y no haya expirado
-        if (!isTokenValid(token!!)) {
-            android.util.Log.e("ResetPassword", "❌ Token inválido o expirado")
-            Toast.makeText(
-                this,
-                "❌ Este enlace ha expirado.\nSolicita uno nuevo desde 'Olvidé mi contraseña'",
-                Toast.LENGTH_LONG
-            ).show()
-            finish()
-            return
-        }
+        // Asignar a las propiedades de la clase
+        email = extractedEmail
+        token = extractedToken
 
-        android.util.Log.d("ResetPassword", "✅ Token válido, mostrando UI")
+        android.util.Log.d("ResetPassword", "✅ Datos válidos, mostrando UI")
         initializeViews()
         setupListeners()
         displayEmail()
@@ -88,7 +101,7 @@ class ResetPasswordActivity : AppCompatActivity() {
         etConfirmNewPassword = findViewById(R.id.etConfirmNewPassword)
         btnChangePassword = findViewById(R.id.btnChangePassword)
         tvCancelReset = findViewById(R.id.tvCancelReset)
-        
+
         tvReqLength = findViewById(R.id.tvReqLength)
         tvReqUppercase = findViewById(R.id.tvReqUppercase)
         tvReqNumber = findViewById(R.id.tvReqNumber)
@@ -124,7 +137,7 @@ class ResetPasswordActivity : AppCompatActivity() {
      */
     private fun updatePasswordRequirements(password: String) {
         val validation = PasswordValidator.validate(password)
-        
+
         val colorValid = ContextCompat.getColor(this, R.color.green_success)
         val colorInvalid = Color.parseColor("#757575")
         val iconValid = R.drawable.ic_check_circle
@@ -150,30 +163,85 @@ class ResetPasswordActivity : AppCompatActivity() {
     }
 
     /**
-     * Maneja el cambio de contraseña
+     * Maneja el cambio de contraseña con validaciones estrictas
      */
     private fun handlePasswordChange() {
-        val newPassword = etNewPassword.text?.toString() ?: ""
-        val confirmPassword = etConfirmNewPassword.text?.toString() ?: ""
+        // Obtener textos de forma explícita
+        val newPasswordObj = etNewPassword.text
+        val confirmPasswordObj = etConfirmNewPassword.text
+
+        val newPassword = newPasswordObj?.toString() ?: ""
+        val confirmPassword = confirmPasswordObj?.toString() ?: ""
+
+        android.util.Log.d("ResetPassword", "=== VALIDACIÓN INICIADA ===")
+        android.util.Log.d("ResetPassword", "Nueva contraseña: '$newPassword'")
+        android.util.Log.d("ResetPassword", "Longitud: ${newPassword.length}")
+        android.util.Log.d("ResetPassword", "Confirmar contraseña: '$confirmPassword'")
 
         // Limpiar errores previos
         etNewPassword.error = null
         etConfirmNewPassword.error = null
 
-        // Validar contraseña
-        val validation = PasswordValidator.validate(newPassword)
-        if (!validation.isValid) {
-            etNewPassword.error = PasswordValidator.getErrorMessage(validation)
-            Toast.makeText(this, "❌ La contraseña no cumple los requisitos", Toast.LENGTH_LONG).show()
+        // === VALIDACIÓN 1: Vacía ===
+        if (newPassword.trim().isEmpty()) {
+            etNewPassword.error = "La contraseña no puede estar vacía"
+            Toast.makeText(this, "❌ La contraseña no puede estar vacía", Toast.LENGTH_SHORT).show()
             return
         }
 
-        // Verificar que coincidan
-        if (!PasswordValidator.passwordsMatch(newPassword, confirmPassword)) {
-            etConfirmNewPassword.error = "Las contraseñas no coinciden"
-            Toast.makeText(this, "❌ Las contraseñas no coinciden", Toast.LENGTH_LONG).show()
+        // === VALIDACIÓN 2: Longitud ===
+        if (newPassword.length < 8) {
+            val msg = "La contraseña debe tener AL MENOS 8 caracteres (tienes ${newPassword.length})"
+            etNewPassword.error = msg
+            Toast.makeText(this, "❌ $msg", Toast.LENGTH_SHORT).show()
             return
         }
+
+        // === VALIDACIÓN 3: Mayúscula ===
+        var tieneMAYUSCULA = false
+        for (char in newPassword) {
+            if (char.isUpperCase() && char.isLetter()) {
+                tieneMAYUSCULA = true
+                break
+            }
+        }
+
+        if (!tieneMAYUSCULA) {
+            etNewPassword.error = "DEBE tener AL MENOS UNA letra MAYÚSCULA"
+            Toast.makeText(this, "❌ DEBE tener AL MENOS UNA letra MAYÚSCULA", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // === VALIDACIÓN 4: Número ===
+        var tieneNUMERO = false
+        for (char in newPassword) {
+            if (char.isDigit()) {
+                tieneNUMERO = true
+                break
+            }
+        }
+
+        if (!tieneNUMERO) {
+            etNewPassword.error = "DEBE tener AL MENOS UN número"
+            Toast.makeText(this, "❌ DEBE tener AL MENOS UN número", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // === VALIDACIÓN 5: Confirmación vacía ===
+        if (confirmPassword.trim().isEmpty()) {
+            etConfirmNewPassword.error = "Confirma tu contraseña"
+            Toast.makeText(this, "❌ Confirma tu contraseña", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // === VALIDACIÓN 6: Coinciden ===
+        if (newPassword != confirmPassword) {
+            etConfirmNewPassword.error = "Las contraseñas NO coinciden"
+            Toast.makeText(this, "❌ Las contraseñas NO coinciden", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        android.util.Log.d("ResetPassword", "✅ TODAS LAS VALIDACIONES PASARON")
 
         // Deshabilitar botón mientras se procesa
         btnChangePassword.isEnabled = false
@@ -183,7 +251,7 @@ class ResetPasswordActivity : AppCompatActivity() {
         lifecycleScope.launch(Dispatchers.IO) {
             try {
                 val user = usuarioDao.getUserByEmail(email!!)
-                
+
                 if (user == null) {
                     withContext(Dispatchers.Main) {
                         Toast.makeText(
@@ -199,19 +267,18 @@ class ResetPasswordActivity : AppCompatActivity() {
 
                 // Cifrar nueva contraseña
                 val encryptedPassword = EncryptionUtil.encryptPassword(newPassword)
-                
+
                 // Actualizar contraseña en Room
                 val updatedUser = user.copy(passwordHash = encryptedPassword)
                 usuarioDao.actualizar(updatedUser)
-                
-                // También actualizar en Firebase (opcional pero recomendado)
+
+                // También actualizar en Firebase
                 com.example.myapplication.cloud.FirebaseService.actualizarContrasena(email!!, encryptedPassword)
-                
+
                 // Invalidar el token usado
                 invalidateToken(token!!)
 
                 withContext(Dispatchers.Main) {
-                    // Mostrar diálogo de éxito
                     showSuccessDialog()
                 }
 

@@ -60,6 +60,28 @@
             android:exported="true"
             android:launchMode="singleTop">
 
+            <!-- Interceptar enlace web de Firebase directamente -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="https"
+                    android:host="tamats-aea71.firebaseapp.com"
+                    android:pathPattern="/__/auth/action" />
+            </intent-filter>
+
+            <!-- Alternativa: interceptar con path exacto -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="https"
+                    android:host="tamats-aea71.firebaseapp.com"
+                    android:path="/__/auth/action" />
+            </intent-filter>
+
             <!-- Deep Link personalizado: tamats://reset -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />

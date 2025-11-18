@@ -370,12 +370,12 @@ class LoginActivity : AppCompatActivity() {
     private fun sendResetEmail(email: String, btnSend: MaterialButton?, dialog: androidx.appcompat.app.AlertDialog) {
         val auth = com.google.firebase.auth.FirebaseAuth.getInstance()
 
-        // Primero intentar enviar el email de recuperación
+        // Enviar email de recuperación de contraseña directamente
+        // Firebase enviará el enlace web, pero nuestro AndroidManifest interceptará
         auth.sendPasswordResetEmail(email)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    // Email enviado exitosamente
-                    android.util.Log.d("PasswordReset", "✅ Email de recuperación enviado por Firebase a: $email")
+                    android.util.Log.d("PasswordReset", "✅ Email de recuperación enviado a: $email")
                     btnSend?.isEnabled = true
                     btnSend?.text = "Enviar"
                     Toast.makeText(
@@ -385,20 +385,16 @@ class LoginActivity : AppCompatActivity() {
                     ).show()
                     dialog.dismiss()
                 } else {
-                    // Error al enviar correo - podría ser que no exista el usuario
                     val errorMessage = task.exception?.message ?: "Error desconocido"
                     android.util.Log.e("PasswordReset", "❌ Error enviando correo: $errorMessage")
 
-                    // Si el usuario no existe en Firebase Auth, intentar crearlo
                     if (errorMessage.contains("no user record", ignoreCase = true)) {
                         android.util.Log.d("PasswordReset", "🔄 Usuario no existe en Firebase Auth, intentando crearlo...")
 
-                        // Buscar en Room para obtener la contraseña
                         lifecycleScope.launch(Dispatchers.IO) {
                             val localUser = usuarioDao.getUserByEmail(email)
 
                             if (localUser != null) {
-                                // Usuario existe en Room, usar una contraseña temporal para crear en Firebase Auth
                                 withContext(Dispatchers.Main) {
                                     android.util.Log.d("PasswordReset", "📝 Creando usuario en Firebase Auth...")
                                     val tempPassword = "TempPass123"
@@ -406,8 +402,7 @@ class LoginActivity : AppCompatActivity() {
                                     auth.createUserWithEmailAndPassword(email, tempPassword)
                                         .addOnCompleteListener { createTask ->
                                             if (createTask.isSuccessful) {
-                                                // Usuario creado exitosamente, ahora enviar el email de recuperación
-                                                android.util.Log.d("PasswordReset", "✅ Usuario creado en Firebase Auth, enviando email de recuperación...")
+                                                android.util.Log.d("PasswordReset", "✅ Usuario creado en Firebase Auth, enviando email...")
 
                                                 auth.sendPasswordResetEmail(email)
                                                     .addOnCompleteListener { retryTask ->
