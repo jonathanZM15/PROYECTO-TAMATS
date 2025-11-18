@@ -337,8 +337,9 @@ class LoginActivity : AppCompatActivity() {
                 val resetToken = java.util.UUID.randomUUID().toString()
                 val timestamp = System.currentTimeMillis()
 
-                // Crear link de recuperación
-                val resetLink = "tamats://reset?token=$resetToken&email=$email"
+                // Crear link de recuperación - Deep Link directo
+                val deepLink = "tamats://reset?token=$resetToken&email=${android.net.Uri.encode(email)}"
+                val resetLink = deepLink
 
                 // Guardar token en SharedPreferences (expira en 1 hora)
                 val prefs = getSharedPreferences("password_reset", MODE_PRIVATE)

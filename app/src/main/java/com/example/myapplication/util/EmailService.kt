@@ -155,14 +155,48 @@ object EmailService {
             <html>
             <head>
                 <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <style>
-                    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
                     .container { max-width: 600px; margin: 0 auto; padding: 20px; }
                     .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
                     .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
-                    .button { display: inline-block; background: #9C27B0; color: white; padding: 12px 30px; text-decoration: none; border-radius: 25px; margin: 20px 0; }
+                    .button { 
+                        display: inline-block; 
+                        background: #9C27B0; 
+                        color: white !important; 
+                        padding: 16px 40px; 
+                        text-decoration: none; 
+                        border-radius: 25px; 
+                        margin: 20px 0;
+                        font-size: 16px;
+                        font-weight: bold;
+                        box-shadow: 0 4px 6px rgba(156, 39, 176, 0.3);
+                    }
+                    .button:hover { background: #7B1FA2; }
                     .footer { text-align: center; margin-top: 20px; color: #777; font-size: 12px; }
-                    .warning { background: #fff3cd; border-left: 4px solid #ffc107; padding: 10px; margin: 15px 0; }
+                    .warning { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 15px 0; border-radius: 4px; }
+                    .steps { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; }
+                    .step { margin: 10px 0; padding-left: 25px; position: relative; }
+                    .step:before { content: "✓"; position: absolute; left: 0; color: #9C27B0; font-weight: bold; }
+                    .link-box { 
+                        background: white; 
+                        border: 2px dashed #9C27B0; 
+                        padding: 15px; 
+                        margin: 20px 0; 
+                        border-radius: 8px;
+                        word-break: break-all;
+                        font-family: monospace;
+                        font-size: 12px;
+                        color: #9C27B0;
+                    }
+                    .info-box {
+                        background: #e3f2fd;
+                        border-left: 4px solid #2196F3;
+                        padding: 15px;
+                        margin: 15px 0;
+                        border-radius: 4px;
+                    }
                 </style>
             </head>
             <body>
@@ -174,20 +208,39 @@ object EmailService {
                     <div class="content">
                         <h2>¡Hola!</h2>
                         <p>Recibimos una solicitud para restablecer la contraseña de tu cuenta en <strong>TAMATS</strong>.</p>
+                        
                         <div class="warning">
                             <strong>⚠️ Importante:</strong> Si NO solicitaste este cambio, ignora este correo y tu contraseña permanecerá segura.
                         </div>
-                        <p>Para crear una nueva contraseña, haz clic en el siguiente botón:</p>
-                        <p style="text-align: center;">
-                            <a href="$resetLink" class="button">Restablecer Contraseña</a>
+                        
+                        <div class="steps">
+                            <h3 style="margin-top: 0; color: #9C27B0;">📱 Opción 1 - Click directo (recomendado):</h3>
+                            <div class="step">Abre este correo desde tu dispositivo móvil con TAMATS instalada</div>
+                            <div class="step">Toca el botón morado de abajo</div>
+                            <div class="step">La app se abrirá automáticamente</div>
+                        </div>
+                        
+                        <p style="text-align: center; margin: 30px 0;">
+                            <a href="$resetLink" class="button" style="color: white;">📱 Abrir TAMATS y Cambiar Contraseña</a>
                         </p>
-                        <p><small>O copia y pega este enlace en tu navegador:</small><br>
-                        <small style="color: #9C27B0; word-break: break-all;">$resetLink</small></p>
-                        <p><strong>Este enlace expirará en 1 hora</strong> por motivos de seguridad.</p>
+                        
+                        <div class="info-box">
+                            <h3 style="margin-top: 0; color: #2196F3;">🔧 Opción 2 - Si el botón no funciona:</h3>
+                            <p style="margin: 5px 0;">1. Copia el siguiente enlace (mantén presionado y selecciona "Copiar"):</p>
+                            <div class="link-box">$resetLink</div>
+                            <p style="margin: 5px 0;">2. Abre la app TAMATS manualmente</p>
+                            <p style="margin: 5px 0;">3. Ve a "Olvidé mi contraseña"</p>
+                            <p style="margin: 5px 0;">4. Pega el enlace cuando se te solicite (próximamente)</p>
+                        </div>
+                        
+                        <p style="font-size: 12px; color: #666; text-align: center; margin-top: 30px;">
+                            <strong>⏰ Este enlace expirará en 1 hora</strong> por motivos de seguridad.
+                        </p>
                     </div>
                     <div class="footer">
                         <p>💜 Gracias por ser parte de TAMATS</p>
                         <p>© 2025 TAMATS. Todos los derechos reservados.</p>
+                        <p style="font-size: 10px; margin-top: 10px;">Este es un correo automático, por favor no respondas.</p>
                     </div>
                 </div>
             </body>
