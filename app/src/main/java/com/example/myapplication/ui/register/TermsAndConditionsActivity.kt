@@ -24,55 +24,55 @@ class TermsAndConditionsActivity : AppCompatActivity() {
     private fun getTermsAndConditionsText(): String {
         return """
             📱 TÉRMINOS Y CONDICIONES
-            
+
             Última actualización: 16 de noviembre de 2025
-            
-            
+
+
             👋 ¡Hola!
-            
+
             Bienvenido/a a TAMATS, tu app para conocer gente increíble. Al usar nuestra plataforma, aceptas estos términos. Si no estás de acuerdo, por favor no uses la app.
-            
-            
-            
+
+
+
             ✅ 1. ACEPTACIÓN
-            
+
             Para usar TAMATS debes:
-            
+
             🔸 Tener al menos 18 años
             🔸 Aceptar estos términos
             🔸 Usar la app responsablemente
-            
-            
-            
+
+
+
             🔒 2. TUS DATOS Y PRIVACIDAD
-            
+
             📊 Recopilamos:
             • Nombre, edad y fotos
             • Preferencias y ubicación
             • Mensajes e interacciones
-            
+
             🎯 Los usamos para:
             • Crear tu perfil
             • Conectarte con personas
             • Mejorar tu experiencia
             • Mantener la seguridad
-            
+
             ⚠️ IMPORTANTE
             No compartas información sensible:
             ❌ Dirección de casa
             ❌ Datos bancarios
             ❌ Contraseñas
-            
-            
-            
+
+
+
             👥 3. NORMAS DE LA COMUNIDAD
-            
+
             ✅ SÍ PUEDES:
             • Ser auténtico y respetuoso
             • Usar fotos reales tuyas
             • Reportar comportamientos
             • Conocer gente increíble
-            
+
             ❌ PROHIBIDO:
             • Acosar o intimidar
             • Contenido sexual no solicitado
@@ -82,84 +82,91 @@ class TermsAndConditionsActivity : AppCompatActivity() {
             • Spam o publicidad
             • Contenido ilegal
             • Solicitar dinero
-            
-            
-            
-            ⚖️ 4. CONSECUENCIAS
-            
+
+            🖼️ 4. GESTIÓN DEL CONTENIDO
+            Al subir contenido a TAMATS, aceptas:
+            🔸Contenido No Eliminable: Una vez subido, el contenido
+            no puede ser eliminado por el usuario desde la aplicación.
+            🔸Integridad: Esto mantiene la integridad de la plataforma.
+            🔸Excepciones: Las solicitudes de eliminación deben ser enviadas a
+              el soporte y quedan sujetas a la aprobación exclusiva de TAMATS.
+
+
+            ⚖️ 5. CONSECUENCIAS
+
             Si violas las normas:
-            
+
             1️⃣ Primera vez
                → Advertencia
-            
+
             2️⃣ Reincidencia
                → Suspensión (7-30 días)
-            
+
             3️⃣ Casos graves
                → ❌ Bloqueo permanente
-            
+
             💡 Cualquier usuario puede denunciar. Revisamos cada caso.
-            
-            
-            
-            🛡️ 5. TU SEGURIDAD
-            
+
+
+
+            🛡️ 6. TU SEGURIDAD
+
             Consejos importantes:
-            
+
             ✓ Revisa perfiles antes de interactuar
             ✓ Confía en tu instinto
             ✓ Reporta comportamientos raros
             ✓ No compartas info personal pronto
-            
+
             Si decides conocer a alguien:
             → Lugar público
             → Avisa a un amigo/a
             → Celular cargado
             → Mantente sobrio/a
-            
-            
-            
-            📋 6. RESPONSABILIDAD
-            
+
+
+
+            📋 7. RESPONSABILIDAD
+
             TAMATS NO se responsabiliza de:
-            
+
             • Encuentros fuera de la app
             • Info compartida voluntariamente
             • Acciones de otros usuarios
             • Relaciones que surjan
-            
+
             ⚠️ Tú decides con quién hablar y qué compartir. La seguridad es TU responsabilidad.
-            
-            
-            
-            🔄 7. CAMBIOS
-            
+
+
+
+            🔄 8. CAMBIOS
+
             Podemos actualizar estos términos. Te avisaremos mediante:
-            
+
             • Notificación en la app
             • Email registrado
-            
+
             Seguir usando la app = aceptas cambios.
-            
-            
-            
-            
+
+
+
+
             ✨ RECUERDA
-            
+
             Al usar TAMATS confirmas que:
             • Has leído estos términos
             • Los entiendes y aceptas
             • Te comprometes a seguirlos
-            
-            
+
+
             💬 ¿Dudas?
-            
+
             Contáctanos en el soporte de la app.
             Estamos aquí para ayudarte.
-            
-            
-            
-            
+
+
+
+
             Hecho con 💜 para conectar personas
         """.trimIndent()
     }
